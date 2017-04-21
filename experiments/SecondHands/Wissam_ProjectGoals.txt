@@ -1,0 +1,40 @@
+BP-HMM Paper
+http://web.michaelchughes.com/research/bp-hmm-split-merge-inference
+
+BP-HMM + SPCM Paper
+http://openreview.informatik.uni-freiburg.de/sites/default/files/papers/submission_43.pdf
+
+Code 
+https://github.com/nbfigueroa/tGau-BP-HMM
+
+go to ./Experiment/SecondHands
+PreProcess_Mocap.m and Segment_Mocap.m
+
+In order to run the mocap functions you must have the following toolboxes in your path:
+http://inverseprobability.com/mocap/
+http://inverseprobability.com/ndlutil/downloadFiles/vrs0p161/
+
+1st Goal: Evaluation of Segmentation
+--> Map extracted segments from BP-HMM to videos
+https://www.dropbox.com/sh/iqjotpciyara6we/AAAzRf5687V9c4ksK30GAmKva?dl=0
+
+2nd Goal: Try out as much as these ideas as possible
+
+-->	IDEA1: Extract relevant joints by hand
+
+-->	IDEA2: XYZ Coords of relevant joints (wrist/knees or knees), relative motion
+	Using extracted xyz coords 
+	(For this you can search in the mocap toolbox, there is a function that converts skel + channels to xyz coordinates)
+
+-->	IDEA3: XYZ Coords + Virtual Force Signal
+	Compute contacts from xyz coords and 
+
+-->	IDEA4: Use PCA + GPLVM on Joint Data
+	http://www.iai.uni-bonn.de/~gall/projects/stochGPLVM/stochGPLVM.html
+	http://www.jdl.ac.cn/user/jbpang/GPSTVM.htm
+	http://www.dgp.toronto.edu/~jmwang/gpdm/
+
+-->	IDEA5: Replicating experiment in-house to fuse different data channels
+
+
+Goal of trying out all of these ideas is not to only have a good segmentation, but also to extract useful information from the models that could be used as informative priors to a probabilistic controller. (Jose)

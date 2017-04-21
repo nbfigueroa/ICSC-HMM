@@ -1,0 +1,19 @@
+Recordings:
+1:10 	: trials - testing
+20:25	: first trial - recorded just pouring
+30:35	: second trial - recorded pouring and back until it stops dropping
+40 ...	: pouring and back
+50 ...	: pouring and back
+
+
+File Format:
+ 1	: measured Time
+ 2: 4	: cartesian position
+ 5: 7	: cartesian orientation
+ 8:13	: cartesian forces and torques in the base RF
+14:25	: cartesian RF of the robot
+26:37	: bowl RF
+38:49	: wrist RF
+50:61	: tool RF
+62:67	: FT from the external sensor in the tool
+

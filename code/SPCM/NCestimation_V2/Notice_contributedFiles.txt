@@ -1,0 +1,24 @@
+Copyright Notice of contributed files
+
+Several contributed files (*) included in this package may have their own copyright 
+notices,  to which you should pay attention. Please contact the authors or visit their
+web sites for detail. 
+
+The authors of these contributed files hold the copyrights. 
+
+
+
+
+
+
+(*): The contributed files are
+(1) PAM files such as daisy.m, daisyc.dll, pam.m and pamc.dll are part of the LIBRA 
+     toolbox, and these files are distributed under their own copyright notices available at
+
+     the download section:  http://wis.kuleuven.be/stat/robust/LIBRA.html.
+
+
+
+
+Acknowledgement
+The authors of these contributed files are appreciated much for their contributions to this package.
