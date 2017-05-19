@@ -5,7 +5,7 @@ close all
 clc
 %% Extract data from directory
 
-d = '../data/CMU_Mocap/';
+d = '../../data/CMU_Mocap/';
 files = dir(strcat(d,'dat/','*.dat'));
 
 ex_session = {};

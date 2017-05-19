@@ -16,7 +16,7 @@ grid on
 end
 
 % title( ['Sequence ' num2str(ii)], 'FontSize', 20 );
-title( data.seqNames{ii});
+% title( data.seqNames{ii});
 
 axis( [1 T ys(1) ys(end)] );
 

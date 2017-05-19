@@ -27,11 +27,17 @@ fprintf( 'Creating some toy data...\n' );
 %%
 % Visualize the raw data time series my style
 %   with background colored by "true" hidden state
-% figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
-% for i=1:data.N
-%     subplot(data.N, 1, i );
-%     plotDataNadia( data,i );
-% end
+figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
+for i=1:data.N
+    subplot(data.N, 1, i );
+    plotDataNadia( data,i );
+end
+
+figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
+for i=1:data.N
+    subplot(data.N, 1, i );
+    plotData( data,i );
+end
 
 %%
 % Visualize the raw data time series

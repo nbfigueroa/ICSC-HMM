@@ -16,7 +16,7 @@ for ii=1:size(X,1)
 plot( xs, X(ii,:), 'Color',[rand rand rand], 'LineWidth', 1.5 );
 end
 
-title( ['Sequence ' num2str(ii)], 'FontSize', 20 );
+% title( ['Sequence ' num2str(ii)], 'FontSize', 20 );
 
 axis( [1 T ys(1) ys(end)] );
 

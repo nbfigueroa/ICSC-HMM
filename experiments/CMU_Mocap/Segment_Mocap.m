@@ -4,11 +4,18 @@
 % Visualize the raw data time series my style
 %   with background colored by "true" hidden state
 figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
-for i=1:MocapData.N
-    subplot(MocapData.N, 1, i );
+k = MocapData.N;
+for i=k:k
+%     subplot(k, 1, i );
     plotDataNadia( MocapData,i );
 end
 
+%% %
+figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
+for i=k:k
+%     subplot(k, 1, i );
+    plotData( MocapData,i );
+end
 
 %%
 % Visualize the raw data time series
