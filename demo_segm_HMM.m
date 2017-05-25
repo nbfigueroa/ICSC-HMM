@@ -3,7 +3,14 @@
 % Generate Data for Gaussian HMM test
 
 close all
-
+N =3;
+for i1 = 1:N
+    X1 = mvnrnd([0,0], [0.5, 0.2; 0.2, 0.3]/5, 20);
+    X2 = mvnrnd([0,2], [0.3, -0.2; -0.2, 0.5]/5, 30);
+    X3 = mvnrnd([0,4], [0.5, 0; 0, 0.3]/5, 40);
+    X = [X1; X2; X3];
+    Data{i1} = X;
+end
 
 %%
 % Data{1} = D';
@@ -47,7 +54,7 @@ title('HMM Model Selection','Interpreter','LaTex','Fontsize',20)
 xlabel('Number of states $K$','Interpreter','LaTex')
 
 %% Set feature states
-Q = 3;  % state num
+Q = 10;  % state num
 p = 12;  % feature dim
 p_start0 = [1 0 0];
 A0 = [0.8 0.2 0; 0 0.8 0.2; 0 0 1];
