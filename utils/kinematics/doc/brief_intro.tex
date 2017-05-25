@@ -1,0 +1,72 @@
+\documentclass[a4paper,10pt]{article}
+
+
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+The special Euclidean group (3) is commonly know in the robotics literature as
+homogeneous transformations.  The Lie algebra of SE(3), denoted $se(3)$, is
+identified by a $4\times4$ skew symmetric matrix of the form:
+\begin{equation}
+\left[\begin{array}{c c c c}
+  0 & -\omega_3 & \omega_2 & v_1 \\
+  \omega_3 & 0 & -\omega_1 & v_2 \\
+  -\omega_2 & \omega_1 & 0 & v_3 \\
+  0 & 0 & 0 & 0 \\
+\end{array}\right] = \hat{\xi}
+\end{equation}
+The mapping from $se(3)$ to $SE(3)$ is performed
+by the exponential formula $H = e^{\hat{\xi}}$ and a closed-form solution
+exists through the Rodriguez formula.  We refer to the matrix $\hat{\xi}$ as a
+{\it twist}. Similar to Murray, we define the $\vee$
+(vee) operator to extract the six-dimensional {\it twist coordinates}
+which parametrize a twist,
+\begin{equation}
+\left[\begin{array}{c c c c}
+  0 & -\omega_3 & \omega_2 & v_1 \\
+  \omega_3 & 0 & -\omega_1 & v_2 \\
+  -\omega_2 & \omega_1 & 0 & v_3 \\
+  0 & 0 & 0 & 0 \\
+\end{array}\right]^{\vee} =
+\left[\begin{array}{c}
+  v_1 \\ v_2 \\ v_3 \\ \omega_1 \\ \omega_2 \\ \omega_3 \\
+\end{array}\right] = \xi
+\end{equation}
+The motion between consecutive frames can be represented by right
+multiplication of $H$ with a motion matrix $M$.  
+
+The adjoint operator provides a convenient
+method for transforming a twist from one coordinate frame to
+another. Given $M \in SE(3)$, the adjoint transform is a $6
+\times 6$ matrix which transforms twists from one coordinate frame to another.
+
+\begin{equation}
+  M =
+  \left[\begin{array}{c c}
+    R & {\bf t} \\
+    {\bf 0_{1 \times 3}} & 1 \\
+  \end{array}\right]
+\end{equation}
+
+\begin{equation}
+  Ad(M) =
+  \left[\begin{array}{c c}
+    R & {\bf \hat{t}} R \\
+    {\bf 0_{3 \times 3}} & R
+  \end{array}\right]
+\end{equation}
+
+\noindent The adjoint operator is invertible, and is given by:
+
+\begin{equation}
+  Ad^{-1}(M) =
+  \left[\begin{array}{c c}
+    R^T & -R^T \hat{\bf t} \\
+    {\bf 0_{3 \times 3}} & R^T
+  \end{array}\right]
+\end{equation}
+
+\end{document}

@@ -1,0 +1,405 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+ <head>
+  <title>Matlab Kinematics Toolbox</title>
+  <meta name="description" content="a kinematics toolbox for Matlab">
+  <meta name="keywords" context="Matlab, kinematics, toolbox, homogeneous
+  transformations, Special Euclidean">
+ </head>
+<body>
+
+<h1>Matlab Kinematics Toolbox</h1>
+
+<strong>version: 0.1</strong>
+<br />
+<strong>author: Brad Kratochvil</strong>
+
+<h2>About</h2>
+
+<p>
+The Matlab kinematics toolbox is something I put together over the course of
+my PhD to speed up prototyping robotics and computer vision related tasks at
+the <a href="http://www.iris.ethz.ch/msrl">Institute of Robotics and Intelligent
+Systems</a>, <a href="http://www.ethz.ch">ETH Zurich</a>.
+Much of the mathematics (and indeed the inspiration for the library) comes
+from A Mathematical Introduction to Robotic Manipulation by Murray, Li, and
+Sastry.</p>
+
+<center>
+<a href="http://www.amazon.com/gp/product/0849379814?ie=UTF8&tag=httpwwwdrydoc-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0849379814"><img border="0" src="images/murray_li_sastry.jpg"></a><img src="http://www.assoc-amazon.com/e/ir?t=httpwwwdrydoc-20&l=as2&o=1&a=0849379814" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</center>
+
+<p>
+Peter Corke's Robotics Toolbox has quite a bit of functionality in it, and I
+wasn't trying to reinvent the wheel.  Much of this library was written as I was
+learning how to use twists for rigid-body computer vision applications as
+opposed to traditional robotics.  My hope is that they are useful for others
+doing the same.  The toolbox is broken up into functions that deal primarily
+with homogeneous transforms and their Lie algebra, and a set of functions for
+interacting with serial link kinematic structures. There are also quite a few
+functions for generating nice plots and animations of the results. I have
+included a few examples at the bottom of the page to get you started. 
+</p>
+
+<p>
+If you would like to download the entire library you can grab it from <a
+href="kinematics_toolbox.tgz">kinematics_toolbox.tgz</a>, otherwise just browse
+the functions below.  I primarily use Linux for a development environment, so
+the functions all work there.  That being said, I've used the library in
+Windows (albeit not as much), and I'm guessing that much of it should work in
+Octave, but it's untested.
+</p>
+
+<p>
+These functions are released under <a href="../COPYING">BSD licensing</a>
+without any warranty. Please report any bugs and/or suggest enhancements to <a
+href="mailto:brad@kratochvil.name">brad@kratochvil.name</a>.
+</p>
+
+<p>
+If you don't find what you need here, check out these other cool Matlab toolboxes.
+</p>
+
+<ul>
+  <li>Peter Corke's - <a href="http://petercorke.com/Robotics_Toolbox.html">Robotics Toolbox for Matlab</a></li>
+  <li>Peter Kovesi's - <a href="http://www.csse.uwa.edu.au/~pk/Research/MatlabFns/">Computer Vision functions for Matlab</a></li>
+  <li>Andrew Zisserman's - <a href="http://www.robots.ox.ac.uk/~vgg/hzbook/code/">Multiple View Geometry functions for Matlab</a></li>
+</ul>
+
+<hr />
+
+<h2>Overview</h2>
+
+<p>
+The Special Euclidean group (3) is commonly know in the robotics literature as
+homogeneous transformations.  The Lie algebra of SE(3), denoted 
+<img
+ src="images/img1.png"
+ alt="$se(3)$" />, is
+identified by a <img
+ src="images/img2.png"
+ alt="$4\times4$" /> skew symmetric matrix of the form:
+</p>
+
+<!-- math
+ \begin{equation}
+\left[\begin{array}{c c c c}
+  0 & -\omega_3 & \omega_2 & v_1 \\
+  \omega_3 & 0 & -\omega_1 & v_2 \\
+  -\omega_2 & \omega_1 & 0 & v_3 \\
+  0 & 0 & 0 & 0 \\
+\end{array}\right] = \hat{\xi}
+\end{equation}
+ -->
+<center>
+<img src="images/img3.png"
+ alt="\begin{displaymath}
+\left[\begin{array}{c c c c}
+0 &amp; -\omega_3 &amp; \omega_2 &amp; v_1...
+... 0 &amp; v_3 \\
+0 &amp; 0 &amp; 0 &amp; 0 \\
+\end{array}\right] = \hat{\xi}
+\end{displaymath}" />
+</center>
+
+<p>
+The mapping from <img
+ src="images/img1.png"
+ alt="$se(3)$" /> to <img
+ src="images/img4.png"
+ alt="$se(3)$"/> is performed
+by the exponential formula <!-- math
+ $h = e^{\hat{\xi}}$
+ -->
+<img
+ src="images/img5.png"
+ alt="$h = e^{\hat{\xi}}$" /> and a closed-form solution
+exists through the Rodriguez formula.  We refer to the matrix <img
+ src="images/img6.png"
+ alt="$\hat{\xi}$" /> as a
+<i>twist</i>. Similar to Murray, we define the <img
+ src="images/img7.png"
+ alt="$\vee$" />
+(vee) operator to extract the six-dimensional <i>twist coordinates</i>
+which parametrize a twist,
+</p>
+
+<!-- math
+ \begin{equation}
+\left[\begin{array}{c c c c}
+  0 & -\omega_3 & \omega_2 & v_1 \\
+  \omega_3 & 0 & -\omega_1 & v_2 \\
+  -\omega_2 & \omega_1 & 0 & v_3 \\
+  0 & 0 & 0 & 0 \\
+\end{array}\right]^{\vee} =
+\left[\begin{array}{c}
+  v_1 \\v_2 \\v_3 \\\omega_1 \\\omega_2 \\\omega_3 \\
+\end{array}\right] = \xi
+\end{equation}
+ -->
+<center>
+<img
+ src="images/img8.png"
+ alt="\begin{displaymath}
+\left[\begin{array}{c c c c}
+0 &amp; -\omega_3 &amp; \omega_2 &amp; v_1...
+... \omega_1 \\ \omega_2 \\ \omega_3 \\
+\end{array}\right] = \xi
+\end{displaymath}" />
+</center>
+
+<p>
+The motion between consecutive frames can be represented by right
+multiplication of <img
+ src="images/img9.png"
+ alt="$h$" /> with a motion matrix <img
+ src="images/img10.png"
+ alt="$m$" />.
+</p>
+
+
+<p>
+The adjoint operator provides a convenient
+method for transforming a twist from one coordinate frame to
+another. Given <img 
+ src="images/img11.png"
+ alt="$m \in se(3)$" />, the adjoint transform is a <img
+ src="images/img12.png"
+ alt="$6 \times 6$" /> 
+ matrix which transforms twists from one coordinate frame to another.
+</p>
+
+<!-- math
+ \begin{equation}
+m =
+  \left[\begin{array}{c c}
+    r & {\bf t} \\
+    {\bf0_{1 \times 3}} & 1 \\
+  \end{array}\right]
+\end{equation}
+ -->
+<center>
+<img
+ src="images/img13.png"
+ alt="\begin{displaymath}
+m =
+\left[\begin{array}{c c}
+r &amp; {\bf t} \\
+{\bf0_{1 \times 3}} &amp; 1 \\
+\end{array}\right]
+\end{displaymath}" />
+</center>
+<!-- math
+ \begin{equation}
+ad(m) =
+  \left[\begin{array}{c c}
+    r & {\bf\hat{t}} r \\
+    {\bf0_{3 \times 3}} & r
+  \end{array}\right]
+\end{equation}
+ -->
+<center>
+<img
+ src="images/img14.png"
+ alt="\begin{displaymath}
+ad(m) =
+\left[\begin{array}{c c}
+r &amp; {\bf\hat{t}} r \\
+{\bf0_{3 \times 3}} &amp; r
+\end{array}\right]
+\end{displaymath}" />
+</center>
+
+<p>
+the adjoint operator is invertible, and is given by:
+</p>
+
+<!-- math
+ \begin{equation}
+ad^{-1}(m) =
+  \left[\begin{array}{c c}
+    r^t & -r^t \hat{\bf t} \\
+    {\bf0_{3 \times 3}} & r^t
+  \end{array}\right]
+\end{equation}
+ -->
+<center>
+<img
+ src="images/img15.png"
+ alt="\begin{displaymath}
+ad^{-1}(m) =
+\left[\begin{array}{c c}
+r^t &amp; -r^t \hat{\bf t} \\
+{\bf0_{3 \times 3}} &amp; r^t
+\end{array}\right]
+\end{displaymath}" />
+</center>
+
+<h2>Nomenclature</h2>
+
+<p>When browsing through the documentation, here are a few terms that might
+help you avoid confusion.
+
+<ul>
+  <li>skew - 3x3 matrix, so(3)</li>
+  <li>skewcoords - 3x1 matrix which can be unpacked into a skew</li>
+  <li>twist - 4x4 matrix, se(3)</li>
+  <li>twistcoords - 6x1 matrix which can be unpacked into a twist</li>
+  <li>frame - coordinate frame described by a homogeneous transformation matrix, SE(3)</li>
+  <li>rotation - a 3x3 rotation matrix, SO(3)</li>
+  <li>traj - series of homogeneous transformations</li>
+</ul>
+
+Also, Matlab has some built-in functions such as expm and logm that
+I've re-implemented for our skew-symmetric matrices.  This is due to some
+occasional troubles that Matlab runs into finding solutions.  The included
+functions (such as 
+<a href="../screws/skewexp.m">skewexp</a>, 
+<a href="../screws/skewlog.m">skewlog</a>, 
+<a href="../screws/twistexp.m">twistexp</a>, and 
+<a href="../screws/twistlog.m">twistlog</a>) can often be swapped directly for
+their Matlab counterparts.
+
+<hr />
+
+<h2>Operations in SO(3)</h2>
+
+<center>
+  <img src="images/skew.png" alt="skew.png"/>
+</center>
+
+<ul>
+  <li><a href="../screws/fast_skewexp.m">fast_skewexp</a> - quickly calculate the exponential of a skew-symmetric matrix (good if needed in  least-squares)</li>
+  <li><a href="../screws/rotaxis.m">rotaxis</a> - calculate the axis of rotation for a matrix R</li>
+  <li><a href="../screws/rotparam.m">rotparam</a> - pulls a skew matrix and theta out of a rotation matrix</li>
+  <li><a href="../screws/rotx.m">rotx</a> - rotation matrix around the x-axis</li>
+  <li><a href="../screws/roty.m">roty</a> - rotation matrix around the y-axis</li>
+  <li><a href="../screws/rotz.m">rotz</a> - rotation matrix around the z-axis</li>
+  <li><a href="../screws/rpy.m">rpy</a> - returns the X-Y-Z fixed angles of a rotation matrix</li>
+  <li><a href="../screws/skew.m">skew</a> - generates a skew-symmetric matrix given a vector</li>
+  <li><a href="../screws/skewcoords.m">skewcoords</a> - generates a vector w given a skew-symmetric matrix</li>
+  <li><a href="../screws/skewexp.m">skewexp</a> - calculate the exponential of a skew-symmetric matrix (similar to expm, but friendly to symbolic variables)</li>
+  <li><a href="../screws/skewlog.m">skewlog</a> - calculate the log of a rotation matrix (similar to logm, but friendlier)</li>
+</ul>
+
+<h2>Operations in SE(3)</h2>
+
+<center>
+  <img src="images/twist_1.png" alt="twist_1.png"/>
+  <img src="images/twist_0.png" alt="twist_0.png"/>
+</center>
+
+<ul>
+  <li><a href="../screws/ad.m">ad</a> - Performs the adjoint transform</li>
+  <li><a href="../screws/createtwist.m">createtwist</a> - Inputs a skew and a point, and returns a twist</li>
+  <li><a href="../screws/fast_twistexp.m">fast_twistexp</a> - quickly calculate the exponential of a twist matrix (good if needed in  least-squares)</li>
+  <li><a href="../screws/homdiff.m">homdiff</a> - compute differential between two homogeneous transforms in twist</li>
+  <li><a href="../screws/homerror.m">homerror</a> - calculates the error between two homogeneous transforms</li>
+  <li><a href="../screws/homtotwist.m">homtotwist</a> - finds a twist and a theta to create the homogeneous transform T</li>
+  <li><a href="../screws/iad.m">iad</a> - performs the inverse adjoint transform</li>
+  <li><a href="../screws/rotxh.m">rotxh</a> - homogeneous rotation matrix around the x-axis</li>
+  <li><a href="../screws/rotyh.m">rotyh</a> - homogeneous rotation matrix around the y-axis</li>
+  <li><a href="../screws/rotzh.m">rotzh</a> - homogeneous rotation matrix around the z-axis</li>
+  <li><a href="../screws/twist.m">twist</a> - convert xi from a 6-vector to a 4 x 4 skew-symmetric matrix</li>
+  <li><a href="../screws/twistaxis.m">twistaxis</a> - inputs a twist and returns the axis</li>
+  <li><a href="../screws/twistcoords.m">twistcoords</a> - convert xi from a 4 x 4 skew-symmetric matrix to a 6-vector</li>
+  <li><a href="../screws/twistexp.m">twistexp</a> - calculate the exponential of a twist matrix (similar to expm, but friendly to symbolic variables)</li>
+  <li><a href="../screws/twistlog.m">twistlog</a> - calculate the log of a homogeneous matrix (similar to logm, but friendlier)</li>
+  <li><a href="../screws/twistmagnitude.m">twistmagnitude</a> - inputs a twist and returns the magnitude</li>
+  <li><a href="../screws/twistpitch.m">twistpitch</a> - inputs a twist and returns the pitch</li>
+</ul>
+
+<h2>Robot Links</h2>
+
+<ul>
+  <li><a href="../robotlinks/bjacob.m">bjacob</a> - calculate the body jacobian for the robot</li>
+  <li><a href="../robotlinks/fkine.m">fkine</a> - forward kinematics for serial link manipulator</li>
+  <li><a href="../robotlinks/ikine.m">ikine</a> - inverse kinematics for serial link manipulator</li>
+  <li><a href="../robotlinks/ikine2.m">ikine2</a> - iverse kinematics for serial link manipulator (alternate method)</li>
+  <li><a href="../robotlinks/robot.m">robot</a> - creates a robot structure</li>
+  <li><a href="../robotlinks/robotparams.m">robotparams</a> - returns a parameter vector from a robot (useful for numerically solving kinematic parameters)</li>
+  <li><a href="../robotlinks/sjacob.m">sjacob</a> - calculate the spatial jacobian for the robot</li>
+</ul>
+
+<h2>Logicals</h2>
+
+<ul>
+  <li><a href="../screws/ishom.m">ishom</a> - returns true if the matrix is a homogeneous transform</li>
+  <li><a href="../robotlinks/isrobot.m">isrobot</a> - returns true if the structure is a robot</li>
+  <li><a href="../screws/isrot.m">isrot</a> - returns true if the matrix is a rotation matrix</li>
+  <li><a href="../screws/isskew.m">isskew</a> - returns true if the matrix is a skew-semmetric matrix</li>
+  <li><a href="../screws/istwist.m">istwist</a> - returns true if the matrix is a twist</li>
+</ul>
+
+<h2>Display</h2>
+
+<center>
+  <img src="images/trajectory.png" alt="trajectory.png"/>
+</center>
+
+<ul>
+  <li><a href="../screws/animframetraj.m">animframetraj</a> - animates a series of frames</li>
+  <li><a href="../screws/drawframe.m">drawframe</a> - plots a graphical description of a coordinate frame</li>
+  <li><a href="../screws/drawframediff.m">drawframediff</a> - plots the difference between frames</li>
+  <li><a href="../screws/drawframetraj.m">drawframetraj</a> - plots the a series of homogeneous transforms</li>
+  <li><a href="../screws/drawskew.m">drawskew</a> - plot a skew's axis of rotation</li>
+  <li><a href="../screws/drawskewtraj.m">drawskewtraj</a> - generates a graphical description of a screw over a series of thetas</li>
+  <li><a href="../screws/drawtwist.m">drawtwist</a> - plot a twist's axis of rotation</li>
+  <li><a href="../screws/drawtwisttraj.m">drawtwisttraj</a> - generates a graphical description of a twist over a series of thetas</li>
+</ul>
+
+<h2>Helpers</h2>
+
+<ul>
+  <li><a href="../screws/pos.m">pos</a> - set or extract the translational part of a homogeneous matrix</li>
+  <li><a href="../screws/rot.m">rot</a> - extracts the rotational part of a homogeneous matrix</li>
+  <li><a href="../screws/transl.m">transl</a> - set or extract the translational part of a homogeneous matrix</li>
+  <li><a href="../screws/noisehom.m">noisehom</a> - applies noise to a homogeneous transform</li>
+  <li><a href="../screws/noiseskew.m">noiseskew</a> - applies noise to a skew</li>
+  <li><a href="../screws/noisetwist.m">noisetwist</a> - applies noise to a twist</li>
+  <li><a href="../screws/randhom.m">randhom</a> - generates a random homogeneous transform</li>
+  <li><a href="../screws/randskew.m">randskew</a> - generates a random skew vector</li>
+  <li><a href="../screws/randtwist.m">randtwist</a> - generates a random twist vector</li>
+</ul>
+
+<h2>Utility</h2>
+
+<ul>
+  <li><a href="../util/arrow3.m">arrow3</a> - plots an arrow</li>
+  <li><a href="../util/dimg.m">dimg</a> - displays an image if global DebugLevel > level </li>
+  <li><a href="../util/dout.m">dout</a> - displays the string if global DebugLevel > level </li>
+  <li><a href="../util/dtor.m">dtor</a> - converts degrees to radians</li>
+  <li><a href="../util/isequalf.m">isequalf</a> - returns true if the two quantities are equal within a threshold</li>
+  <li><a href="../util/man.m">man</a> - emulates man function from the console</li>
+  <li><a href="../util/named_figure.m">named_figure</a> - selects a figure based on a string instead of by number</li>
+  <li><a href="../util/nice3d.m">nice3d</a> - make 3D plots look nicer</li>
+  <li><a href="../util/rtod.m">rtod</a> - converts radians to degrees</li>
+</ul>
+
+<h2>Examples</h2>
+
+<center>
+<a href="avi/swimmer_movie.mpg"><img src="images/swimmer.png" alt="swimmer.png"/></a>
+<a href="avi/example_frame_traj_movie.mpg"><img src="images/example_movie.png" alt="example_movie.png"/></a>
+</center>
+
+<ul>
+  <li><a href="../examples/example_robotlinks.m">example_robotlinks</a> - an example using the ability to construct robots</li>
+  <li><a href="../examples/example_swimmer.m">example_swimmer</a> - an example of the kinematics for our helical swimming robots (<a href="avi/swimmer_movie.mpg">mpg</a>)</li>
+  <li><a href="../examples/test_screws.m">test_screws</a> - a test program I wrote for verifying the library (<a href="avi/example_frame_traj_movie.mpg">mpg</a>)</li>
+</ul>
+
+<hr />
+
+<h2>References</h2>
+
+R. M. Murray and Z. Li and S. S. Sastry, A Mathematical Introduction to Robotic Manipulation, CRC Press 1994.
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-2107955-2";
+urchinTracker();
+</script>
+
+</body>
+</html>
