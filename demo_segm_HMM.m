@@ -12,9 +12,7 @@ for i1 = 1:N
     Data{i1} = X;
 end
 
-%%
-% Data{1} = D';
-% X = D';
+
 figure('Color',[1 1 1])
 for i=1:length(Data)
 plot(Data{i},'-.', 'LineWidth',2,'Color',[rand rand rand]); hold on
@@ -22,7 +20,7 @@ grid on
 end
 xlabel('Time (1,...,T)')
 ylabel('$\mathbf{y}$','Interpreter','LaTex')
-% legend({'O_1','O_2','O_3'})
+legend({'O_1','O_2','O_3'})
 
 
 %% Model Selection
