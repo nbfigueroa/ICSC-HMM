@@ -1,6 +1,11 @@
 # ICSC-HMM
 
-Toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Mode). The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM), coupling of the SPCM-CRP and other modification are implemented on top of this fork.
+Toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation: (1) cardinality, (2) topology and (3) transform-invariance. This is done by coupling the IBP-HMM which solve for challenges (1-2) with the SPCM-CRP mixture model for Covariance matrices which addresses challenge (3).
+
+The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM), coupling of the SPCM-CRP and other modification are implemented on top of this fork.
+
+#### Reference
+[1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *In preparation for Pattern Recognition*. 
 
 ---
 
@@ -8,9 +13,9 @@ Toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Mode).
 - [LightSpeed Matlab Toolbox](https://github.com/tminka/lightspeed): Tom Minka's library which includes highly optimized versions of mathematical functions.
 - [Eigen3 C++ Matrix Library](http://eigen.tuxfamily.org/index.php?title=Main_Page): C++ Linear Algebra Library.
 - [SPCM-CRP](https://github.com/nbfigueroa/SPCM-CRP.git): Transform Invariant Chinese Restaurant Process Mixture Model for Covariance Matrices
-- [ML_toolbox](https://github.com/epfl-lasa/ML_toolbox): Machine learning toolbox containing a plethora of dimensionality reduction, clustering, classification and regression algorithms accompanying the [Advanced Machine Learning](http://lasa.epfl.ch/teaching/lectures/ML_MSc_Advanced/index.php) course imparted at EPFL by Prof. Aude Billard.
 
-#### Installation
+---
+### Installation
 Before trying out anything, you must first compile the MEX functions for fast HMM dynamic programming, to do so run the following:
 ```
 ~/ICSC-HMM/CompileMEX.sh
@@ -19,6 +24,6 @@ Before trying out anything, you must first compile the MEX functions for fast HM
 You're ready! Now run demos..
 
 ---
-### Run Demo
+### Illustrative Example
 
 ...
