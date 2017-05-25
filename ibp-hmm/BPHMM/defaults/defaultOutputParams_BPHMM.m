@@ -1,7 +1,6 @@
 function settings = defaultOutputParams_BPHMM( outParams, algP, saveDir )
 
 % saveDir = getUserSpecifiedPath( 'SimulationResults' );
-% saveDir = getUserSpecifiedPath( 'SimulationResults' );
 
 for aa = 1:length( outParams )
     switch aa

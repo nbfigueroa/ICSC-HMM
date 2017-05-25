@@ -42,17 +42,13 @@ end
 
 % -------------------------------- Likelihood terms
 logMargPrObs_Prop = calcLogMargPrObsSeqFAST( propLL, propEta );
-logMargPrObs_Cur
-logMargPrObs_Prop
 
 % -------------------------------- Accept or Reject!
 PrAccept = PrF_diff * exp( logMargPrObs_Prop - logMargPrObs_Cur );
 if rand < PrAccept
     newFik = ~curFik;
     logMargPrObs_New = logMargPrObs_Prop;
-    fprintf('Accept flip with logProb %f \n',logMargPrObs_Prop);
 else
     newFik = curFik;
     logMargPrObs_New = logMargPrObs_Cur;
-    fprintf('Keep current fik \n');
 end

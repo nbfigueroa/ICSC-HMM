@@ -40,7 +40,6 @@ propF(:, featIDs(2) ) = 0;
 propFeatIDs = kmerge;
 propF(allObjIDs, kmerge) = 1;
 
-% Line 3 of Alg B.2 
 propStateSeq = Psi.stateSeq;
 if algParams.SM.doSeqUpdateThetaHatOnMerge
     for aa = 1:data.N
@@ -59,15 +58,12 @@ else
     end
 end
 
-% Line 4 of Alg B.2 
-% Create deterministic Theta for ALL features: others + [kA kB]
-propThetaM = Psi.ThetaM.getAllTheta_PosteriorMean( data, propStateSeq, propFeatIDs, featIDs );
-assert( propThetaM.K == length(propThetaM.Xstats), 'Badness');
-
-% Line 5 of Alg B.2 
 % Create deterministic trans params Eta
 propTransM = Psi.TransM.getAllEta_PriorMean( allObjIDs, propF, propFeatIDs );
 
+% Create deterministic Theta for ALL features: others + [kA kB]
+propThetaM = Psi.ThetaM.getAllTheta_PosteriorMean( data, propStateSeq, propFeatIDs, featIDs );
+assert( propThetaM.K == length(propThetaM.Xstats), 'Badness');
 
 if ~exist( 'TargetPsi', 'var' )
     TargetPsi = [];
@@ -75,7 +71,6 @@ elseif exist( 'TargetPsi', 'var' ) && ~isempty( TargetPsi )
     TargetPsi.externalFeatIDs = kmerge;
 end
 
-% Line 6: for all non-anchor items do the following
 proposalsON = false(1, size(propF,2) );
 proposalsON(propFeatIDs) = 1;
 for aa = [ otherObjIDs( randperm( length(otherObjIDs) ) ) anchorObjIDs]
@@ -84,7 +79,7 @@ for aa = [ otherObjIDs( randperm( length(otherObjIDs) ) ) anchorObjIDs]
     allActiveFeatIDs = find( propF(aa,:) | proposalsON );
     seqSoftEv = propThetaM.calcLogSoftEv( aa, data, allActiveFeatIDs );
     
-    % Line 7: sample state sequence aa, z ~ p(z|x,f,theta_hat,eta_hat)     
+    
     % ==============================================  Sample stateSeq(aa)
     seqTransM = propTransM.getSeqEtaWithFeats( aa, propF(aa,:) );
     [propStateSeq(aa).z, logQ_zaa] = sampleSingleStateSeq_WithSoftEv( aa, seqTransM, seqSoftEv(propF(aa,:), :), TargetPsi);

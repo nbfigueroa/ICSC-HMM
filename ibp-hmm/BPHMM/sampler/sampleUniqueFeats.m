@@ -23,26 +23,18 @@ Stats.DEL.nTotal = 0;
 
 for ii = objIDs
     if doZMove
-        fprintf('Doing Z Move as well');
         [Psi, RhoTerms] = sampleSingleFeat_UniqueRJStateSeq( ii, Psi, data, algParams );
     else
-%         fprintf('Using %s proposal distribution \n',algParams.RJ.birthPropDistr)        
         [Psi, RhoTerms] = sampleSingleFeatEntry_UniqueRJ( ii, Psi, data, algParams );
     end
     
     if RhoTerms.doBirth
-        if RhoTerms.doAccept
-%             fprintf('Time-series %d ... added a feature with %f log acceptance. prob \n',ii, RhoTerms.log_rho_star);
-        end
         Stats.ADD.nTotal = Stats.ADD.nTotal+1;
         if RhoTerms.doAccept;
             Stats.ADD.nAccept = Stats.ADD.nAccept+1;
         end
         
     else
-        if RhoTerms.doAccept
-%             fprintf('Time-series %d ...deleted features with %f log acceptance. prob \n',ii, RhoTerms.log_rho_star);
-        end
         Stats.DEL.nTotal = Stats.DEL.nTotal+1;
         if RhoTerms.doAccept;
             Stats.DEL.nAccept = Stats.DEL.nAccept+1;

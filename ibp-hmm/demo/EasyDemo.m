@@ -8,7 +8,7 @@
 %   -- Create local directories for saving results (./ConfigToolbox.sh)
 % See QuickStartGuide.pdf in doc/ for details on configuring the toolbox
 
-clear all;
+clear variables;
 close all;
 
 % -------------------------------------------------   CREATE TOY DATA!
@@ -33,14 +33,15 @@ plotData( data, 3 );
 
 % Visualize the "true" generating parameters
 % Feat matrix F (binary 5 x 4 matrix )
-% figure('Units', 'normalized', 'Position', [0 0.5 0.3 0.5] );
-% plotFeatMat( TruePsi.F );
-% title( 'True Feature Matrix', 'FontSize', 20 );
+figure('Units', 'normalized', 'Position', [0 0.5 0.3 0.5] );
+plotFeatMat( TruePsi.F );
+title( 'True Feature Matrix', 'FontSize', 20 );
 
-%% Emission parameters theta (Gaussian 2D contours)
+% Emission parameters theta (Gaussian 2D contours)
 figure('Units', 'normalized', 'Position', [0.5 0.5 0.5 0.5] );
-plotEmissionParams( TruePsi.theta , data );
+plotEmissionParams( TruePsi.theta, data );
 title( 'True Emission Params (with all data points)', 'FontSize', 20 );
+
 
 %% -------------------------------------------------   RUN MCMC INFERENCE!
 mkdir ./Results
@@ -48,10 +49,12 @@ modelP = {'bpM.gamma', 2};
 algP   = {'Niter', 100, 'HMM.doSampleHypers',0,'BP.doSampleMass',0,'BP.doSampleConc',0}; 
 % Start out with just one feature for all objects
 initP  = {'F.nTotal', 1}; 
-CH = runBPHMM( data, modelP, {1, 1}, algP, initP, './Results'  );
+CH = runBPHMM( data, modelP, {1, 1}, algP, initP, './Results' );
 % CH is a structure that captures the "Chain History" of the MCMC
 %  it stores both model config at each each iteration (in Psi field)
 %             and diagnostic information (log prob, sampler stats, etc.)
+
+
 % -------------------------------------------------   VISUALIZE RESULTS!
 % Remember: the actual labels of each behavior are irrelevent
 %   so there won't in general be direct match with "ground truth"
@@ -68,13 +71,13 @@ alignedPsi100 = alignPsiToTruth_OneToOne( Psi100, data );
 
 
 % Estimated feature matrix F
-% figure( 'Units', 'normalized', 'Position', [0 0.5 0.5 0.5] );
-% subplot(1,2,1);
-% plotFeatMat( alignedPsi90 );
-% title( 'F (@ iter 90)', 'FontSize', 20 );
-% subplot(1,2,2);
-% plotFeatMat( alignedPsi100 );
-% title( 'F (@ iter 100)', 'FontSize', 20 );
+figure( 'Units', 'normalized', 'Position', [0 0.5 0.5 0.5] );
+subplot(1,2,1);
+plotFeatMat( alignedPsi90 );
+title( 'F (@ iter 90)', 'FontSize', 20 );
+subplot(1,2,2);
+plotFeatMat( alignedPsi100 );
+title( 'F (@ iter 100)', 'FontSize', 20 );
 
 % Estimated emission parameters
 figure( 'Units', 'normalized', 'Position', [0.5 0.5 0.5 0.5] );
@@ -88,9 +91,9 @@ title( 'Theta (@ iter 100)', 'FontSize', 20 );
 % Estimated state sequence
 plotStateSeq( alignedPsi100, [1 3] );
 set( gcf, 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5] );
-% subplotHandles = findobj(gcf,'type','axes');
-% title(min(subplotHandles), 'Est. Z : Seq 1', 'FontSize', 20 );
-% title(max(subplotHandles), 'Est. Z : Seq 3', 'FontSize', 20 );
+subplotHandles = findobj(gcf,'type','axes');
+title(min(subplotHandles), 'Est. Z : Seq 1', 'FontSize', 20 );
+title(max(subplotHandles), 'Est. Z : Seq 3', 'FontSize', 20 );
 
 fprintf( 'Remember: actual labels for behaviors are *irrelevant* from model perspective\n');
 fprintf( '  what matters: *aligned* behaviors consistently assigned to same datapoints as ground truth\n' );

@@ -18,57 +18,33 @@
 %  Markov Chain state variables saved at preset frequency to hard drive
 %     at filepath location specified in outParams.saveDir
 
-function [ChainHist] = RunMCMCSimForBPHMM( data, Psi, algParams, outParams, model)
+function [ChainHist] = RunMCMCSimForBPHMM( data, Psi, algParams, outParams, model )
 tic;
 
 if isfield( Psi, 'F' )
-    % Starting chain from scratch
-    display('Starting chain from scratch');
+    % Stating chain from scratch
     n = 0;
     logPr = calcJointLogPr_BPHMMState( Psi, data );
-    fprintf('Initial Log-Probability of F: %f, z: %f, obs: %f \n', logPr.F,logPr.z,logPr.obs)
     ChainHist = recordMCMCHistory_BPHMM( 0, outParams, [], Psi, logPr  );
+
     fprintf( 'Initial Config: \n' );
     printMCMCSummary_BPHMM( 0, Psi, logPr, algParams); 
-    
 else
-    % Starting chain from an existing configuration
     ChainHist = Psi;
     Psi = unpackBPHMMState(  ChainHist.Psi(end), data, model );
+    
     logPr = calcJointLogPr_BPHMMState( Psi, data );
     n = ChainHist.iters.Psi(end );
     fprintf( 'Resumed Config: \n' );
     printMCMCSummary_BPHMM( n, Psi, logPr, algParams); 
 end
 
-
 fprintf( 'Running MCMC Sampler %d : %d ... \n', outParams.jobID, outParams.taskID );
-
-dis = 0;
-plotiters = 0;
-after_n = 0;
-do_cluster = 1;
-
-fprintf('Log-Probability of F: %f, z: %f, obs: %f \n', logPr.F,logPr.z,logPr.obs)
-
-outParams.saveEvery =1;
-
-% if algParams.Niter > 11
-%     show_iter = algParams.Niter-1;
-% else
-%     show_iter = 1;
-% end
-
 for n=n+1:algParams.Niter
-    
-%     if n >= show_iter            
-%         plotiters = 1;
-%         dis = 1;        
-%     end
+    Psi.iter = n;
 
-    
-    % Perform 1 iteration of MCMC, moving to next Markov state
-    [Psi, Stats] = BPHMMsample( Psi, data, algParams , dis, do_cluster);
+    % Perform 1 iteration of MCMC, moving to next Markov state!
+    [Psi, Stats] = BPHMMsample( Psi, data, algParams );
     
     % Diagnose convergence by calculating joint log pr. of all sampled vars
     if n == 1 || rem(n, outParams.logPrEvery)==0
@@ -87,84 +63,9 @@ for n=n+1:algParams.Niter
     end
     
     if n == 1 || rem(n, outParams.printEvery)==0
-       printMCMCSummary_BPHMM( n, Psi, logPr, algParams);
+       printMCMCSummary_BPHMM( n, Psi, logPr, algParams); 
     end
- 
     
-    if plotiters
-            % Extract Thetas from Inferred Behaviors
-            sigmas = {};    
-            theta = Psi.ThetaM.theta;
-            stateSeq = Psi.stateSeq;
-            K = length(theta);
-            Zall = horzcat( stateSeq(:).z );
-            N = length( Zall );
-            [Zcounts, sortIDs] = sort( histc( Zall, 1:K ), 'descend' );
-            sortIDs = sortIDs( Zcounts > 0 );
-            K = length( sortIDs );        
-            theta = theta( sort(sortIDs(1:K)) ) ;               
-            % Compute Similarity with Probabilities for current Theta = {theta_1,theta_2,...}
-            for i = 1:length(theta)
-                sigmas{i} = theta(i).invSigma^-1;
-            end
-
-            % %%%%%% Visualize Prob. Similarity Confusion Matrix %%%%%%%%%%%%%%
-            tau = 5;
-            spcm = ComputeSPCMfunctionProb(sigmas, tau);  
-            figure('Color', [1 1 1], 'Position',[ 3283  545  377 549]);           
-
-            subplot(3,1,1)
-            imagesc(spcm(:,:,2))
-            title('Probability of Similarity Confusion Matrix')
-            colormap(pink)
-            colorbar 
-
-            % % %%% Use Kernel-K-means to find the number of clusters from Similarity function  %%%%%%
-            N_runs = 100;
-            [labels_kkmeans energy] = kernel_kmeans(log(spcm(:,:,2)), N_runs);
-            K = length(unique(labels_kkmeans));
-
-            fprintf('After SPCM and KK-means--->>> \n Number of clusters: %d with total energy %d\n', K, energy);
-            subplot(3,1,2)
-            imagesc(labels_kkmeans)
-            title('Clustering from kernel-kmeans on SPCM Prob. function')
-            axis equal tight
-            colormap(pink)
-
-            % %%% Compute clusters from Similarity Matrix using Affinity Propagation %%%%%%
-            subplot(3,1,3)
-            spcm_aff = log(spcm(:,:,2));
-            prob_spcm_aff = diag(median(spcm_aff,2)) + spcm_aff;
-            [E K labels_aff idx] = affinitypropagation(prob_spcm_aff);
-            fprintf('After Affine Propagation on SPCM Prob. function--->>> \n Number of clusters: %d\n', K);
-            imagesc(labels_aff')
-            title('Clustering from Aff. Prop. on SPCM Prob. function')
-            axis equal tight
-            colormap(pink)                
-
-            if energy < 5e-2
-                 labels = labels_kkmeans;                                            
-            end
-
-            if length(unique(labels_aff))==1                    
-                labels = labels_kkmeans;                                            
-            else
-                labels = labels_aff;
-            end
-
-            % %%%%%% Generate Estimated feature grouping %%%%%%%%%%%%%%
-            groups = {};          
-            for c=1:K; groups{1,c} = find(labels==c); end
-
-
-            % Display estimated segmentations
-            title_seg = strcat('Segmentation after iteration ', num2str(n));        
-            theta = Psi.ThetaM.theta;
-            stateSeq = Psi.stateSeq;
-            Psi_.theta = theta;
-            Psi_.stateSeq = stateSeq;
-            [Segm_results Total_feats] = plotSegDataNadia(data, Psi_, 1:data.N, title_seg, groups);            
-   end
     
 end % loop over sampler iterations
 

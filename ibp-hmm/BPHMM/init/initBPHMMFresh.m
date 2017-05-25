@@ -111,11 +111,5 @@ Psi.bpM = model.bpM;
 
 
 % ---------------------------------------------------------  Reset stream
-% curStream = RandStream.getDefaultStream();
-% --------------------------------------------------------- Reset stream
-% for Matlab2015a
-s = RandStream('mt19937ar','Seed',0);
-RandStream.setGlobalStream(s);
 curStream = RandStream.getGlobalStream();
-
 curStream.State = entryState;

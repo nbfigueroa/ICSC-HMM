@@ -19,6 +19,7 @@ function [ChainHist] = runBPHMM( dataParams, modelParams, outParams, algParams, 
 %   {'InitFunc', @initBPHMMfromGroundTruth'} initializes to known stateSeq
 
 % Add required libraries, etc.
+% configNPBayesToolbox;
 
 % ================================================ SANITIZE INPUT
 % Converts strings to doubles when possible, etc. to allow command line input
@@ -91,9 +92,7 @@ end
 
 % ================================================= RUN INFERENCE
 if isfield( algParams, 'TimeLimit' ) && ~isempty( algParams.TimeLimit )
-   display('running timed bphmm')
   ChainHist = RunTimedMCMCSimForBPHMM( data, Psi, algParams, outParams, model);
 else
-  display('running standard bphmm')
   ChainHist = RunMCMCSimForBPHMM( data, Psi, algParams, outParams);
 end

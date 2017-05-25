@@ -33,7 +33,6 @@ else
 end
 
 % ------------------------------------------------------- INIT PROPOSAL
-% Lines 1-2 of Alg. 1 of hughes paper.
 propF = Psi.F == 1;
 propF(:, kold) = 0;
 propF( ii, kA) = 1;
@@ -47,7 +46,6 @@ end
 propStateSeq( ii ).z(  Psi.stateSeq( ii ).z == kold )  = kA;
 propStateSeq( jj ).z(  Psi.stateSeq( jj ).z == kold )  = kB;
 
-% Lines 3-4 of Alg. 1 of hughes paper.
 % Create deterministic trans params Eta
 propTransM = Psi.TransM.getAllEta_PriorMean( activeObjIDs, propF, propFeatIDs );
 
@@ -63,11 +61,8 @@ logQ.z = 0;
 
 proposalsON = false(1, size(propF,2) );
 proposalsON(propFeatIDs) = 1;
-
-% Lines 5-10 of Alg. 1 of hughes paper.
 for aa = [ otherObjIDs( randperm(length(otherObjIDs)) ) ii jj]
     
-    % Line 6
     if aa == ii || aa == jj
         % Make sure to update F suff. stats for anchors
         %  since we've already "seen" them before, unlike other sequences
@@ -75,7 +70,6 @@ for aa = [ otherObjIDs( randperm(length(otherObjIDs)) ) ii jj]
         nObj = nObj - 1;
         propThetaM = propThetaM.decXStats( aa, data, propStateSeq, propFeatIDs );
     end
-    
     
     % ====================================================  Sample F(aa,:)
     % Calc Soft Evidence for the current sequence, including both new feats
@@ -88,19 +82,16 @@ for aa = [ otherObjIDs( randperm(length(otherObjIDs)) ) ii jj]
     propF(aa, propFeatIDs) = newFaa==1;
     logQ.F = logQ.F + logQ_Faa;    
 
-    % Line 7 
     % ===============================================  Sample stateSeq(aa)
     seqTransM = propTransM.getSeqEtaWithFeats( aa, propF(aa,:) );
     propTransM = propTransM.setEta( aa, propF(aa,:), seqTransM.eta );
     [propStateSeq(aa).z, logQ_zaa] = sampleSingleStateSeq_WithSoftEv( aa, seqTransM, seqSoftEv(propF(aa,:), :), TargetPsi);
     logQ.z = logQ.z + logQ_zaa;
     
-    % Line 8
     % Update suff. stats for F
     featCounts = featCounts + propF(aa, propFeatIDs);
     nObj = nObj + 1;
     
-    % Line 9:
     % Update Emission Params for new proposed features [kA, kB]
     %   using the newly allocated data from the current sequence
     propThetaM = propThetaM.incXStats( aa, data, propStateSeq, propFeatIDs );

@@ -23,14 +23,9 @@ stateSeq = Psi.stateSeq;
 
 % --------------------------  loop over all time series
 for ii=objIDs
-        
-    ks = find( Psi.F(ii,:)>0 );
     
-%     fprintf('For sequence %d we have sampled a state sequence with ',ii);
-
-    % If we only have one feature set all of time-steps to this state
+    ks = find( Psi.F(ii,:)>0 );
     if length( ks ) == 1
-%         fprintf('1 feature (state)\n');
         stateSeq(ii).z = Psi.TransM.seq(ii).availFeatIDs(1)*ones(1,data.Ts(ii) );
         continue;
     end
@@ -48,13 +43,9 @@ for ii=objIDs
      
     SEED = randomseed();
     randomseed( SEED+1 );
-    
-    % Else sample the state sequence of z1:T from the posterior z1:t ~
-    % p(z1:T|x1:T) using Forwards filtering/Backwards sampling 
     z = SampleHMMStateSeqC( Psi.TransM.pi( ii ), Lik, Psi.TransM.pi_init(ii), SEED(1) );
-%     fprintf('%d features (states)\n', length(unique(z)));
     stateSeq(ii).z = Psi.TransM.seq(ii).availFeatIDs(z);
-    
+   
 end % loop over time series objs
 
 Psi.stateSeq = stateSeq;

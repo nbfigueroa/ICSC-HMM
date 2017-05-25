@@ -44,7 +44,6 @@ switch algParams.RJ.birthPropDistr
         [thetaStar] = ThetaM.sampleThetaProposal_BirthPrior( );
         propThetaM = ThetaM.insertTheta( thetaStar );
     case {'DataDriven', 'DD', 'datadriven'}
-        
         if isfield( algParams, 'Debug' ) && isfield( algParams.Debug, 'wstart' )        
             wstart = algParams.Debug.wstart;
             wend   = algParams.Debug.wend;
@@ -182,7 +181,6 @@ RhoTerms.logMargPrObs_Cur  = logMargPrObs_Cur;
 RhoTerms.logPrThetaDiff = logPrTheta_Diff;
 RhoTerms.logQMove.fwd = logQ.moveChoice;
 RhoTerms.logQMove.rev = logQ_Rev.moveChoice;
-RhoTerms.log_rho_star = log_rho_star; 
 RhoTerms.thetaStar = thetaStar;
 RhoTerms.choice = choice;
 RhoTerms.window = [wstart wend];

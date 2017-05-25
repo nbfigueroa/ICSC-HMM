@@ -20,7 +20,6 @@ if ~exist( 'MyColors', 'var' );
 else
     hold on;
 end
-
 if ~exist( 'figH', 'var' )
     figH = gca();
 end
@@ -34,8 +33,9 @@ end
 Sigma = Sigma(1:2, 1:2, :);
 for kk = 1:K
     taskVis = 'on';
-    for R = linspace(0.1, 2, 4)
-        
+    %for R = linspace(0.1, 2, 4)
+    for R = linspace(0.5, 2, 2)
+         
         t = -pi:.01:pi;
         k = length(t);
         x = R*sin(t);
@@ -46,9 +46,7 @@ for kk = 1:K
         A = real((vv*sqrt(dd))');
         z = [x' y']*A;
         
-        plot(figH, z(:,1)+Mu(kk,1),z(:,2)+Mu(kk,2), '.', 'Color', MyColors(kk,:), 'HandleVisibility', taskVis);
-        
-        text(Mu(kk,1),Mu(kk,2),int2str(kk),'FontSize',30, 'FontWeight','bold');
+        plot(figH, z(:,1)+Mu(kk,1),z(:,2)+Mu(kk,2), '.', 'MarkerSize', 15, 'Color', MyColors(kk,:), 'HandleVisibility', taskVis);
         taskVis = 'off';
     end
     

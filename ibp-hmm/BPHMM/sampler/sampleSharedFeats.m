@@ -43,15 +43,13 @@ end
 featCounts = sum( F, 1 );
 
 % ------------------------------------------------- Sample each entry in F
-for ii = seqIDs( randperm( length(seqIDs)  ) )   
-    for kk = featIDs( randperm( length(featIDs) ) )            
+for ii = seqIDs( randperm( length(seqIDs)  ) )
+    for kk = featIDs( randperm( length(featIDs) ) )
         
-%         fprintf('For kk=%d and ii=%d:',kk,ii); 
-%         if featCounts(kk) == 1 && F(ii,kk) == 1
-%             fprintf('Skip update as it is a unique featr \n');
+        if featCounts(kk) == 1 && F(ii,kk) == 1
             % Skip updates to unique features!
             continue;
-%         end
+        end
         
         featCounts(kk) = featCounts(kk) - F(ii,kk );
         
@@ -65,7 +63,7 @@ for ii = seqIDs( randperm( length(seqIDs)  ) )
         end
         propEta = PropEta{ii}( propks, propks );
         propLL = logSoftEv{ii}( propks, : );
-         
+        
         [ F(ii,kk), logMargPrObs(ii) ] = sampleSingleFeatEntry_SharedMH( F(ii,kk), featCounts(kk), N, Psi.bpM.c, propEta, propLL, logMargPrObs(ii) );
 
         featCounts(kk) = featCounts(kk) + F(ii,kk );

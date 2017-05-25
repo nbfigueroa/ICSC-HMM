@@ -30,41 +30,25 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
         %  To initialize directly to given parameters
         %      ObsM = ObsM.setPrior( MeanMat, invAScaleMat, degFree, ScaleMat )
         function obj = setPrior( obj, varargin )
+            obj.priorDef.doEmpCov = 0;
+            obj.priorDef.doEmpCovFirstDiff = 0;
+            obj.priorDef.Scoef = 0;
             if strfind( class(varargin{1} ), 'SeqData' )
                 data = varargin{1};
                 obsM = varargin{2};                
                 obj.prior.MeanMat = zeros( data.D, data.D*obj.R );
                 obj.prior.invAScaleMat = obsM.Scoef*eye( data.D*obj.R, data.D*obj.R);
                 obj.prior.degFree = max( obsM.degFree, data.D+2 );
-                obj.prior.degFree = data.D+6;
+                obj.priorDef.doEmpCov = obsM.doEmpCov;
+                obj.priorDef.doEmpCovFirstDiff = obsM.doEmpCovFirstDiff;
+                obj.priorDef.Scoef  = obsM.Scoef;                
                 if obsM.doEmpCov
                     obj.prior.ScaleMat = obsM.Scoef * cov( data.Xdata', 1);
                 elseif obsM.doEmpCovFirstDiff
-                   obj.prior.ScaleMat = obsM.Scoef * cov( diff(data.Xdata'), 1); 
+                    obj.prior.ScaleMat = obsM.Scoef * cov( diff(data.Xdata'), 1); 
                 else
-                  obj.prior.ScaleMat = obsM.Scoef * eye( data.D );
+                    obj.prior.ScaleMat = obsM.Scoef * eye( data.D );
                 end
-
-                %PR2 guys
-                   Dall = data.Xdata; 
-                   meanSigma = obsM.Scoef*cov(diff(Dall'));  %If bad segmentation, try values between 0.75 and 5.0
-                    for i=1:size(meanSigma,1)
-                        for j=1:size(meanSigma,2)
-                            if(i~=j) 
-                                meanSigma(i,j) = 0;
-                            end
-                        end
-                    end
-                    sig0 = meanSigma;
-                  obj.prior.ScaleMat = sig0;
-
-                %%New non-informative prior distribution for CovarianceMat
-%                 ScaleA=10^5;Ak=repmat(ScaleA,1,data.D);
-%                 ak = 1./(gamrnd(1/2,1./(Ak.^2)));
-% %                 obj.prior.ScaleMat = 2*obsM.Scoef*diag(1./ak);
-%                 obj.prior.Scoef = obsM.Scoef;
-                                    
-                
             elseif length( varargin ) == 1
                 PStruct = varargin{1};
                 obj.prior.MeanMat = PStruct.MeanMat;
@@ -85,15 +69,11 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
             if Xstats.nObs > 0
                 Xstats.XX = Xkk*Xkk';
                 Xstats.XY = Xkk*XkkPrev';
-                Xstats.YY = XkkPrev*XkkPrev';   
-                Xstats.Xsum = sum( Xkk, 2);
-                Xstats.XXsum = Xkk*Xkk';
+                Xstats.YY = XkkPrev*XkkPrev';                
             else
                 Xstats.XX = [];
                 Xstats.XY = [];
                 Xstats.YY = [];
-                Xstats.Xsum = [];
-                Xstats.XXsum = [];
             end
         end
         
@@ -110,7 +90,7 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
                 XX = Xkk*Xkk';
                 XY = Xkk*Xprev';
                 YY = Xprev*Xprev';
-                if obj.Xstats(kk).nObs == 0
+                if length(obj.Xstats)<kk ||obj.Xstats(kk).nObs == 0
                     obj.Xstats(kk).nObs = nNew;
                     obj.Xstats(kk).XX = XX;
                     obj.Xstats(kk).XY = XY;
@@ -157,13 +137,21 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
             if ~exist('PP','var')
                 PP = obj.prior;
             end
-            retStr = 'Matrix Normal Inv Wishart';            
+            retStr = 'MNIW. dFree=%d,';
+            if obj.priorDef.doEmpCov
+                retStr = [retStr ' S0=%.2f*EmpCov'];
+            elseif obj.priorDef.doEmpCovFirstDiff                
+                retStr = [retStr ' S0=%.2f*FirstDiffEmpCov'];
+            else
+                retStr = [retStr ' S0=%.2f*eye'];            
+            end
+            retStr = sprintf( retStr, obj.prior.degFree, obj.priorDef.Scoef );
         end
 
-        function PP = getPosteriorParams( obj, Xstats)
+        function PP = getPosteriorParams( obj, Xstats )
             if Xstats.nObs > 0
                 degFreeN = Xstats.nObs + obj.prior.degFree;
-%                 degFreeN = degFreeN + 6;
+                
                 MK  = obj.prior.MeanMat*obj.prior.invAScaleMat;
                 MKM = MK*obj.prior.MeanMat';
                 Sxx = Xstats.XX + MKM;
@@ -173,14 +161,7 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
                 invAScaleMatN = Syy;
                 MeanMatN  = Sxy / Syy; % Sxy * inv(Syy)
                 ScaleMatN = obj.prior.ScaleMat + Sxx - (MeanMatN)*Sxy';
-
-%                 %%New stuff (Non informative covariance prior)
-%                 ScaleMat = MeanMatN;
-%                 Ak = (obj.prior.Scoef*(1./diag(ScaleMat,0)) + (1./repmat(10^3,1,size(ScaleMat,1)))')';
-%                 ak = 1./gamrnd((obj.prior.Scoef + size(ScaleMat,1))/2,1./(Ak.^2));
-%                 ScaleMatGamma = 2*obj.prior.Scoef*diag(1./ak);
-%                 ScaleMatN = ScaleMatGamma + Sxx - (MeanMatN)*Sxy';
-
+                            
                 PP.MeanMat = MeanMatN;
                 PP.invAScaleMat = invAScaleMatN;
                 PP.degFree = degFreeN;
@@ -196,38 +177,19 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
                 PP = obj.prior;
             end
             theta.A  = PP.MeanMat;
-            theta.invSigma = (PP.degFree-obj.D-1)*( PP.ScaleMat \  eye(obj.D) ); %%Changed for translated
-            theta.invSigma = (PP.degFree-obj.D-1)*pinv(PP.ScaleMat);
-            [~, p] = chol(theta.invSigma);
-                if p~=0
-                    C = theta.invSigma;
-                    k = min(eig(C));
-                    C_ = C - k*eye(size(C));
-                    Cnew = C_/C_(1,1);
-                    theta.invSigma = Cnew;
-                end            
+            theta.invSigma = (PP.degFree-obj.D-1)*( PP.ScaleMat \ eye(obj.D) );
         end
 
-        % ==================================================== GET theta samps                 
-        function [theta, PP] = sampleTheta_FromParams( obj, PP)
+        % ==================================================== GET theta samps
+        function [theta, PP] = sampleTheta_FromParams( obj, PP )
            if ~exist('PP','var') 
                PP = obj.prior;
            end
             [sqrtSigma, sqrtInvSigma] = randiwishart( PP.ScaleMat, PP.degFree );
             theta.A = sampleFromMatrixNormal( PP.MeanMat, sqrtSigma, chol( inv(PP.invAScaleMat) ) );
-            theta.invSigma = sqrtInvSigma'*sqrtInvSigma; %%Changed for
-%             translated
-            theta.invSigma = (PP.degFree-obj.D-1)*pinv(PP.ScaleMat);
-%             Check for pos-definite
-            [~, p] = chol(theta.invSigma);
-                if p~=0
-                    C = theta.invSigma;
-                    k = min(eig(C));
-                    C_ = C - k*eye(size(C));
-                    Cnew = C_/C_(1,1);
-                    theta.invSigma = Cnew;
-                end            
+            theta.invSigma = sqrtInvSigma'*sqrtInvSigma;
         end
+                
         
         function [theta, PN] = sampleTheta( obj, Xkk, Xprev )
             if ~exist( 'Xkk', 'var' )
@@ -255,15 +217,12 @@ classdef SeqObsModel_ARGaussian < SeqObsModel
             Xprev = data.prev(ii);
             
             T = size( Xseq,2);
-            logSoftEv = zeros( obj.K, T );
+            logSoftEv = -inf( obj.K, T );
             for kk = kIDs
-%                 size(obj.theta(kk).invSigma)
-                [cholInvSigma, p]  = chol( obj.theta(kk).invSigma );
+                cholInvSigma  = chol( obj.theta(kk).invSigma );
                 logDetInvSigma = 2*sum( log( diag( cholInvSigma ) ) );
-                
-%                 size(cholInvSigma)
+
                 XdiffMu = Xseq - obj.theta(kk).A*Xprev;
-%                 size(XdiffMu)
                 U = XdiffMu'*cholInvSigma';
                 
                 logSoftEv(kk,:) = 0.5*logDetInvSigma - 0.5*sum( U.^2,2);

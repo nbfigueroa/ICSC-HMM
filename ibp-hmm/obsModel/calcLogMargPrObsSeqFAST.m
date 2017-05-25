@@ -34,7 +34,6 @@ if K == 1
     margLogPr = sum(normC );
     return;
 end
-
 Lik = exp( bsxfun( @minus, LL, normC ) );
     
 [~,margLogPr] = FilterFwdC( Pi, Lik, 1/K*ones(1,K) );

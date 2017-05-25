@@ -43,22 +43,12 @@ classdef SeqObsModel
             obj.theta(kk) = theta;
         end
         
-        function obj = sampleAllTheta(obj, data, stateSeq)
+        function obj = sampleAllTheta(obj, data, stateSeq )
             Zall = horzcat( stateSeq(:).z );
             obj = obj.updateAllXSuffStats( Zall, data );
-%             Dall = data.Xdata; 
-%                     meanSigma = 2.0*cov(diff(Dall'));  %If bad segmentation, try values between 0.75 and 5.0
-%                     for i=1:size(meanSigma,1)
-%                         for j=1:size(meanSigma,2)
-%                             if(i~=j) 
-%                                 meanSigma(i,j) = 0;
-%                             end
-%                         end
-%                     end
-%                 sig0 = meanSigma;  %Only needed for MNIW-N prior
             for kk = 1:obj.K
-                PN = obj.getPosteriorParams( obj.Xstats(kk) );   
-                obj.theta(kk) = obj.sampleTheta_FromParams( PN );                  
+               PN = obj.getPosteriorParams( obj.Xstats(kk) );
+               obj.theta(kk) = obj.sampleTheta_FromParams( PN ); 
             end
         end
         
@@ -128,9 +118,8 @@ classdef SeqObsModel
             for ii = 1:length(propStateSeq)
                 propStateSeq(ii).z( stateSeq(ii).z==kj ) = ki;
             end
-            logPrProp = obj.calcMargPrData( data, propStateSeq, ki );            
+            logPrProp = obj.calcMargPrData( data, propStateSeq, ki );
             logPrDiff = logPrProp - logPrCur;
-%             fprintf('Merge feats log Prob: %f - Split feats log Prob: %f = %f\n',logPrProp,logPrCur,logPrDiff);
         end
         
         function [theta,PP] = sampleThetaProposal_BirthPrior( obj )
