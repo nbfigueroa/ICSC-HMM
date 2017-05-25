@@ -3,7 +3,13 @@ ICSC-HMM : IBP Coupled SPCM-CRP Hidden Markov Model for Transform-Invariant Time
 Website: https://github.com/nbfigueroa/ICSC-HMM  
 Author: Nadia Figueroa (nadia.figueroafernandez AT epfl.ch) 
 
-This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation: (1) cardinality, (2) topology and (3) transform-invariance. This is done by coupling the IBP-HMM which solves for challenges (1-2) with the SPCM-CRP mixture model for Covariance matrices which addresses challenge (3). The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM) and modified accordingly. 
+This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation: 
+
+**(1) Unknown cardinality:** The typical model selection problem, number of hidden states is unknown.  
+**(2) Fixed dynamics:** For multiple time-series, the switching dynamics has to be the same for all time-series.   
+**(3) Transform-invariance:** Emission models are unique, there is no way to handle transformations in time-series.  
+
+This is done by coupling the IBP-HMM which solves for challenges **(1-2)** with the SPCM-CRP mixture model for Covariance matrices which addresses challenge **(3)**. The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM) and modified accordingly. 
 
 #### Reference
 [1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *In preparation for Pattern Recognition*. 
