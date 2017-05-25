@@ -21,7 +21,36 @@ grid on
 end
 xlabel('Time (1,...,T)')
 ylabel('$\mathbf{y}$','Interpreter','LaTex')
-legend({'O_1','O_2','O_3'})
+% legend({'O_1','O_2','O_3'})
+
+
+%% Model Selection
+dim = size(X,2);
+numObs = size(X,1);
+bic = [];
+aic = [];
+logProb_ms = [];
+for Q=1:10
+    [p_start, A, phi, loglik] = ChmmGauss(Data, Q);
+    
+    numParam = dim*Q  + Q*Q + Q + (dim*dim)*Q; %param, transition, initial, cov
+    bic_N = - 2 * loglik + numParam * log(numObs);
+    aic_N = - 2 * loglik + 2 * numParam;
+    
+    bic = [bic bic_N];
+    aic = [aic aic_N];
+
+    logProb_ms = [logProb_ms loglik];
+end
+
+%% Visualize plots
+figure('Color',[1 1 1])
+plot(bic,'-.','LineWidth',2,'Color',[rand rand rand]); hold on;
+plot(aic,'-.','LineWidth',2,'Color',[rand rand rand]); hold on;
+grid on;
+legend({'BIC','AIC'})
+title('HMM Model Selection','Interpreter','LaTex','Fontsize',20)
+xlabel('Number of states $K$','Interpreter','LaTex')
 
 %% Set feature states
 Q = 7;  % state num
@@ -32,17 +61,15 @@ A0 = [0.8 0.2 0; 0 0.8 0.2; 0 0 1];
 [p_start, A, phi, loglik] = ChmmGauss(Data, Q);
 % [p_start, A, phi, loglik] = ChmmGauss(Data, Q, 'p_start0', p_start0, 'A0', A0, 'phi0', phi0, 'cov_type', 'diag', 'cov_thresh', 1e-1);
 
+Q
+loglik
+
 % Calculate p(X) & vertibi decode
 logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{1}, phi);
 [~,~, loglik] = LogForwardBackward(logp_xn_given_zn, p_start, A);
 path = LogViterbiDecode(logp_xn_given_zn, p_start, A);
 
-p_start0
-A0
-p_start
-A
-phi
-loglik
+
 
 % figure('Color',[1 1 1])
 % Xall = cell2mat(Data');
