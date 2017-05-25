@@ -1,19 +1,13 @@
 % ================================
 % function ChmmGaussTest()
 % Generate Data for Gaussian HMM test
-for i1 = 1:3
-    X1 = mvnrnd([0,0], [0.5, 0.2; 0.2, 0.3]/5, 20);
-    X2 = mvnrnd([0,2], [0.3, -0.2; -0.2, 0.5]/5, 30);
-    X3 = mvnrnd([0,4], [0.5, 0; 0, 0.3]/5, 40);
-    X = [X1; X2; X3];
-    Data{i1} = X;
-end
+
 close all
 
 
 %%
-Data{1} = D';
-X = D';
+% Data{1} = D';
+% X = D';
 figure('Color',[1 1 1])
 for i=1:length(Data)
 plot(Data{i},'-.', 'LineWidth',2,'Color',[rand rand rand]); hold on
@@ -53,7 +47,7 @@ title('HMM Model Selection','Interpreter','LaTex','Fontsize',20)
 xlabel('Number of states $K$','Interpreter','LaTex')
 
 %% Set feature states
-Q = 7;  % state num
+Q = 3;  % state num
 p = 12;  % feature dim
 p_start0 = [1 0 0];
 A0 = [0.8 0.2 0; 0 0.8 0.2; 0 0 1];
@@ -82,4 +76,5 @@ path = LogViterbiDecode(logp_xn_given_zn, p_start, A);
 % end
 %
 data_labeled = [X path]';
-plotLabeledEEData(data_labeled, [], strcat('Segmented Data, K:',num2str(Q),', loglik:',num2str(loglik)), 0,{'x_1','x_2'});
+plotLabeledData( data_labeled, [], strcat('Segmented Data, K:',num2str(Q),', loglik:',num2str(loglik)), {'x_1','x_2'})
+% plotLabeledEEData(data_labeled, [], strcat('Segmented Data, K:',num2str(Q),', loglik:',num2str(loglik)), 0,{'x_1','x_2'});
