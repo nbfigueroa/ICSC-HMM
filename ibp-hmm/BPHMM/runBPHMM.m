@@ -1,4 +1,4 @@
-function [ChainHist] = runBPHMM( dataParams, modelParams, outParams, algParams, initParams )
+function [ChainHist] = runBPHMM( dataParams, modelParams, outParams, algParams, initParams, saveDir )
 % runBPHMM
 % User-facing entry function for configuring and executing MCMC simulation 
 %   for posterior inference of a Beta Process HMM (BP-HMM) model.
@@ -19,7 +19,6 @@ function [ChainHist] = runBPHMM( dataParams, modelParams, outParams, algParams, 
 %   {'InitFunc', @initBPHMMfromGroundTruth'} initializes to known stateSeq
 
 % Add required libraries, etc.
-configNPBayesToolbox;
 
 % ================================================ SANITIZE INPUT
 % Converts strings to doubles when possible, etc. to allow command line input
@@ -33,7 +32,7 @@ initParams  = sanitizeUserInput( initParams );
 algDefs = defaultMCMCParams_BPHMM();
 algParams = updateParamsWithUserInput(  algDefs, algParams );
 
-outDefs = defaultOutputParams_BPHMM( outParams, algParams );
+outDefs = defaultOutputParams_BPHMM( outParams, algParams, saveDir );
 outParams = updateParamsWithUserInput( outDefs, outParams(3:end) );
 
 initDefs = defaultInitMCMC_BPHMM();

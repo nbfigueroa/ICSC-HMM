@@ -103,38 +103,38 @@ switch algParams.SM.featSelectDistr
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%% BLOCK OF CODE THAT USES SPCM TO FIND CANDIDATE %%%%%%%
         %%%%%%%%%%%%%%% FEATURE AND Q PROBABILITY %%%%%%%%%%%%%%%%%%%%
-        log_qs_kj_spcm = ones( 1, size(F,2)  )*(-inf);
-        tau = 10;
-
-        % Compute model-based pair-wise similarity
-        for kk = find( F(jj,:) )
-            if kk == ki
-               continue;
-            end                    
-            [p_sim, spcm, ~ , ~] = ComputeSPCMPair(ThetaM.theta(ki).invSigma^-1, ThetaM.theta(kk).invSigma^-1, tau);
-            log_qs_kj_spcm(kk) = log(p_sim); 
-        end  
-                
-        M_spcm = max( log_qs_kj_spcm );        
-        if all( isinf(log_qs_kj_spcm) )
-            % They are all the same
-            qs_kj_spcm = zeros(1, size(F,2) );
-            qs_kj_spcm(ki) = F(jj,ki);
-        else            
-            qs_kj_spcm = exp( log_qs_kj_spcm - M_spcm );
-            qs_kj_spcm( ki ) = F(jj,ki)*2*sum( qs_kj_spcm ); 
-            qs_kj_spcm = qs_kj_spcm ./ sum( qs_kj_spcm );        
-        end           
-        
-        
+%         log_qs_kj_spcm = ones( 1, size(F,2)  )*(-inf);
+%         tau = 10;
+% 
+%         Compute model-based pair-wise similarity
+%         for kk = find( F(jj,:) )
+%             if kk == ki
+%                continue;
+%             end                    
+%             [p_sim, spcm, ~ , ~] = ComputeSPCMPair(ThetaM.theta(ki).invSigma^-1, ThetaM.theta(kk).invSigma^-1, tau);
+%             log_qs_kj_spcm(kk) = log(p_sim); 
+%         end  
+%                 
+%         M_spcm = max( log_qs_kj_spcm );        
+%         if all( isinf(log_qs_kj_spcm) )
+%             They are all the same
+%             qs_kj_spcm = zeros(1, size(F,2) );
+%             qs_kj_spcm(ki) = F(jj,ki);
+%         else            
+%             qs_kj_spcm = exp( log_qs_kj_spcm - M_spcm );
+%             qs_kj_spcm( ki ) = F(jj,ki)*2*sum( qs_kj_spcm ); 
+%             qs_kj_spcm = qs_kj_spcm ./ sum( qs_kj_spcm );        
+%         end           
+%         
+%         
         if ~exist('kj','var')
             kj = multinomial_single_draw( qs_kj );            
-            kj_spcm = multinomial_single_draw( qs_kj_spcm );
-            kj = kj_spcm;
+%             kj_spcm = multinomial_single_draw( qs_kj_spcm );
+%             kj = kj_spcm;
         end  
-        
-        %Substitute qs_kj and kj computed by marg_like by spcm
-        qs_kj = qs_kj_spcm;                
+%         
+%         Substitute qs_kj and kj computed by marg_like by spcm
+%          qs_kj = qs_kj_spcm;                
 end
 
 % display('Proposal probabilities for each candidate:');

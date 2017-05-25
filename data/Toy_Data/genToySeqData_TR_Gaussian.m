@@ -1,4 +1,4 @@
-function [data, PsiTrue] = genToySeqData_Gaussian( nStates, nDim, N, T, pIncludeFeature)
+function [data, PsiTrue] = genToySeqData_TR_Gaussian( nStates, nDim, N, T, pIncludeFeature)
 % INPUTS ----------------------------------------------------------
 %    nStates = # of available Markov states
 %    nDim = number of observations at each time instant
@@ -13,7 +13,8 @@ entryState = curStream.State;
 
 % Reset PRNG state to default value with SEED 0
 %       so that we always get same synth data regardless of when called
-reset( RandStream.getGlobalStream(), 0);
+% reset( RandStream.getGlobalStream(), 0);
+reset( RandStream.getGlobalStream());
 
 if T < 0
     doVaryLength = 1;
@@ -50,23 +51,28 @@ ts = linspace( -pi, pi, nStates+1 );
 xs = cos(ts);
 ys = sin(ts);
 
-S(:,:,1) = [V 0; 0 .1*V];
+% S(:,:,1) = [V 0; 0 .1*V];
+S(:,:,1) = [V*2 0; 0 V];
 S(:,:,2) = [0.5*V .4*V; .4*V .5*V];
-S(:,:,3) = [0.1*V 0; 0 V];
+% S(:,:,3) = [0.1*V 0; 0 V];
+S(:,:,3) = [V*4 0 ;0 V*2];
 S(:,:,4) = [0.5*V -.4*V; -.4*V .5*V];
+% S(:,:,4) = [0.25*V 0.2*V; 0.2*V 0.25*V];
 if nDim == 1
     Px.Mu = linspace( -1*V, 1*V, nStates )';
     for kk = 1:nStates
         Px.Sigma(:,:,kk) = V;
     end
 elseif nDim == 2
-    Px.Mu = [xs(1:end-1)' ys(1:end-1)'];
+%     Px.Mu = [xs(1:end-1)' ys(1:end-1)']
+    Px.Mu = [ 0 0; 2 0; 0 2;  2 2];
     
     if nStates == 8
         Px.Sigma(:,:,1:4) = S(:,:,1:4);
         Px.Sigma(:,:,5:8) = S(:,:,1:4);
     elseif nStates == 4
-        Px.Sigma(:,:,1:4) = S(:,:,[1 3 1 3] );
+%         Px.Sigma(:,:,1:4) = S(:,:,[1 3 1 3] );
+        Px.Sigma(:,:,1:4) = S(:,:,[1 2 3 4] );
     else
         for kk = 1:nStates
             Px.Sigma(:,:, mod(kk,4)+1 ) = S(:,:,mod(kk,4)+1);
@@ -146,3 +152,6 @@ PsiTrue.Pz = Pz;
 PsiTrue.z = zTrue;
 
 end % main function
+
+
+

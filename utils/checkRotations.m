@@ -1,14 +1,15 @@
 %% Check rotation values
 function [q_sw] = checkRotations(q)
+% r = Xn{1}(5,:);
 
 q_sw = q;
 for ii=1:size(q,1)
     r = q(ii,:);
     r_0 = r(2:end);
-    diff = abs(r(1:end-1) - r_0);
+    diff = r(1:end-1) - r_0;
     r_sw = r;
     xyz_sw = q;
-    if abs(range(diff)) > 0.5
+    if abs(range(diff)) > 1
         ma = max(diff);
         maxIndex = find(diff > 0.5*ma);
         mi = min(diff);
