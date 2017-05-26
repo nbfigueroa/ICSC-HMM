@@ -19,8 +19,8 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
-N_TS = 3;
-[Data] = genToyHMMData_Gaussian( N_TS ); 
+N_TS = 3; display = 1 ;
+[Data, states] = genToyHMMData_Gaussian( N_TS, display ); 
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;

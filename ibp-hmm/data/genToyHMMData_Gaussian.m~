@@ -1,4 +1,4 @@
-function [Data, True_states] = genToyHMMData_Gaussian(N, display)
+function [Data, states] = genToyHMMData_Gaussian(N, display)
 % INPUTS ----------------------------------------------------------
 %    nStates = # of available Markov states
 %    nDim = number of observations at each time instant
@@ -16,12 +16,12 @@ for iter = 1:N
     X2 = mvnrnd([0,0], [0.5, 0.2; 0.2, 0.3]/5, 20);
     X3 = mvnrnd([0,4], [0.5, 0; 0, 0.3]/5, 40);
     X = [X1; X2; X3];
-    labels = [ones(1,30) 2*ones(1,20) 3*ones(1,40)];
+    labels = [ones(1,30) 2*ones(1,30) 3*ones(1,30)];
     Data{iter}   = X;
-    True_states{iter} = labels;
+    states{iter} = labels;
 end
 
-if display == 1
+if display
     figure('Color',[1 1 1])
     for i=1:length(Data)
         plot(Data{i},'-.', 'LineWidth',2,'Color',[rand rand rand]); hold on
@@ -29,25 +29,9 @@ if display == 1
     end
     axis( [1 length(X) min(min(X)) max(max(X))] );
     xlabel('Time (1,...,T)')
-    ylabel('$\mathbf{x}$','Interpreter','LaTex')
+    ylabel('$\mathbf{}$','Interpreter','LaTex')
     legend({'O_1','O_2','O_3'})
 end
-
-if display == 2
-    ts = [1:length(Data)];
-    figure('Color',[1 1 1])
-    for i=1:length(ts)
-        X = Data{ts(i)};
-        true_states = True_states{ts(i)};
-        
-        % Plot time-series with true labels
-        subplot(length(ts),1,i);
-        data_labeled = [X true_states']';
-        plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'})
-    end
-end
-
-
 end % main function
 
 

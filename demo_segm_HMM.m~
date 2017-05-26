@@ -19,8 +19,9 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
-N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
+N_TS = 3; display = 0 ;
 [Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
@@ -50,6 +51,6 @@ for i=1:length(ts)
     
     % Plot segmentation Results on each time-series
     subplot(length(ts),1,i);
-    data_labeled = [X relabeled_est_states']';
+    data_labeled = [X relabeled_est_states]';
     plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'})
 end
