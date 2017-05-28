@@ -90,3 +90,27 @@ model.HMMmodel.params.c=100;  % self trans
 model.HMMmodel.params.d=1;
 model.HMMmodel.type = 'HDP';
 
+%% Generate data from the prior:
+time_steps = 1000;
+data_struct = [];
+time_series = 1;
+figure('Color',[1 1 1])
+for i=1:time_series    
+    data_struct = generateData(model,settings,time_steps);            
+    data_labeled = [data_struct.obs; data_struct.true_labels];
+    label_range = unique(data_struct.true_labels);
+    K = length(label_range);
+    subplot(time_series,1,i)
+    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(i),'), K:',num2str(K)), {'x_1','x_2'},label_range)    
+end
+
+%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM
+T = 1;
+for seq=1
+    data_struct.test_cases = seq;
+    for run=1:T
+        settings.trial = run;  % Defines trial number, which is part of the filename used when saving stats
+        HDPHMMDPinference(data_struct,model,settings)
+    end
+end
+
