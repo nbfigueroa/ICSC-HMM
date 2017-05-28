@@ -1,7 +1,7 @@
 function [relabeled_est_labels hamming_dist assignment relabeled_true_labels] = mapSequence2Truth(true_labels,est_labels)
 
 true_labels = map2smallestIntegers(true_labels,max(true_labels));
-%est_labels = map2smallestIntegers(est_labels,max(est_labels));
+est_labels = map2smallestIntegers(est_labels,max(est_labels));
 
 [DM unique_true unique_est] = buildDistanceMatrix(true_labels,est_labels);
 
@@ -25,7 +25,6 @@ for ii=1:length(assignment)
         relabeled_est_labels(find(est_labels==unique_est(ii)))=assignment(ii);
     end
 end
-
 hamming_dist = sum(relabeled_est_labels~=true_labels)/length(true_labels);
 
 relabeled_true_labels = true_labels;

@@ -8,7 +8,7 @@ if isempty(t)
     t = 1:N;
 end
 
-M = 10;
+M = 4;
 begin_time = t(1); 
 xs = 1:N;    
 
