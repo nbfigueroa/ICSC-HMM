@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Main demo script for the ICSC-HMM Segmentation Algorithm proposed in:
+% Main demo scripts for the ICSC-HMM Segmentation Algorithm proposed in:
 %
 % N. Figueroa and A. Billard, “Transform-Invariant Clustering of SPD Matrices 
 % and its Application on Joint Segmentation and Action Discovery}”
@@ -25,6 +25,7 @@ N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [data, TruePsi] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+label_range = unique(data.zTrueAll);
 
 Data = []; True_states = [];
 % Extract data for HMM
@@ -41,7 +42,7 @@ for i=1:length(ts)
     % Plot time-series with true labels
     subplot(length(ts),1,i);
     data_labeled = [X true_states]';
-    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'})
+    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range);
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,8 +83,8 @@ for i=1:length(ts)
     
     % Plot segmentation Results on each time-series
     subplot(length(ts),1,i);
-    data_labeled = [X est_states]';
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'})
+    data_labeled = [X relabeled_est_states]';
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'},label_range)
 end
 
 % Cluster Metrics

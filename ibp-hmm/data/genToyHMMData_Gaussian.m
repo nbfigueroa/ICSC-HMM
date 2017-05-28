@@ -20,6 +20,7 @@ for iter = 1:N
     Data{iter}   = X;
     True_states{iter} = labels;
 end
+label_range = [1 2 3];
 
 if display == 1
     figure('Color',[1 1 1])
@@ -43,7 +44,7 @@ if display == 2
         % Plot time-series with true labels
         subplot(length(ts),1,i);
         data_labeled = [X true_states']';
-        plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'})
+        plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range)
     end
 end
 
