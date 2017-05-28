@@ -1,4 +1,4 @@
-function [data, PsiTrue] = genToySeqData_Gaussian( nStates, nDim, N, T, pIncludeFeature)
+function [data, PsiTrue, Data , True_states ] = genToySeqData_Gaussian( nStates, nDim, N, T, pIncludeFeature)
 % INPUTS ----------------------------------------------------------
 %    nStates = # of available Markov states
 %    nDim = number of observations at each time instant
@@ -144,5 +144,27 @@ for kk = 1:nStates
 end
 PsiTrue.Pz = Pz;
 PsiTrue.z = zTrue;
+
+Data = []; True_states = [];
+% Extract data for HMM
+for i=1:data.N
+    Data{i} = data.seq(i)';
+    True_states{i} = data.zTrue(i)';
+end
+
+label_range = unique(data.zTrueAll);
+
+ts = [1:length(Data)];
+figure('Color',[1 1 1])
+for i=1:length(ts)
+    X = Data{ts(i)};
+    true_states = True_states{ts(i)};
+    
+    % Plot time-series with true labels
+    subplot(length(ts),1,i);
+    data_labeled = [X true_states]';
+    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range);
+end
+
 
 end % main function

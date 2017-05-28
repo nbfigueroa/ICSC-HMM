@@ -18,7 +18,7 @@ for iter = 1:N
     X = [X1; X2; X3];
     labels = [ones(1,30) 2*ones(1,20) 3*ones(1,40)];
     Data{iter}   = X;
-    True_states{iter} = labels;
+    True_states{iter} = labels';
 end
 label_range = [1 2 3];
 
@@ -43,7 +43,7 @@ if display == 2
         
         % Plot time-series with true labels
         subplot(length(ts),1,i);
-        data_labeled = [X true_states']';
+        data_labeled = [X true_states]';
         plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range)
     end
 end

@@ -21,29 +21,12 @@
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+[data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 label_range = unique(data.zTrueAll);
-
-Data = []; True_states = [];
-% Extract data for HMM
-for i=1:data.N
-    Data{i} = data.seq(i)';
-    True_states{i} = data.zTrue(i)';
-end
-ts = [1:length(Data)];
-figure('Color',[1 1 1])
-for i=1:length(ts)
-    X = Data{ts(i)};
-    true_states = True_states{ts(i)};
-    
-    % Plot time-series with true labels
-    subplot(length(ts),1,i);
-    data_labeled = [X true_states]';
-    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range);
-end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
@@ -54,38 +37,68 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; 
-tic;
-[p_start, A, phi, loglik] = ChmmGauss(Data, K);
-toc;
-
-% Calculate p(X) & viterbi decode fo reach time-series
+K = 4; T = 10;
 ts = [1:length(Data)];
-segmentation_hamm = zeros(1,length(ts));
-segmentation_acc  = zeros(1,length(ts));
-true_states_all   = [];
-est_states_all    = [];
 
-figure('Color',[1 1 1])
-for i=1:length(ts)
-    X = Data{ts(i)};
-    true_states = True_states{ts(i)};
-    logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{i}, phi);
-    [~,~, loglik] = LogForwardBackward(logp_xn_given_zn, p_start, A);
-    est_states = LogViterbiDecode(logp_xn_given_zn, p_start, A);    
+% Segmentation Metric Arrays
+hamming_distance   = zeros(1,T);
+global_consistency = zeros(1,T);
+variation_info     = zeros(1,T);
+% Clustering Metric Arrays
+cluster_purity = zeros(1,T);
+cluster_NMI    = zeros(1,T);
+cluster_F      = zeros(1,T);
+% Model Metric Arrays
+logliks        = zeros(length(ts),T);
+
+for run=1:T
+    % Fit HMM with 'optimal' K to set of time-series
+    [p_start, A, phi, loglik] = ChmmGauss(Data, K);
         
-    % Stack all labels`
-    true_states_all = [true_states_all; true_states ];
-    est_states_all  = [est_states_all; est_states];
+    true_states_all   = [];
+    est_states_all    = [];
+    segmentation_hamm = zeros(1,length(ts));    
     
-    % Segmentation Metrics
-    [relabeled_est_states, segmentation_hamm(i),~,~] = mapSequence2Truth(true_states,est_states);    
+    % Calculate p(X) & viterbi decode fo reach time-series
+    if run==T
+        if exist('h0','var') && isvalid(h0), delete(h0);end
+        h0 = figure('Color',[1 1 1]);
+    end
     
-    % Plot segmentation Results on each time-series
-    subplot(length(ts),1,i);
-    data_labeled = [X relabeled_est_states]';
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'},label_range)
+    for i=1:length(ts)
+        X = Data{ts(i)};
+        true_states = True_states{ts(i)};
+        logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{i}, phi);
+        [~,~, logliks(i,run)] = LogForwardBackward(logp_xn_given_zn, p_start, A);
+        est_states = LogViterbiDecode(logp_xn_given_zn, p_start, A);                       
+        
+        % Stack labels for state clustering metrics        
+        true_states_all = [true_states_all; true_states];
+        est_states_all  = [est_states_all; est_states];
+        
+        % Plot segmentation Results on each time-series
+        if run==T
+            subplot(length(ts),1,i);
+            data_labeled = [X est_states]';
+            plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'},label_range)
+        end
+    end
+    
+    % Segmentation Metrics per run
+    [relabeled_est_states, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
+    [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
+    
+    % Cluster Metrics per run
+    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_states_all);
+    
 end
 
-% Cluster Metrics
-[cluster_purity cluster_NMI cluster_F] = cluster_metrics(true_states_all, est_states_all)
+% Visualize Transition Matrix
+if exist('h1','var') && isvalid(h1), delete(h1);end
+h1 = plotTransMatrix(A);
+
+% Final Stats for HMM segmentation and state clustering
+clc;
+fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
+    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+

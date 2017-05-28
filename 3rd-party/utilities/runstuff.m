@@ -142,7 +142,7 @@ switch obsModelType
         settings.Kz = Kz;   % truncation level for mode transition distributions
         settings.Ks = Ks;  % truncation level for mode transition distributions
 end
-settings.Niter = 2000;  % Number of iterations of the Gibbs sampler
+settings.Niter = 1000;  % Number of iterations of the Gibbs sampler
 settings.resample_kappa = 1;  % Whether or not to use sticky model
 settings.seqSampleEvery = 100; % How often to run sequential z sampling
 settings.saveEvery = 100;  % How often to save Gibbs sample stats

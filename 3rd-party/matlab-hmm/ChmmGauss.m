@@ -60,7 +60,7 @@ if (~exist('iter_num'))
     iter_num = 100;          % the maximum of EM iteration
 end
 if (~exist('cov_type'))
-    cov_type = 'diag';      % 'full' or 'diag'
+    cov_type = 'full';      % 'full' or 'diag'
 end
 if (~exist('cov_thresh'))
     cov_thresh = 1e-2;      % the thresh of cov
