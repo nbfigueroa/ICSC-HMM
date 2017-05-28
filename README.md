@@ -5,9 +5,9 @@ Author: Nadia Figueroa (nadia.figueroafernandez AT epfl.ch)
 
 This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation: 
 
-**(1) Unknown cardinality:** The typical model selection problem, number of hidden states is unknown.  
-**(2) Fixed dynamics:** For BNP analysis of multiple time-series with HDP, the switching dynamics has to be the same for all time-series.   
-**(3) Transform-invariance:** Emission models are unique, there is no way to handle transformations in time-series.  
+**(1) Unknown cardinality:** The typical model selection problem, number of hidden states is unknown. This can be solved by formulating an HMM with the Bayesian Non-Parametric treatment, i.e. placing an infinite prior on the transition distributions.  
+**(2) Fixed dynamics:** For BNP analysis of ***multiple*** time-series with the HDP prior, the time series are tied together with the same set of transition and emission parameters.  
+**(3) Transform-invariance:** For ***any*** type of HMM, the emission models are unique, there is no way to handle transformations within or throughout time-series.  
 
 This is done by coupling the IBP-HMM which solves for challenges **(1-2)** with the SPCM-CRP mixture model for Covariance matrices which addresses challenge **(3)**. The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM) and modified accordingly. 
 
