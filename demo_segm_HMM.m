@@ -57,7 +57,6 @@ for run=1:T
         
     true_states_all   = [];
     est_states_all    = [];
-    segmentation_hamm = zeros(1,length(ts));    
     
     % Calculate p(X) & viterbi decode fo reach time-series
     if run==T
@@ -85,11 +84,11 @@ for run=1:T
     end
     
     % Segmentation Metrics per run
-    [relabeled_est_states, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
+    [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
     [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
     
     % Cluster Metrics per run
-    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_states_all);
+    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
     
 end
 

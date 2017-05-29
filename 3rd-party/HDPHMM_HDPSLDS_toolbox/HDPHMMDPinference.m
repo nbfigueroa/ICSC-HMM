@@ -162,6 +162,12 @@ if isfield(data_struct(1),'true_labels')
     end
 end
 
+if isfield(settings,'ploton') & isfield(data_struct,'true_labels')
+    if settings.ploton == 1
+        H = figure;
+    end
+end
+
 clear ChainStats
 stats_iter = 1;
 logliks = zeros(length(data_struct),Niter);
@@ -233,11 +239,7 @@ for n=n_start:Niter
     if isfield(data_struct,'true_labels') & settings.ploton
         % If the 'ploton' option is included in the settings structure (and if it
         % is set to 1), then create a figure for the plots:
-        if isfield(settings,'ploton')
-            if settings.ploton == 1
-                H = figure;
-            end
-        end
+
         
         if rem(n,settings.plotEvery)==0
             

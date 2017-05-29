@@ -41,6 +41,7 @@ meanSigma = eye(d);    % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
 Kz = 10;               % truncation level of the DP prior on HMM transition distributions pi_k
 Ks = 1;                % truncation level of the DPMM on emission distributions pi_s
 saveDir = './Results';
+plot_iter = 1;
 
 % Sampler Settings for HDP-HMM:
 clear settings
@@ -52,7 +53,7 @@ settings.seqSampleEvery = 100; % How often to run sequential z sampling
 settings.saveEvery = 100;      % How often to save Gibbs sample stats
 settings.storeEvery = 1;
 settings.storeStateSeqEvery = 100;
-settings.ploton = 1;           % Plot the mode sequence while running sampler
+settings.ploton = plot_iter;    % Plot the mode sequence while running sampler
 settings.plotEvery = 20;
 settings.plotpause = 0;        % Length of time to pause on the plot
 settings.saveDir = saveDir;    % Directory to which to save files
@@ -92,37 +93,100 @@ model.HMMmodel.params.d=1;
 model.HMMmodel.type = 'HDP';
 
 %% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM
-% Create data structure for HDP-HMM sampler
+% Create data structure of multiple time-series for HDP-HMM sampler
 clear data_struct 
 for ii=1:length(Data)
     data_struct(ii).obs = Data{ii}';
-%     data_struct(ii).true_labels = True_states{ii};
+    data_struct(ii).true_labels = True_states{ii}';
 end
 data_struct(1).test_cases = [1:length(data_struct)];
 
-T = 1; % Number of Repetitions
-ChainStats = [];
-for run=1:T
-    settings.trial = run;     
+% Options for sticky-HDP-HMM sampler, (1) Gaussian emission models
+% hdp_options clear
+% hdp_options.
+%...
+
+% Segmentation Metric Arrays
+hamming_distance   = zeros(1,T);
+global_consistency = zeros(1,T);
+variation_info     = zeros(1,T);
+inferred_states    = zeros(1,T);
+
+% Clustering Metric Arrays
+cluster_purity = zeros(1,T);
+cluster_NMI    = zeros(1,T);
+cluster_F      = zeros(1,T);
+
+% Run Weak Limit Collapsed Gibbs Sampler for T times
+T = 2; % Number of Repetitions
+ChainStats_Run = [];
+for run=1:T             
     tic;
-    [ChainStats(run)] = HDPHMMDPinference(data_struct,model,settings);
+    clear ChainStats
+    settings.trial = 1;
+    [ChainStats] = HDPHMMDPinference(data_struct,model,settings);
     toc;    
-end
-
-%% Compute the log-likelihood of Chain States
-logliks = zeros(1,length(ChainStats));
-for kk=1:length(ChainStats)
-    clear phi
-    phi.mu = ChainStats(kk).theta.mu;
-    phi.Sigma = ChainStats(kk).theta.invSigma;
+    
+    % Extract Stats from Last Run
+    ChainStats_Run(run).stateSeq  = ChainStats(end).stateSeq;
+    ChainStats_Run(run).initProb  = ChainStats(end).dist_struct(end).pi_init;
+    ChainStats_Run(run).TransProb = ChainStats(end).dist_struct(end).pi_z;
+    ChainStats_Run(run).Theta     = ChainStats(end).theta(end);
+    
+    % Compute Log-Likelihood and est_states for this run
+    true_states_all   = [];
+    est_states_all    = [];
     loglik_ = zeros(length(data_struct),1);
+    Theta.mu =  ChainStats_Run(run).Theta.mu;
+    Theta.Sigma =  ChainStats_Run(run).Theta.invSigma;
     for jj=1:length(data_struct)
-        logp_xn_given_zn = Gauss_logp_xn_given_zn(data_struct(jj).obs', phi);
-        [~,~, loglik_(jj,1)] = LogForwardBackward(logp_xn_given_zn, ChainStats(kk).dist_struct.pi_init, ChainStats(kk).dist_struct.pi_z);
+        logp_xn_given_zn = Gauss_logp_xn_given_zn(data_struct(jj).obs', Theta);
+        [~,~, loglik_(jj,1)] = LogForwardBackward(logp_xn_given_zn, ChainStats_Run(run).initProb, ChainStats_Run(run).TransProb);
+        
+        % Stack labels for state clustering metrics        
+        true_states = True_states{jj};
+        est_states  = ChainStats_Run(run).stateSeq(jj).z';
+        true_states_all = [true_states_all; true_states];
+        est_states_all  = [est_states_all; est_states];
+        
     end
-    logliks(1,kk) = sum(loglik_);
+    ChainStats_Run(run).logliks = loglik_;    
+    
+    % Segmentation Metrics per run
+    [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
+    [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
+    inferred_states(run)   = length(unique(est_states_all));
+    
+    % Cluster Metrics per run
+    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);        
 end
 
-% Compute Metrics
+% Final Stats for Sticky HDP-HMM segmentation and state clustering
+clc;
+fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
+    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
+%% Visualize Transition Matrix and Segmentation from 'Best' Run
+log_likelihoods = zeros(1,T);
+for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
+[Max_ll, id] = max(log_likelihoods);
+BestChain = ChainStats_Run(id);
+K_est = inferred_states(id);
+est_states_all = [];
+for ii=1:length(data_struct); est_states_all  = ChainStats_Run(id).stateSeq(jj).z'; end
+label_range = [];
+% Plot Segmentation
+figure('Color',[1 1 1])
+for i=1:length(data_struct)
+    X = data_struct(i).obs;
+    est_states  = BestChain.stateSeq(i).z;
+    subplot(length(data_struct),1,i);
+    data_labeled = [X; est_states];
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(Max_ll)), {'x_1','x_2'},label_range)
+    
+end
+
+% Plot Transition Matrix
+if exist('h1','var') && isvalid(h1), delete(h1);end
+h1 = plotTransMatrix(BestChain.TransProb);
 
