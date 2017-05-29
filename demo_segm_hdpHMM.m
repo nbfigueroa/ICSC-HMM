@@ -42,12 +42,13 @@ Kz = 10;               % truncation level of the DP prior on HMM transition dist
 Ks = 1;                % truncation level of the DPMM on emission distributions pi_s
 saveDir = './Results';
 plot_iter = 1;
+Niter = 1000;
 
 % Sampler Settings for HDP-HMM:
 clear settings
 settings.Kz = Kz;              % truncation level for mode transition distributions
 settings.Ks = Ks;              % truncation level for mode transition distributions
-settings.Niter = 1000;         % Number of iterations of the Gibbs sampler
+settings.Niter = Niter;         % Number of iterations of the Gibbs sampler
 settings.resample_kappa = 1;   % Whether or not to use sticky model
 settings.seqSampleEvery = 100; % How often to run sequential z sampling
 settings.saveEvery = 100;      % How often to save Gibbs sample stats
@@ -97,7 +98,7 @@ model.HMMmodel.type = 'HDP';
 clear data_struct 
 for ii=1:length(Data)
     data_struct(ii).obs = Data{ii}';
-    data_struct(ii).true_labels = True_states{ii}';
+%     data_struct(ii).true_labels = True_states{ii}';
 end
 data_struct(1).test_cases = [1:length(data_struct)];
 
@@ -106,6 +107,7 @@ data_struct(1).test_cases = [1:length(data_struct)];
 % hdp_options.
 %...
 
+T = 10; % Number of Repetitions
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -118,7 +120,6 @@ cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
 
 % Run Weak Limit Collapsed Gibbs Sampler for T times
-T = 2; % Number of Repetitions
 ChainStats_Run = [];
 for run=1:T             
     tic;
@@ -161,6 +162,8 @@ for run=1:T
     [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);        
 end
 
+% Clean up metrics.. F-measure might give nan's sometimes
+
 % Final Stats for Sticky HDP-HMM segmentation and state clustering
 clc;
 fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
@@ -173,16 +176,25 @@ for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];
-for ii=1:length(data_struct); est_states_all  = ChainStats_Run(id).stateSeq(jj).z'; end
-label_range = [];
+for ii=1:length(data_struct); est_states_all  = [est_states_all BestChain.stateSeq(ii).z]; end
+label_range = unique(est_states_all)
+
+% Optimal Theta
+Theta.mu    =  BestChain.Theta.mu(:,label_range);
+Theta.Sigma =  BestChain.Theta.invSigma(:,:,label_range);
+
 % Plot Segmentation
 figure('Color',[1 1 1])
 for i=1:length(data_struct)
     X = data_struct(i).obs;
+    
+    % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
     est_states  = BestChain.stateSeq(i).z;
+    
+    % Plot Inferred Segments
     subplot(length(data_struct),1,i);
     data_labeled = [X; est_states];
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(Max_ll)), {'x_1','x_2'},label_range)
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(ChainStats_Run(2).logliks(i))), {'x_1','x_2'},label_range)
     
 end
 
