@@ -13,7 +13,7 @@
 %%%% in a structure of the form S(store_count).field(time_series).subfield
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function HDPHMMDPinference(data_struct,model,settings,restart)
+function [ChainStats] = HDPHMMDPinference(data_struct,model,settings,restart)
 
 trial = settings.trial;
 if ~isfield(settings,'saveMin')
@@ -162,14 +162,9 @@ if isfield(data_struct(1),'true_labels')
     end
 end
 
-% If the 'ploton' option is included in the settings structure (and if it
-% is set to 1), then create a figure for the plots:
-if isfield(settings,'ploton')
-    if settings.ploton == 1
-        H = figure;
-    end
-end
-
+clear ChainStats
+stats_iter = 1;
+logliks = zeros(length(data_struct),Niter);
 %%%%%%%%%% Run Sampler %%%%%%%%%%
 for n=n_start:Niter
 
@@ -228,15 +223,29 @@ for n=n_start:Niter
         S = store_stats(S,n,settings,stateSeq,dist_struct,theta,hyperparams);
     end
     
-    % Plot stats:
+    if (mod(n,settings.saveEvery)==0)
+        ChainStats(stats_iter) = S;        
+        stats_iter = stats_iter + 1;
+    end
+   
     
     % Plot stats:
     if isfield(data_struct,'true_labels') & settings.ploton
+        % If the 'ploton' option is included in the settings structure (and if it
+        % is set to 1), then create a figure for the plots:
+        if isfield(settings,'ploton')
+            if settings.ploton == 1
+                H = figure;
+            end
+        end
+        
         if rem(n,settings.plotEvery)==0
             
             Nsets = length(data_struct);
-            sub_x = floor(sqrt(Nsets));
-            sub_y = Nsets/sub_x;
+
+            
+            sub_x = Nsets;
+            sub_y = 1;
             
             z_tot(1:length_ii(1)) = stateSeq(1).z;            
             for ii=2:Nsets

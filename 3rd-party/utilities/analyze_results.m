@@ -26,7 +26,6 @@ if strcmp(model.obsModel.priorType,'ARD')
 % elseif settings.Kr>1
 %     eta_hist = zeros(Ntrial,Niter);
 end
-
 unique_z = zeros(Ntrial,Niter);
 
 alpha_p_kappa_hist = zeros(size(hamming_dist));

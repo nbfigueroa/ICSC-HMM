@@ -25,11 +25,11 @@ label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
-label_range = unique(data.zTrueAll);
+[data_nbp, TruePsi_nbp, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+label_range = unique(data_nbp.zTrueAll);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%    Run Sticky HDP-HMM Sampler N times for good statistics             %%
+%%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Default Setting for HDP-HMM
@@ -46,7 +46,7 @@ saveDir = './Results';
 clear settings
 settings.Kz = Kz;              % truncation level for mode transition distributions
 settings.Ks = Ks;              % truncation level for mode transition distributions
-settings.Niter = 2000;         % Number of iterations of the Gibbs sampler
+settings.Niter = 1000;         % Number of iterations of the Gibbs sampler
 settings.resample_kappa = 1;   % Whether or not to use sticky model
 settings.seqSampleEvery = 100; % How often to run sequential z sampling
 settings.saveEvery = 100;      % How often to save Gibbs sample stats
@@ -56,6 +56,7 @@ settings.ploton = 1;           % Plot the mode sequence while running sampler
 settings.plotEvery = 20;
 settings.plotpause = 0;        % Length of time to pause on the plot
 settings.saveDir = saveDir;    % Directory to which to save files
+settings.formZinit = 1;
 
 % Dynamical Model Settings for HDP-HMM:
 clear model
@@ -90,27 +91,38 @@ model.HMMmodel.params.c=100;  % self trans
 model.HMMmodel.params.d=1;
 model.HMMmodel.type = 'HDP';
 
-%% Generate data from the prior:
-time_steps = 1000;
-data_struct = [];
-time_series = 1;
-figure('Color',[1 1 1])
-for i=1:time_series    
-    data_struct = generateData(model,settings,time_steps);            
-    data_labeled = [data_struct.obs; data_struct.true_labels];
-    label_range = unique(data_struct.true_labels);
-    K = length(label_range);
-    subplot(time_series,1,i)
-    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(i),'), K:',num2str(K)), {'x_1','x_2'},label_range)    
+%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM
+% Create data structure for HDP-HMM sampler
+clear data_struct 
+for ii=1:length(Data)
+    data_struct(ii).obs = Data{ii}';
+%     data_struct(ii).true_labels = True_states{ii};
+end
+data_struct(1).test_cases = [1:length(data_struct)];
+
+T = 1; % Number of Repetitions
+ChainStats = [];
+for run=1:T
+    settings.trial = run;     
+    tic;
+    [ChainStats(run)] = HDPHMMDPinference(data_struct,model,settings);
+    toc;    
 end
 
-%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM
-T = 1;
-for seq=1
-    data_struct.test_cases = seq;
-    for run=1:T
-        settings.trial = run;  % Defines trial number, which is part of the filename used when saving stats
-        HDPHMMDPinference(data_struct,model,settings)
+%% Compute the log-likelihood of Chain States
+logliks = zeros(1,length(ChainStats));
+for kk=1:length(ChainStats)
+    clear phi
+    phi.mu = ChainStats(kk).theta.mu;
+    phi.Sigma = ChainStats(kk).theta.invSigma;
+    loglik_ = zeros(length(data_struct),1);
+    for jj=1:length(data_struct)
+        logp_xn_given_zn = Gauss_logp_xn_given_zn(data_struct(jj).obs', phi);
+        [~,~, loglik_(jj,1)] = LogForwardBackward(logp_xn_given_zn, ChainStats(kk).dist_struct.pi_init, ChainStats(kk).dist_struct.pi_z);
     end
+    logliks(1,kk) = sum(loglik_);
 end
+
+% Compute Metrics
+
 

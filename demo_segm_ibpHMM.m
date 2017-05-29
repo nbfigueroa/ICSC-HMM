@@ -52,7 +52,7 @@ title( 'True Emission Params (with all data points)', 'FontSize', 20 );
 
 %% -------------------------------------------------   RUN MCMC INFERENCE!
 mkdir ./Results
-modelP = {'bpM.gamma', 2}; 
+modelP = {'bpM.gamma', 1}; 
 algP   = {'Niter', 100, 'HMM.doSampleHypers',0,'BP.doSampleMass',0,'BP.doSampleConc',0}; 
 % Start out with just one feature for all objects
 initP  = {'F.nTotal', 1}; 
@@ -96,7 +96,7 @@ plotEmissionParams( Psi100 );
 title( 'Theta (@ iter 100)', 'FontSize', 20 );
 
 % Estimated state sequence
-plotStateSeq( alignedPsi100, [1 3] );
+plotStateSeq( alignedPsi100, [1:5] );
 
 fprintf( 'Remember: actual labels for behaviors are *irrelevant* from model perspective\n');
 fprintf( '  what matters: *aligned* behaviors consistently assigned to same datapoints as ground truth\n' );
