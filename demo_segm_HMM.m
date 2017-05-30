@@ -97,7 +97,7 @@ clc;
 fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
-%% Visualize Transition Matrix and Segmentation from 'Best' Run
+% Visualize Transition Matrix and Segmentation from 'Best' Run
 % Visualize Transition Matrix
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(A);

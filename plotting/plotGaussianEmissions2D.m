@@ -1,4 +1,4 @@
-function [h] = plotGaussianEmissions2D(gmm, plot_labels, title_name)
+function [h] = plotGaussianEmissions2D(gmm, plot_labels, title_name, varargin)
 
 
 font_size   = 18;
@@ -30,10 +30,17 @@ hold on;
 ml_plot_centroid(gmm.Mu',colors); hold on;
 ml_plot_gmm_contour(gca,gmm.Priors,gmm.Mu,gmm.Sigma,colors,1); 
 
+
+if isempty(varargin)
+    labels = 1:K;
+else
+    labels = varargin{1};
+end
+
 for i=1:K   
     hold on;
-    legend = sprintf('\\theta_{%d}',[i]);
-    text(gmm.Mu(1,i)*1.5 ,gmm.Mu(2,i)*1.5,legend,'Interpreter','Tex','FontSize',font_size);   
+    legend = sprintf('\\theta_{%d}',[labels(i)]);
+    text(gmm.Mu(1,i) + gmm.Sigma(1,1,i) ,gmm.Mu(2,i) + gmm.Sigma(2,2,i),legend,'Interpreter','Tex','FontSize',font_size);   
 end
 
 
