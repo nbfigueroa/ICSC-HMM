@@ -1,4 +1,4 @@
-function [Data, True_states, True_theta] = genToyHMMData_Gaussian(N, display)
+function [data, Data, True_states, True_theta] = genToyHMMData_Gaussian(N, display)
 % INPUTS ----------------------------------------------------------
 %    nStates = # of available Markov states
 %    nDim = number of observations at each time instant
@@ -9,14 +9,16 @@ function [Data, True_states, True_theta] = genToyHMMData_Gaussian(N, display)
 
 
 Data   = [];
-states = [];
-
+True_states = [];
 True_theta.K = 3;
 True_theta.Mu    = [0 0 0; 2 0 4];
 True_theta.Sigma(:,:,1) = [0.3, -0.2; -0.2, 0.5]/5;
 True_theta.Sigma(:,:,2) = [0.5, 0.2; 0.2, 0.3]/5;
 True_theta.Sigma(:,:,3) = [0.5, 0; 0, 0.3]/5;
 
+
+% Build time series
+data = SeqData();
 for iter = 1:N    
     X1 = mvnrnd([0,2], [0.3, -0.2; -0.2, 0.5]/5, 30);
     X2 = mvnrnd([0,0], [0.5, 0.2; 0.2, 0.3]/5, 20);
@@ -25,6 +27,7 @@ for iter = 1:N
     labels = [ones(1,30) 2*ones(1,20) 3*ones(1,40)];
     Data{iter}   = X;
     True_states{iter} = labels';
+    data = data.addSeq( X', num2str(iter), labels );
 end
 label_range = [1 2 3];
 

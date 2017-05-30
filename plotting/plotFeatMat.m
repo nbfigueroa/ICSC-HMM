@@ -1,4 +1,4 @@
-function [] = plotFeatMat( varargin )
+function [h] = plotFeatMat( varargin )
 % Show the binary feature matrix of current sampler state.
 % Uses "bone" colormap, so *active* features (F==1) are WHITE, F==0 black.
 % Designed to handle diverse inputs easily. When an HMM state sequence 
@@ -13,6 +13,7 @@ function [] = plotFeatMat( varargin )
 %  To see matrix for stored sampler run, at particular iteration
 %    plotFeatMat( jobID, taskID, queryIter )
 
+h = figure('Color',[1 1 1]);
 if isstruct( varargin{1} )
     if isfield( varargin{1}, 'F' )
         F = varargin{1}.F;
@@ -67,11 +68,20 @@ F_used = F_used(objIDs,:);
 
 imagesc(F+F_used, [0 2]);
 
-xlabel( 'behaviors', 'FontSize', 20);
-ylabel( 'data sequences', 'FontSize', 20 );
-set( gca, 'FontSize', 16 );
-colormap bone;
+xlabel( 'Actions/States', 'Interpreter','Latex','FontSize', 14,'FontName','Times', 'FontWeight','Light');
+ylabel( 'Time-Series','Interpreter','Latex','FontSize',14,'FontName','Times', 'FontWeight','Light');
+set( gca, 'FontSize', 16);
+% colormap bone;
+
+level = 10; n = ceil(level/2);
+cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
+cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
+cmap = [cmap1; cmap2(2:end, :)];
+colormap(vivid(cmap, [0.85 0.85]));
+% colorbar
 colorbar(  'YTick', [0 1 2],       'YTickLabel', {'Disabled', 'Available', 'Active'});
+title ('Feature Matrix','Interpreter','LaTex')
+grid on
 
 % Force ytick labels to be integers
 ticks = get( gca, 'YTick');

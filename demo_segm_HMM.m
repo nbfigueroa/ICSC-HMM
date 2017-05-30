@@ -20,13 +20,11 @@
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
-[Data, True_states, True_theta] = genToyHMMData_Gaussian( N_TS, display ); 
-label_range = unique(True_states{1});
+[~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi, Data, True_states, True_theta] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
-label_range = unique(data.zTrueAll);
+[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
@@ -50,6 +48,7 @@ cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
 % Model Metric Arrays
 logliks        = zeros(length(ts),T);
+label_range    = [1:K];
 
 for run=1:T
     % Fit HMM with 'optimal' K to set of time-series

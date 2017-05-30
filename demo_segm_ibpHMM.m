@@ -1,102 +1,109 @@
-% Welcome!
-% This easy demo first shows a simple toy BP-HMM dataset,
-%  and then runs fast BP-HMM inference and visualizes the results!
-% Make sure you've done these simple things to run this script:
-%   -- install Eigen C++ library
-%   -- install Lightspeed toolbox
-%   -- Compile the MEX routines for fast sampling (./CompileMEX.sh)
-%   -- Create local directories for saving results (./ConfigToolbox.sh)
-% See QuickStartGuide.pdf in doc/ for details on configuring the toolbox
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Main demo scripts for the ICSC-HMM Segmentation Algorithm proposed in:
+%
+% N. Figueroa and A. Billard, “Transform-Invariant Clustering of SPD Matrices 
+% and its Application on Joint Segmentation and Action Discovery}”
+% Arxiv, 2017. 
+%
+% Author: Nadia Figueroa, PhD Student., Robotics
+% Learning Algorithms and Systems Lab, EPFL (Switzerland)
+% Email address: nadia.figueroafernandez@epfl.ch  
+% Website: http://lasa.epfl.ch
+% November 2016; Last revision: 25-May-2017
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear variables;
-close all;
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                    --Select a Dataset to Test--                       %%    
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
+clc; clear all; close all;
+N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
+[data, ~, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+label_range = unique(True_states{1});
 
-% -------------------------------------------------   CREATE TOY DATA!
-fprintf( 'Creating some toy data...\n' );
-% First, we'll create some toy data
-%   5 sequences, each of length T=500.
-%   Each sequences selects from 4 behaviors, 
-%     and switches among its selected set over time.
-%     We'll use K=4 behaviors, each of which defines a distinct Gaussian
-%     emission distribution (with 2 dimensions).
-% Remember that data is a SeqData object that contains
-%   the true state sequence labels for each time series
-[data, TruePsi] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+%% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
+clc; clear all; close all;
+[data, TruePsi, ~, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+label_range = unique(data.zTrueAll);
 
-%%
-% Visualize the raw data time series my style
-%   with background colored by "true" hidden state
-figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
-for i=1:data.N
-    subplot(data.N, 1, i );
-    plotDataNadia( data,i );
-end
-
-figure( 'Units', 'normalized', 'Position', [0.1 0.25 0.75 0.5], 'Color',[1 1 1] );
-for i=1:data.N
-    subplot(data.N, 1, i );
-    plotData( data,i );
-end
-
-%% Visualize the "true" generating parameters
 % Feat matrix F (binary 5 x 4 matrix )
-figure('Units', 'normalized', 'Position', [0 0.5 0.3 0.5] );
-plotFeatMat( TruePsi.F );
-title( 'True Feature Matrix', 'FontSize', 20 );
+if exist('h0','var') && isvalid(h0), delete(h0);end
+h0 = plotFeatMat( TruePsi.F);
 
-% Emission parameters theta (Gaussian 2D contours)
-figure('Units', 'normalized' );
-plotEmissionParams( TruePsi.theta, data );
-title( 'True Emission Params (with all data points)', 'FontSize', 20 );
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Define Settings for IBP-HMM %%%
+
+% Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
+modelP = {'bpM.gamma', 1, 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
+
+% Sampler Settings
+algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
+
+% Number of Repetitions
+T = 10; 
+
+% Segmentation Metric Arrays
+hamming_distance   = zeros(1,T);
+global_consistency = zeros(1,T);
+variation_info     = zeros(1,T);
+inferred_states    = zeros(1,T);
+
+% Clustering Metric Arrays
+cluster_purity = zeros(1,T);
+cluster_NMI    = zeros(1,T);
+cluster_F      = zeros(1,T);
+
+Sampler_Stats = [];
+jobID = ceil(rand*1000);
+for run=1:T       
+    % Run Gibbs Sampler for Niter once.
+    clear CH    
+    % Start out with just one feature for all objects
+    initP  = {'F.nTotal', randsample(T,1)}; 
+    CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './IBP-Results' );  
+    Sampler_Stats(run).CH = CH;
+end
+
+%% %%%%%% Visualize MCMC Sampler Convergence %%%%%%%%%%%%%%
+
+% Gather High-level Stats
+T = length(Sampler_Stats);
+Iterations = Sampler_Stats(1).CH.iters.logPr;
+
+% Plot Joint Log-prob
+figure('Color',[1 1 1])
+subplot(2,1,1)
+for i=1:T
+    joint_logs = zeros(1,length(Iterations));
+    for ii=1:length(Iterations); joint_logs(1,ii) = Sampler_Stats(i).CH.logPr(ii).all;end
+    [max_joint best_iter] = max(joint_logs);
+    semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;
+end
+xlim([1 Iterations(end)])
+xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
+title ({sprintf('Trace of Joint Probabilities $p(F, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+grid on
+
+Iterations_feat = Sampler_Stats(1).CH.iters.Psi;
+subplot(2,1,2)
+for i=1:T
+    nFeats = zeros(1,length(Iterations_feat));
+    for ii=1:length(Iterations_feat); nFeats(1,ii) = length(Sampler_Stats(i).CH.Psi(ii).theta);end
+    
+    stairs(Iterations_feat,nFeats, 'LineWidth',2); hold on;
+    set(gca, 'XScale', 'log')
+    xlim([1 Iterations_feat(end)])
+end
+xlim([1 Iterations_feat(end)])
+xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('$K$','Interpreter','LaTex','Fontsize',20)
+title ({sprintf('Number of estimated features (shared states) for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+grid on
+
+%% %%%%%% Visualize MCMC Sampler Clustering/Segmentation vs Ground Truth %%%%%%%%%%%%%%
 
 
-%% -------------------------------------------------   RUN MCMC INFERENCE!
-mkdir ./Results
-modelP = {'bpM.gamma', 1}; 
-algP   = {'Niter', 100, 'HMM.doSampleHypers',0,'BP.doSampleMass',0,'BP.doSampleConc',0}; 
-% Start out with just one feature for all objects
-initP  = {'F.nTotal', 1}; 
-CH = runBPHMM( data, modelP, {1, 1}, algP, initP, './Results' );
-% CH is a structure that captures the "Chain History" of the MCMC
-%  it stores both model config at each each iteration (in Psi field)
-%             and diagnostic information (log prob, sampler stats, etc.)
-
-
-% -------------------------------------------------   VISUALIZE RESULTS!
-% Remember: the actual labels of each behavior are irrelevent
-%   so there won't in general be direct match with "ground truth"
-% For example, the true behavior #1 may be inferred behavior #4
-
-% So we'll need to align recovered parameters (separately at each iter)
-% Let's just look at iter 90 and iter 100
-
-Psi90 = CH.Psi( CH.iters.Psi == 90 );
-alignedPsi90 = alignPsiToTruth_OneToOne( Psi90, data );
-
-Psi100 = CH.Psi( CH.iters.Psi == 100 );
-alignedPsi100 = alignPsiToTruth_OneToOne( Psi100, data );
-
-
-% Estimated feature matrix F
-figure( 'Units', 'normalized', 'Position', [0 0.5 0.5 0.5] );
-subplot(1,2,1);
-plotFeatMat( alignedPsi90 );
-title( 'F (@ iter 90)', 'FontSize', 20 );
-subplot(1,2,2);
-plotFeatMat( alignedPsi100 );
-title( 'F (@ iter 100)', 'FontSize', 20 );
-
-% Estimated emission parameters
-figure( 'Units', 'normalized', 'Position', [0.5 0.5 0.5 0.5] );
-subplot(1,2,1);
-plotEmissionParams( Psi90 );
-title( 'Theta (@ iter 90)', 'FontSize', 20 );
-subplot(1,2,2);
-plotEmissionParams( Psi100 );
-title( 'Theta (@ iter 100)', 'FontSize', 20 );
-
-% Estimated state sequence
-plotStateSeq( alignedPsi100, [1:5] );
-
-fprintf( 'Remember: actual labels for behaviors are *irrelevant* from model perspective\n');
-fprintf( '  what matters: *aligned* behaviors consistently assigned to same datapoints as ground truth\n' );
+%% VISUALIZE RESULTS!

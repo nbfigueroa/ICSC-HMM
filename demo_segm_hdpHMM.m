@@ -20,13 +20,12 @@
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
-[Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+[~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data_nbp, TruePsi_nbp, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
-label_range = unique(data_nbp.zTrueAll);
+[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
