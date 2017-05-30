@@ -19,8 +19,12 @@ if isempty(label_range)
 else  % With label_range  
     imagesc( xs, ys, repmat(X(D,:), M, 1), [1 max( label_range)] ); hold on;
 end
+level = 10; n = ceil(level/2);
+cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
+cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
+cmap = [cmap1; cmap2(2:end, :)];
 
-alpha(0.3)
+colormap(vivid(cmap, [.85, .85]));
 plot(t - begin_time, X(1:end-1,:)','-.', 'LineWidth',2);hold on;
 axis( [1 N ys(1) ys(end)] );
 xlabel('Time (1,...,T)')

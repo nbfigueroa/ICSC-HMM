@@ -20,19 +20,19 @@
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
-[Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+[Data, True_states, True_theta] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+[data, TruePsi, Data, True_states, True_theta] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 label_range = unique(data.zTrueAll);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Model Selection for HMM
-K_range = [1:10]; repeats = 5; 
+K_range = [1:10]; repeats = 10; 
 hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
@@ -92,12 +92,22 @@ for run=1:T
     
 end
 
+% Overall Stats for HMM segmentation and state clustering
+clc;
+fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
+    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+
+%% Visualize Transition Matrix and Segmentation from 'Best' Run
 % Visualize Transition Matrix
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(A);
 
-% Final Stats for HMM segmentation and state clustering
-clc;
-fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
-    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+% Visualize Estimated Emission Parameters
+title_name  = 'Estimated Emission Parameters';
+plot_labels = {'$x_1$','$x_2$'};
+Est_theta.Mu = phi.mu;
+Est_theta.Sigma = phi.Sigma;
+Est_theta.K = K;
+if exist('h2','var') && isvalid(h2), delete(h2);end
+h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 

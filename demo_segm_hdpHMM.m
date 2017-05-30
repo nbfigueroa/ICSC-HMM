@@ -31,89 +31,36 @@ label_range = unique(data_nbp.zTrueAll);
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Define Settings for HDP-HMM %%%
+clear hdp_options
+hdp_options.obsModelType = 'Gaussian';
+hdp_options.priorType = 'NIW';
+hdp_options.d = size(Data{1},2);
+hdp_options.sticky = 1;
+hdp_options.kappa = 0.1;                    % NIW(kappa,theta,delta,nu_delta)
+hdp_options.meanSigma = eye(hdp_options.d); % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
+hdp_options.Kz = 10;                        % truncation level of the DP prior on HMM transition distributions pi_k
+hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
+hdp_options.plot_iter = 1;
+hdp_options.Niter = 1000;
+hdp_options.saveDir = './Results';
 
-% Default Setting for HDP-HMM
-obsModelType = 'Gaussian';
-priorType = 'NIW';
-d = size(Data{1},2);
-kappa = 0.1;           % NIW(kappa,theta,delta,nu_delta)
-meanSigma = eye(d);    % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
-Kz = 10;               % truncation level of the DP prior on HMM transition distributions pi_k
-Ks = 1;                % truncation level of the DPMM on emission distributions pi_s
-saveDir = './Results';
-plot_iter = 1;
-Niter = 1000;
-
-% Sampler Settings for HDP-HMM:
-clear settings
-settings.Kz = Kz;              % truncation level for mode transition distributions
-settings.Ks = Ks;              % truncation level for mode transition distributions
-settings.Niter = Niter;         % Number of iterations of the Gibbs sampler
-settings.resample_kappa = 1;   % Whether or not to use sticky model
-settings.seqSampleEvery = 100; % How often to run sequential z sampling
-settings.saveEvery = 100;      % How often to save Gibbs sample stats
-settings.storeEvery = 1;
-settings.storeStateSeqEvery = 100;
-settings.ploton = plot_iter;    % Plot the mode sequence while running sampler
-settings.plotEvery = 20;
-settings.plotpause = 0;        % Length of time to pause on the plot
-settings.saveDir = saveDir;    % Directory to which to save files
-settings.formZinit = 1;
-
-% Dynamical Model Settings for HDP-HMM:
-clear model
-model.obsModel.type = obsModelType;
-model.obsModel.priorType = priorType;
-model.obsModel.params.M  = zeros([d 1]);
-model.obsModel.params.K =  kappa;
-% Degrees of freedom and scale matrix for covariance of process noise:
-model.obsModel.params.nu = 1000; %d + 2;
-model.obsModel.params.nu_delta = (model.obsModel.params.nu-d-1)*meanSigma;
-      
-% Always using DP mixtures emissions, with single Gaussian forced by
-% Ks=1...Need to fix.
-model.obsModel.mixtureType = 'infinite';
-
-% Sticky HDP-HMM parameter settings:
-model.HMMmodel.params.a_alpha=1;  % affects \pi_z
-model.HMMmodel.params.b_alpha=0.01;
-model.HMMmodel.params.a_gamma=1;  % global expected # of HMM states (affects \beta)
-model.HMMmodel.params.b_gamma=0.01;
-if settings.Ks>1
-    model.HMMmodel.params.a_sigma = 1;
-    model.HMMmodel.params.b_sigma = 0.01;
-end
-if isfield(settings,'Kr')
-    if settings.Kr > 1
-        model.HMMmodel.params.a_eta = 1;
-        model.HMMmodel.params.b_eta = 0.01;
-    end
-end
-model.HMMmodel.params.c=100;  % self trans
-model.HMMmodel.params.d=1;
-model.HMMmodel.type = 'HDP';
-
-%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM
-% Create data structure of multiple time-series for HDP-HMM sampler
+%%% Create data structure of multiple time-series for HDP-HMM sampler %%%
 clear data_struct 
 for ii=1:length(Data)
     data_struct(ii).obs = Data{ii}';
-%     data_struct(ii).true_labels = True_states{ii}';
+    % Set true_labels to visualize the sampler evolution
+    % data_struct(ii).true_labels = True_states{ii}';
 end
-data_struct(1).test_cases = [1:length(data_struct)];
 
-% Options for sticky-HDP-HMM sampler, (1) Gaussian emission models
-% hdp_options clear
-% hdp_options.
-%...
-
-T = 10; % Number of Repetitions
+%%%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM %%%
+% Number of Repetitions
+T = 10; 
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
 variation_info     = zeros(1,T);
 inferred_states    = zeros(1,T);
-
 % Clustering Metric Arrays
 cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);
@@ -121,12 +68,10 @@ cluster_F      = zeros(1,T);
 
 % Run Weak Limit Collapsed Gibbs Sampler for T times
 ChainStats_Run = [];
-for run=1:T             
-    tic;
+for run=1:T       
+    % Run Gibbs Sampler for Niter once.
     clear ChainStats
-    settings.trial = 1;
-    [ChainStats] = HDPHMMDPinference(data_struct,model,settings);
-    toc;    
+    ChainStats = run_HDPHMM_sampler(data_struct, hdp_options);
     
     % Extract Stats from Last Run
     ChainStats_Run(run).stateSeq  = ChainStats(end).stateSeq;
@@ -162,10 +107,7 @@ for run=1:T
     [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);        
 end
 
-% Clean up metrics.. F-measure might give nan's sometimes
-
-% Final Stats for Sticky HDP-HMM segmentation and state clustering
-clc;
+% Overall Stats for HMM segmentation and state clustering
 fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
@@ -178,10 +120,6 @@ K_est = inferred_states(id);
 est_states_all = [];
 for ii=1:length(data_struct); est_states_all  = [est_states_all BestChain.stateSeq(ii).z]; end
 label_range = unique(est_states_all)
-
-% Optimal Theta
-Theta.mu    =  BestChain.Theta.mu(:,label_range);
-Theta.Sigma =  BestChain.Theta.invSigma(:,:,label_range);
 
 % Plot Segmentation
 figure('Color',[1 1 1])
@@ -201,4 +139,18 @@ end
 % Plot Transition Matrix
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(BestChain.TransProb);
+
+% Visualize Estimated Emission Parameters
+title_name  = 'Estimated Emission Parameters';
+plot_labels = {'$x_1$','$x_2$'};
+clear Est_theta
+Est_theta.Mu = BestChain.Theta.mu(:,label_range);
+Est_theta.invSigma = BestChain.Theta.invSigma(:,:,label_range);
+Est_theta.K = K_est;
+for k=1:K_est
+    Est_theta.Sigma(:,:,k) = inv(Est_theta.invSigma(:,:,k));
+end
+
+if exist('h2','var') && isvalid(h2), delete(h2);end
+h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
