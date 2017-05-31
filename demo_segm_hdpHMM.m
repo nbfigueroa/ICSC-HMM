@@ -110,7 +110,7 @@ end
 fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
-%% Visualize Transition Matrix and Segmentation from 'Best' Run
+%% Visualize Transition Matrix, Emission Parameters and Segmentation from 'Best' Run
 log_likelihoods = zeros(1,T);
 for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
 [Max_ll, id] = max(log_likelihoods);
