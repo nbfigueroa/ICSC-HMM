@@ -46,6 +46,24 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleC
 % Number of Repetitions
 T = 10; 
 
+% Run MCMC Sampler for T times
+Sampler_Stats = [];
+jobID = ceil(rand*1000);
+for run=1:T       
+    % Run Gibbs Sampler for Niter once.
+    clear CH    
+    % Start out with just one feature for all objects
+    initP  = {'F.nTotal', randsample(data.N,1)}; 
+    CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './IBP-Results' );  
+    Sampler_Stats(run).CH = CH;
+end
+
+%% %%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%%%%%
+if exist('h1','var') && isvalid(h1), delete(h1);end
+[h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
+
+%% %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%%%%%
+
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -57,53 +75,34 @@ cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
 
-Sampler_Stats = [];
-jobID = ceil(rand*1000);
-for run=1:T       
-    % Run Gibbs Sampler for Niter once.
-    clear CH    
-    % Start out with just one feature for all objects
-    initP  = {'F.nTotal', randsample(T,1)}; 
-    CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './IBP-Results' );  
-    Sampler_Stats(run).CH = CH;
-end
+true_states_all = data.zTrueAll;
 
-%% %%%%%% Visualize MCMC Sampler Convergence %%%%%%%%%%%%%%
-
-% Gather High-level Stats
-T = length(Sampler_Stats);
-Iterations = Sampler_Stats(1).CH.iters.logPr;
-
-% Plot Joint Log-prob
-figure('Color',[1 1 1])
-subplot(2,1,1)
-for i=1:T
-    joint_logs = zeros(1,length(Iterations));
-    for ii=1:length(Iterations); joint_logs(1,ii) = Sampler_Stats(i).CH.logPr(ii).all;end
-    [max_joint best_iter] = max(joint_logs);
-    semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;
-end
-xlim([1 Iterations(end)])
-xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
-title ({sprintf('Trace of Joint Probabilities $p(F, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
-grid on
-
-Iterations_feat = Sampler_Stats(1).CH.iters.Psi;
-subplot(2,1,2)
-for i=1:T
-    nFeats = zeros(1,length(Iterations_feat));
-    for ii=1:length(Iterations_feat); nFeats(1,ii) = length(Sampler_Stats(i).CH.Psi(ii).theta);end
+for i=1:T    
+    clear Psi
+    est_states_all = [];
     
-    stairs(Iterations_feat,nFeats, 'LineWidth',2); hold on;
-    set(gca, 'XScale', 'log')
-    xlim([1 Iterations_feat(end)])
+    % Extract Estimated States for all sequences
+    Psi = Best_Psi(i).Psi;
+    for j=1:data.N
+        est_states_all = [est_states_all Best_Psi(i).Psi.stateSeq(j).z];
+    end
+    
+     % Segmentation Metrics per run
+    [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
+    [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
+    inferred_states(run)   = length(unique(est_states_all));
+    
+    % Cluster Metrics per run
+    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
+    
 end
-xlim([1 Iterations_feat(end)])
-xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('$K$','Interpreter','LaTex','Fontsize',20)
-title ({sprintf('Number of estimated features (shared states) for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
-grid on
 
-%% %%%%%% Visualize MCMC Sampler Clustering/Segmentation vs Ground Truth %%%%%%%%%%%%%%
+% Overall Stats for HMM segmentation and state clustering
+fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
+    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
 
-%% VISUALIZE RESULTS!
+%% Visualize Transition Matrix and Segmentation from 'Best' Run
+log_likelihoods = zeros(1,T);
+for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
+[Max_ll, id] = max(log_likelihoods);
