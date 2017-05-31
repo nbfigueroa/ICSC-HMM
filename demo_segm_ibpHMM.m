@@ -41,7 +41,7 @@ h0 = plotFeatMat( TruePsi.F);
 modelP = {'bpM.gamma', 1, 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
+algP   = {'Niter', 100, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
 
 % Number of Repetitions
 T = 10; 
@@ -58,11 +58,11 @@ for run=1:T
     Sampler_Stats(run).CH = CH;
 end
 
-%% %%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%%%%%
+%%%%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
 if exist('h1','var') && isvalid(h1), delete(h1);end
 [h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
-%% %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%%%%%
+%%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -101,7 +101,71 @@ fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Dist
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
 
-%% Visualize Transition Matrix and Segmentation from 'Best' Run
-log_likelihoods = zeros(1,T);
-for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
-[Max_ll, id] = max(log_likelihoods);
+%% Visualize Transition Matrices, Emission Parameters and Segmentation from 'Best' Run
+
+% Get 'Best Psi' from all runs
+log_probs = zeros(1,T);
+for ii=1:T; log_probs(ii) = mean(Best_Psi(ii).logPr); end
+[Max_prob, id] = max(log_probs);
+bestPsi = Best_Psi(id)
+
+% Extract info from 'Best Psi'
+K_est = bestPsi.nFeats;
+est_states_all = [];
+for ii=1:data.N; est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; end
+label_range = unique(est_states_all)
+
+% Plot Segmentation
+figure('Color',[1 1 1])
+for i=1:data.N
+    
+    % Extract data from each time-series    
+    X = data.Xdata(:,[data.aggTs(i)+1:data.aggTs(i+1)]);
+    
+    % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
+    est_states  = bestPsi.Psi.stateSeq(i).z;
+    
+    % Plot Inferred Segments
+    subplot(data.N,1,i);
+    data_labeled = [X; est_states];
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', logProb:',num2str(Max_prob)), {'x_1','x_2'},label_range)
+    
+end
+
+% Plot Estimated Feature Matrix
+if exist('h2','var') && isvalid(h2), delete(h2);end
+h2 = plotFeatMat( bestPsi.Psi.F);
+
+% Plot Estimated Transition Matrices
+if exist('h3','var') && isvalid(h3), delete(h3);end
+h3 = figure('Color',[1 1 1]);
+pi = [];
+for i=1:data.N   
+    % Construct Transition Matrices for each time-series
+    f_i   = bestPsi.Psi.Eta(i).availFeatIDs;
+    eta_i = bestPsi.Psi.Eta(i).eta;
+    
+    % Normalize self-transitions with sticky parameter    
+    pi_i  = zeros(size(eta_i));   
+    for ii=1:size(pi_i,1);pi_i(ii,:) = eta_i(ii,:)/sum(eta_i(ii,:));end
+    pi{i} = pi_i;    
+    
+    % Plot them
+    subplot(data.N, 1, i)
+    plotTransMatrix(pi{i},strcat('Time-Series (', num2str(i),')'),0, f_i);
+end
+bestPsi.pi = pi;
+
+%% Plot Estimated  Emission Parameters
+title_name  = 'Estimated Emission Parameters';
+plot_labels = {'$x_1$','$x_2$'};
+clear Est_theta
+Est_theta.K = K_est;
+for k=1:K_est
+    Est_theta.Mu(:,k)         = bestPsi.Psi.theta(k).mu;
+    Est_theta.invSigma(:,:,k) = bestPsi.Psi.theta(k).invSigma;
+    Est_theta.Sigma(:,:,k)    = Est_theta.invSigma(:,:,k) \ eye(data.D);
+end
+
+if exist('h4','var') && isvalid(h4), delete(h4);end
+h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
