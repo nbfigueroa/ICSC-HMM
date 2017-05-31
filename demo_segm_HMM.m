@@ -47,7 +47,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 2; T = 1;
+K = 8; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -112,7 +112,7 @@ fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Dis
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(A);
 
-%% Visualize Estimated Emission Parameters for 2D
+%% Visualize Estimated Emission Parameters for 2D Data ONLY!
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 Est_theta.Mu = phi.mu;

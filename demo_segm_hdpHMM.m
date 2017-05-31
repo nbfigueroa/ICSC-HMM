@@ -27,6 +27,16 @@ label_range = unique(True_states{1});
 clc; clear all; close all;
 [~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 
+%% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
+%Demonstration of a Carrot Grating Task consisting of 
+%12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
+%Dimensions:
+%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'same'; full = 0;
+[~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
+dataset_name = 'Grating';
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,7 +141,7 @@ for i=1:length(data_struct)
     % Plot Inferred Segments
     subplot(length(data_struct),1,i);
     data_labeled = [X; est_states];
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(ChainStats_Run(2).logliks(i))), {'x_1','x_2'},label_range)
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(ChainStats_Run(2).logliks(i))), [],label_range)
     
 end
 
@@ -139,7 +149,7 @@ end
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(BestChain.TransProb);
 
-%% Visualize Estimated Emission Parameters
+%% Visualize Estimated Emission Parameters for 2D Data ONLY!
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 clear Est_theta
