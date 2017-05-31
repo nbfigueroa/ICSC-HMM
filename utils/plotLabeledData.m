@@ -11,7 +11,7 @@ end
 M = 10;
 begin_time = t(1); 
 xs = 1:N;    
-ys = linspace(min(min(X(1:end,:))), max(max(X(1:end,:))),M);
+ys = linspace(min(min(X(1:end,:))), max(max(X(1:end-1,:))),M);
 
 % Without label_range
 if isempty(label_range)
@@ -29,9 +29,11 @@ plot(t - begin_time, X(1:end-1,:)','-.', 'LineWidth',2);hold on;
 axis( [1 N ys(1) ys(end)] );
 xlabel('Time (1,...,T)')
 ylabel('$\mathbf{x}$','Interpreter','LaTex')
-legend(legends)
+if ~isempty(legends)
+    legend(legends)
+end
 set(gca,'YDir','normal')
-title(titlename,'Interpreter','LaTex','Fontsize',20)
+title(titlename,'Interpreter','LaTex','Fontsize',12)
 
 end
 

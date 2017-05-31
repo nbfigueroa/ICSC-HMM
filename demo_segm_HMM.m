@@ -22,20 +22,32 @@ clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 
+
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+ts = [1:length(Data)];
+
+%% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
+%Demonstration of a Carrot Grating Task consisting of 
+%12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
+%Dimensions:
+%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'same'; full = 0;
+[~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
+dataset_name = 'Grating';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Model Selection for HMM
-K_range = [1:10]; repeats = 10; 
+K_range = [1:15]; repeats = 5; 
 hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 3; T = 10;
+K = 2; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -66,7 +78,7 @@ for run=1:T
     for i=1:length(ts)
         X = Data{ts(i)};
         true_states = True_states{ts(i)};
-        logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{i}, phi);
+        logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{ts(i)}, phi);
         [~,~, logliks(i,run)] = LogForwardBackward(logp_xn_given_zn, p_start, A);
         est_states = LogViterbiDecode(logp_xn_given_zn, p_start, A);                       
         
@@ -78,7 +90,7 @@ for run=1:T
         if run==T
             subplot(length(ts),1,i);
             data_labeled = [X est_states]';
-            plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), {'x_1','x_2'},label_range)
+            plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), [],label_range)
         end
     end
     
@@ -97,11 +109,10 @@ fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Dis
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
 % Visualize Transition Matrix and Segmentation from 'Best' Run
-% Visualize Transition Matrix
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(A);
 
-% Visualize Estimated Emission Parameters
+%% Visualize Estimated Emission Parameters for 2D
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 Est_theta.Mu = phi.mu;

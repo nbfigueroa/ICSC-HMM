@@ -25,7 +25,7 @@ label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi, ~, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+[data, TruePsi, ~, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
 label_range = unique(data.zTrueAll);
 
 % Feat matrix F (binary 5 x 4 matrix )
@@ -128,7 +128,7 @@ for i=1:data.N
     % Plot Inferred Segments
     subplot(data.N,1,i);
     data_labeled = [X; est_states];
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', logProb:',num2str(Max_prob)), {'x_1','x_2'},label_range)
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), {'x_1','x_2'},label_range)
     
 end
 
