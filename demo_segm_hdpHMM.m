@@ -41,7 +41,7 @@ hdp_options.meanSigma = eye(hdp_options.d); % expected mean of IW(nu,nu_delta) p
 hdp_options.Kz = 10;                        % truncation level of the DP prior on HMM transition distributions pi_k
 hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
 hdp_options.plot_iter = 1;
-hdp_options.Niter = 100;
+hdp_options.Niter = 500;
 hdp_options.saveDir = './Results';
 
 %%% Create data structure of multiple time-series for HDP-HMM sampler %%%

@@ -63,7 +63,6 @@ if exist('h1','var') && isvalid(h1), delete(h1);end
 [h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
 %% %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%%%%%
-
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -77,14 +76,14 @@ cluster_F      = zeros(1,T);
 
 true_states_all = data.zTrueAll;
 
-for i=1:T    
+for run=1:T    
     clear Psi
     est_states_all = [];
     
     % Extract Estimated States for all sequences
-    Psi = Best_Psi(i).Psi;
+    Psi = Best_Psi(run).Psi;
     for j=1:data.N
-        est_states_all = [est_states_all Best_Psi(i).Psi.stateSeq(j).z];
+        est_states_all = [est_states_all Best_Psi(run).Psi.stateSeq(j).z];
     end
     
      % Segmentation Metrics per run

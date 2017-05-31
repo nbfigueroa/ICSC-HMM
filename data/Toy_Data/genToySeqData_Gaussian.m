@@ -8,6 +8,8 @@ function [data, PsiTrue, Data , True_states, True_theta ] = genToySeqData_Gaussi
 %    data  :  SeqData object
 
 % ------------------------------- Remember old state to use again afterward
+
+
 curStream = RandStream.getGlobalStream();
 entryState = curStream.State;
 

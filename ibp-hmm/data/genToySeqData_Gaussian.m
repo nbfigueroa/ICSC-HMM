@@ -1,4 +1,4 @@
-function [data, PsiTrue] = genToySeqData_Gaussian( nStates, nDim, N, T, pIncludeFeature)
+function [data, PsiTrue, Data , True_states, True_theta ] = genToySeqData_Gaussian( nStates, nDim, N, T, pIncludeFeature)
 % INPUTS ----------------------------------------------------------
 %    nStates = # of available Markov states
 %    nDim = number of observations at each time instant
@@ -8,6 +8,8 @@ function [data, PsiTrue] = genToySeqData_Gaussian( nStates, nDim, N, T, pInclude
 %    data  :  SeqData object
 
 % ------------------------------- Remember old state to use again afterward
+
+
 curStream = RandStream.getGlobalStream();
 entryState = curStream.State;
 
@@ -138,14 +140,55 @@ PsiTrue.F = zeros(N, nStates);
 for ii = 1:N
     PsiTrue.F(ii, unique( data.zTrue(ii) ) ) = 1;
 end
+
+
+% Extract true parameters
+Mu = zeros(2,nStates);
+Sigma = zeros(2,2,nStates);
 for kk = 1:nStates
     PsiTrue.theta(kk).mu = Px.Mu(kk,:);
     PsiTrue.theta(kk).invSigma = inv( Px.Sigma(:,:,kk) );
+    
+    Mu(:,kk) = Px.Mu(kk,:);
+    Sigma(:,:,kk) = Px.Sigma(:,:,kk);
 end
+
 PsiTrue.Pz = Pz;
 PsiTrue.z = zTrue;
 
+True_theta.K = nStates;
+True_theta.Mu = Mu;
+True_theta.Sigma = Sigma;
+
+
+Data = []; True_states = [];
+% Extract data for HMM
+for i=1:data.N
+    Data{i} = data.seq(i)';
+    True_states{i} = data.zTrue(i)';
+end
+
+label_range = unique(data.zTrueAll);
+
+ts = [1:length(Data)];
+figure('Color',[1 1 1])
+
+
+for i=1:length(ts)
+    X = Data{ts(i)};
+    true_states = True_states{ts(i)};
+    
+    % Plot time-series with true labels
+    subplot(length(ts),1,i);
+    data_labeled = [X true_states]';
+    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range);    
+end
+
+
+
+title_name  = 'True Emission Parameters';
+plot_labels = {'$x_1$','$x_2$'};
+plotGaussianEmissions2D(True_theta, plot_labels, title_name);
+
+
 end % main function
-
-
-

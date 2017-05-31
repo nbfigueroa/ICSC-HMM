@@ -8,7 +8,7 @@ estimated_feats = zeros(1,T);
 Best_Psi = [];
 
 % Plot Joint Log-prob
-h = figure('Color',[1 1 1])
+h = figure('Color',[1 1 1]);
 subplot(2,1,1)
 for i=1:T
     joint_logs = zeros(1,length(Iterations));
