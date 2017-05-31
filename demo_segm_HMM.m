@@ -35,7 +35,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; T = 10;
+K = 3; T = 10;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays

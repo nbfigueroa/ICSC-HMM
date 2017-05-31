@@ -139,7 +139,7 @@ end
 if exist('h1','var') && isvalid(h1), delete(h1);end
 h1 = plotTransMatrix(BestChain.TransProb);
 
-% Visualize Estimated Emission Parameters
+%% Visualize Estimated Emission Parameters
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 clear Est_theta
