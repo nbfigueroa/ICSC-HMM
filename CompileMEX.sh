@@ -5,10 +5,10 @@
 
 if [ -e "code/EigenLibrary.path" ]
 then
-  read eigenLibPath < code/EigenLibrary.path
+  read eigenLibPath < ibp-hmm/EigenLibrary.path
 else
   read -p "Enter the path to Eigen library:" eigenLibPath  
-  echo $eigenLibPath > code/EigenLibrary.path
+  echo $eigenLibPath > ibp-hmm/EigenLibrary.path
 fi
 
 if [ ! -d "$eigenLibPath" ]
@@ -23,7 +23,7 @@ fi
 # =======================================================================  MAKE MEX BINARIES
 echo "Compiling MEX binaries... "
 echo " using Eigen path:" $eigenLibPath
-cd code/mex/
+cd ibp-hmm/mex/
 mex -I$eigenLibPath SampleHMMStateSeqWithQsC.cpp
 mex -I$eigenLibPath SampleHMMStateSeqC.cpp
 mex -I$eigenLibPath MySmoothBackC.cpp
