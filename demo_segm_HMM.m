@@ -61,6 +61,7 @@ cluster_F      = zeros(1,T);
 % Model Metric Arrays
 logliks        = zeros(length(ts),T);
 label_range    = [1:K];
+est_states     = [];
 
 for run=1:T
     % Fit HMM with 'optimal' K to set of time-series
@@ -80,17 +81,18 @@ for run=1:T
         true_states = True_states{ts(i)};
         logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{ts(i)}, phi);
         [~,~, logliks(i,run)] = LogForwardBackward(logp_xn_given_zn, p_start, A);
-        est_states = LogViterbiDecode(logp_xn_given_zn, p_start, A);                       
+        est_states_ = LogViterbiDecode(logp_xn_given_zn, p_start, A);                       
         
         % Stack labels for state clustering metrics        
         true_states_all = [true_states_all; true_states];
-        est_states_all  = [est_states_all; est_states];
+        est_states_all  = [est_states_all; est_states_];
         
         % Plot segmentation Results on each time-series
         if run==T
             subplot(length(ts),1,i);
-            data_labeled = [X est_states]';
+            data_labeled = [X est_states_]';
             plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(ts(i)),'), K:',num2str(K),', loglik:',num2str(loglik)), [],label_range)
+            est_states{i} = est_states_;
         end
     end
     
@@ -120,4 +122,12 @@ Est_theta.Sigma = phi.Sigma;
 Est_theta.K = K;
 if exist('h2','var') && isvalid(h2), delete(h2);end
 h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
+
+%% Visualize Segmented Trajectories in 3D ONLY!
+labels    = unique(est_states_all);
+titlename = 'Grating Demonstrations';
+
+% Plot Segmentated 3D Trajectories
+if exist('h5','var') && isvalid(h5), delete(h5);end
+h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
 

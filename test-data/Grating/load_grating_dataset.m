@@ -1,8 +1,6 @@
 function [data, TruePsi, Data, True_states] = load_grating_dataset( data_path, type, display, full)
 
-% Data structures for ibp-hmm / icsc-hmm
-data    = [];
-TruePsi = [];
+
 label_range = [1 2 3];
 % Data structures for hmm / hdp-hmm
 switch type
@@ -80,7 +78,16 @@ switch type
         
 end
 
+% Data structures for ibp-hmm / icsc-hmm
+data = SeqData();
+N = length(Data);
+for iter = 1:N    
+    X = Data{iter}';
+    labels = True_states{iter}';
+    data = data.addSeq( X, num2str(iter), labels );
+end
 
+TruePsi = [];
 
 
 

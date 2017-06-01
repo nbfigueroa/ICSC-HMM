@@ -20,17 +20,27 @@
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
-[data, ~, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+[data, Data,, True_states, ~] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
 
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
-[data, TruePsi, ~, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
+[data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
 label_range = unique(data.zTrueAll);
 
 % Feat matrix F (binary 5 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
 h0 = plotFeatMat( TruePsi.F);
+
+%% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
+%Demonstration of a Carrot Grating Task consisting of 
+%12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
+%Dimensions:
+%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'same'; full = 0;
+[data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
+dataset_name = 'Grating';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
@@ -41,7 +51,7 @@ h0 = plotFeatMat( TruePsi.F);
 modelP = {'bpM.gamma', 1, 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
 
 % Sampler Settings
-algP   = {'Niter', 100, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
+algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
 
 % Number of Repetitions
 T = 10; 
@@ -53,7 +63,7 @@ for run=1:T
     % Run Gibbs Sampler for Niter once.
     clear CH    
     % Start out with just one feature for all objects
-    initP  = {'F.nTotal', randsample(data.N,1)}; 
+    initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './IBP-Results' );  
     Sampler_Stats(run).CH = CH;
 end
@@ -107,13 +117,14 @@ fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Dist
 log_probs = zeros(1,T);
 for ii=1:T; log_probs(ii) = mean(Best_Psi(ii).logPr); end
 [Max_prob, id] = max(log_probs);
-bestPsi = Best_Psi(id)
+bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'
 K_est = bestPsi.nFeats;
 est_states_all = [];
 for ii=1:data.N; est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; end
 label_range = unique(est_states_all)
+est_states = [];
 
 % Plot Segmentation
 figure('Color',[1 1 1])
@@ -123,12 +134,12 @@ for i=1:data.N
     X = data.Xdata(:,[data.aggTs(i)+1:data.aggTs(i+1)]);
     
     % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
-    est_states  = bestPsi.Psi.stateSeq(i).z;
+    est_states{i}  = bestPsi.Psi.stateSeq(i).z;
     
     % Plot Inferred Segments
     subplot(data.N,1,i);
-    data_labeled = [X; est_states];
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), {'x_1','x_2'},label_range)
+    data_labeled = [X; est_states{i}];
+    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), [],label_range)
     
 end
 
@@ -156,7 +167,7 @@ for i=1:data.N
 end
 bestPsi.pi = pi;
 
-%% Plot Estimated  Emission Parameters
+%% Plot Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 clear Est_theta
@@ -169,3 +180,13 @@ end
 
 if exist('h4','var') && isvalid(h4), delete(h4);end
 h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
+
+%% Visualize Segmented Trajectories in 3D ONLY!
+labels    = unique(est_states_all);
+titlename = 'Grating Demonstrations';
+
+% Plot Segmentated 3D Trajectories
+if exist('h5','var') && isvalid(h5), delete(h5);end
+h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
+
+

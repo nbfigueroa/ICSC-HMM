@@ -129,18 +129,18 @@ K_est = inferred_states(id);
 est_states_all = [];
 for ii=1:length(data_struct); est_states_all  = [est_states_all BestChain.stateSeq(ii).z]; end
 label_range = unique(est_states_all)
-
+est_states = [];
 % Plot Segmentation
 figure('Color',[1 1 1])
 for i=1:length(data_struct)
     X = data_struct(i).obs;
     
     % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
-    est_states  = BestChain.stateSeq(i).z;
+    est_states{i}  = BestChain.stateSeq(i).z;
     
     % Plot Inferred Segments
     subplot(length(data_struct),1,i);
-    data_labeled = [X; est_states];
+    data_labeled = [X; est_states{i}];
     plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(ChainStats_Run(2).logliks(i))), [],label_range)
     
 end
@@ -162,4 +162,13 @@ end
 
 if exist('h2','var') && isvalid(h2), delete(h2);end
 h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
+
+%% Visualize Segmented Trajectories in 3D ONLY!
+labels    = unique(est_states_all);
+titlename = 'Grating Demonstrations';
+
+% Plot Segmentated 3D Trajectories
+if exist('h5','var') && isvalid(h5), delete(h5);end
+h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
+
 
