@@ -44,56 +44,30 @@ dataset_name = 'Grating';
 %
 % Dimensions:
 % x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
-%
-% Dataset type:
-% type: 'raw', raw sensor recordings at 500 Hz, f/t readings are noisy and
-% quaternions dimensions exhibit discontinuities
+% - positions:         Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:      Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
+% - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
 
-% type: 'proc', Processed Dataset
-% The Dough-Rolling processed (smoothed f/t trajactories, fixed rotation
-% discontinuities and sub-sampled) data contains end-effector:
-% - positions:         Xn{i}(1:3,:)   (3-d: x, y, z)
-% - orientations:      Xn{i}(4:6,:)   (3-d: roll, pitch, yaw)
-% - forces:            Xn{i}(7:9,:)   (3-d: f_x, f_y, f_z)
-% - torques:           Xn{i}(10:12,:) (3-d: tau_x, tau_y, tau_z)
+% Dataset type:
+%
+% type: 'raw', raw sensor recordings at 500 Hz, f/t readings are noisy af and
+% quaternions dimensions exhibit discontinuities
+% This dataset is NOT labeled
+%
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc';
-% [~, ~, Data, True_states] = load_rolling_dataset( data_path, type, display, full);
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
+[~, ~, Data, True_states] = load_rolling_dataset( data_path, type, display, full);
 dataset_name = 'Rolling';
-
-label_range = [1 2 3];
- 
-switch type
-
-    case 'raw'
-        load(strcat(data_path,'Rolling/Rolling_Raw.mat'))
-        
-    case 'proc'
-        load(strcat(data_path,'Rolling/Rolling_Processed.mat'))
-end
-
-% if display == 1
-%     ts = [1:4];
-%     figure('Color',[1 1 1])
-%     for i=1:length(ts)
-%         X = Data{ts(i)};
-%         true_states = True_states{ts(i)};
-%         
-%         % Plot time-series with true labels
-%         subplot(length(ts),1,i);
-%         data_labeled = [X true_states]';
-%         plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), [], label_range)
-%     end        
-% end
-
-figure;plot(Xn_ch{1}')
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Model Selection for HMM
-K_range = [1:15]; repeats = 5; 
+K_range = [1:10]; repeats = 5; 
 hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
