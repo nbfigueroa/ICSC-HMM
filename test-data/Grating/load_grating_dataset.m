@@ -2,6 +2,7 @@ function [data, TruePsi, Data, True_states] = load_grating_dataset( data_path, t
 
 
 label_range = [1 2 3];
+
 % Data structures for hmm / hdp-hmm
 switch type
     case 'same'

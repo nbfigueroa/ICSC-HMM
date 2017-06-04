@@ -2,8 +2,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Main demo scripts for the ICSC-HMM Segmentation Algorithm proposed in:
 %
-% N. Figueroa and A. Billard, “Transform-Invariant Clustering of SPD Matrices 
-% and its Application on Joint Segmentation and Action Discovery}”
+% N. Figueroa and A. Billard, “Transform-Invariant Non-Parametric Clustering 
+% of Covariance Matrices and its Application to Unsupervised Joint Segmentation 
+% and Action Discovery”
 % Arxiv, 2017. 
 %
 % Author: Nadia Figueroa, PhD Student., Robotics
@@ -58,9 +59,11 @@ dataset_name = 'Grating';
 % type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
 % discontinuities.
 
-clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
-[~, ~, Data, True_states] = load_rolling_dataset( data_path, type, display, full);
+% clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+weights = [5*ones(1,7) 10*ones(1,6)]';
+[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
 dataset_name = 'Rolling';
 
 %% 5) Real 'Peeling' 32-D dataset, 5 Unique Emission models, 5 time-series
@@ -113,7 +116,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 8; T = 1;
+K = 6; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -191,9 +194,9 @@ h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = 'Grating Demonstrations';
+titlename = strcat(dataset_name,' Demonstrations');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
-h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
+h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 

@@ -1,8 +1,7 @@
-function [data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize)
+function [data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, varargin)
 
 label_range = [1 2 3];
-Data_ = [];
-weights = [1 1 1 1 1 1 1 5 5 5 3 3 3]';
+Data_ = [];    
 
 switch type
 
@@ -16,18 +15,31 @@ switch type
         
     case 'proc'
         load(strcat(data_path,'Rolling/proc-data-labeled.mat')) 
-        
+               
         Data_ = Data;
         
-        if normalize
+        if normalize > 0
+            
+            if isempty(varargin)
+                X = Data{1};
+                weights = ones(1,size(X,1))';
+            else
+                weights = varargin{1};
+            end
+            
+            
             for i=1:length(Data)
                 X = Data{i};
                 mean_X     = mean(X,2);
-                X_zeroMean = X - repmat( mean_X, 1, length(X));     
-                X_range    = range(X_zeroMean,2);
-                X_scaled   = X_zeroMean .* repmat( 1./X_range, 1, length(X_zeroMean));    
-                X_weighted = X_scaled   .* repmat( weights, 1, length(X_scaled));                
-                Data{i} = X_zeroMean;
+                X_zeroMean = X - repmat( mean_X, 1, length(X));                     
+                if normalize == 1
+                    Data{i} = X_zeroMean;
+                else
+                    X_range    = range(X_zeroMean,2);
+                    X_scaled   = X_zeroMean .* repmat( 1./X_range, 1, length(X_zeroMean));
+                    X_weighted = X_scaled   .* repmat( weights, 1, length(X_scaled));
+                    Data{i} = X_weighted;
+                end                   
             end
         end
         
