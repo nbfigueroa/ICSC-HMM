@@ -63,6 +63,47 @@ data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
 [~, ~, Data, True_states] = load_rolling_dataset( data_path, type, display, full);
 dataset_name = 'Rolling';
 
+%% 5) Real 'Peeling' 32-D dataset, 5 Unique Emission models, 5 time-series
+% Demonstration of a Bimanual Peeling Task consisting of 
+% 5 (32-d) time-series X = {x_1,..,x_T} with variable length T. 
+%
+% Dimensions:
+% x_a = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:         Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:      Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
+% - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+% x_p = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:         Data{i}(14:16,:)   (3-d: x, y, z)
+% - orientations:      Data{i}(17:20,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:            Data{i}(21:23,:)   (3-d: f_x, f_y, f_z)
+% - torques:           Data{i}(24:26,:) (3-d: tau_x, tau_y, tau_z)
+% x_o = {mu_r, mu_g, mu_b, sigma_r, sigma_g, sigma_b}
+% - positions:         Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
+% - orientations:      Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
+
+% Dimension type:
+%
+% dim: 'all', include all 32 dimensions (active + passive robots + object)
+% dim: 'robots', include only 26-d from measurements from active + passive robots
+% dim: 'active', include only 13-d from measurements from active robot
+% dim: 'act_obj', include only 19-d from measurements from active robot + object
+
+% Dataset type:
+%
+% type: 'raw', raw sensor recordings at 500 Hz, f/t readings are noisy af and
+% quaternions dimensions exhibit discontinuities
+% This dataset is NOT labeled
+%
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% discontinuities.
+
+clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'proc'; dim = 'all';
+[~, ~, Data, True_states] = load_peeling_dataset( data_path, type, display, full);
+dataset_name = 'Peeling';
+
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
