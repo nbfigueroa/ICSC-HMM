@@ -61,8 +61,8 @@ dataset_name = 'Grating';
 
 % clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
-weights = [5*ones(1,7) 10*ones(1,6)]';
+normalize = 0; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+weights = [5*ones(1,7) 20*ones(1,6)]';
 [~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
 dataset_name = 'Rolling';
 
@@ -116,7 +116,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 6; T = 1;
+K = 5; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
