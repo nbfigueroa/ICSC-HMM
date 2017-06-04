@@ -1,7 +1,9 @@
-function [data, TruePsi, Data, True_states] = load_rolling_dataset( data_path, type, display, full, normalize)
+function [data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize)
 
 label_range = [1 2 3];
- 
+Data_ = [];
+weights = [1 1 1 1 1 1 1 5 5 5 3 3 3]';
+
 switch type
 
     case 'raw'
@@ -13,17 +15,21 @@ switch type
         end
         
     case 'proc'
-        load(strcat(data_path,'Rolling/proc-data-labeled.mat'))
-                        
+        load(strcat(data_path,'Rolling/proc-data-labeled.mat')) 
+        
+        Data_ = Data;
+        
         if normalize
             for i=1:length(Data)
                 X = Data{i};
-                mean_X     = mean(X,1);
-                X_zeroMean = bsxfun( @minus, X, mean_X );
+                mean_X     = mean(X,2);
+                X_zeroMean = X - repmat( mean_X, 1, length(X));     
+                X_range    = range(X_zeroMean,2);
+                X_scaled   = X_zeroMean .* repmat( 1./X_range, 1, length(X_zeroMean));    
+                X_weighted = X_scaled   .* repmat( weights, 1, length(X_scaled));                
                 Data{i} = X_zeroMean;
             end
         end
-        
         
 end
 
