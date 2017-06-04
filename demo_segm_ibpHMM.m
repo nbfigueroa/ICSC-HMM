@@ -42,6 +42,33 @@ data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating';
 
+%% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
+% Demonstration of a Dough Rolling Task consisting of 
+% 15 (13-d) time-series X = {x_1,..,x_T} with variable length T. 
+%
+% Dimensions:
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:         Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:      Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
+% - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+
+% Dataset type:
+%
+% type: 'raw', raw sensor recordings at 500 Hz, f/t readings are noisy af and
+% quaternions dimensions exhibit discontinuities
+% This dataset is NOT labeled
+%
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% discontinuities.
+
+clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled * weights
+weights = [2*ones(1,7) 1/10*ones(1,6)]';
+[data, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
+dataset_name = 'Rolling';
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,7 +78,7 @@ dataset_name = 'Grating';
 modelP = {'bpM.gamma', 1, 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
+algP   = {'Niter', 1000, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
 
 % Number of Repetitions
 T = 10; 
@@ -64,7 +91,7 @@ for run=1:T
     clear CH    
     % Start out with just one feature for all objects
     initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
-    CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './IBP-Results' );  
+    CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
 end
 
@@ -183,10 +210,10 @@ h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = 'Grating Demonstrations';
+titlename = strcat(dataset_name,' Demonstrations');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
-h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
+h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
 

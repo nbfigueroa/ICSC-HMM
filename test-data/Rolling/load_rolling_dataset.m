@@ -30,15 +30,16 @@ switch type
             
             for i=1:length(Data)
                 X = Data{i};
-                mean_X     = mean(X,2);
-                X_zeroMean = X - repmat( mean_X, 1, length(X));                     
+                
                 if normalize == 1
+                    mean_X     = mean(X,2);
+                    X_zeroMean = X - repmat( mean_X, 1, length(X));                     
                     Data{i} = X_zeroMean;
                 else
-                    X_range    = range(X_zeroMean,2);
-                    X_scaled   = X_zeroMean .* repmat( 1./X_range, 1, length(X_zeroMean));
-                    X_weighted = X_scaled   .* repmat( weights, 1, length(X_scaled));
-                    Data{i} = X_weighted;
+                    X_weighted = X   .* repmat( weights, 1, length(X));
+                    mean_X     = mean(X_weighted,2);
+                    X_zeroMean = X_weighted - repmat( mean_X, 1, length(X));                                         
+                    Data{i} = X_zeroMean;
                 end                   
             end
         end
