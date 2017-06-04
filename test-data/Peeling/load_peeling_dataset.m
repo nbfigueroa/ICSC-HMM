@@ -1,7 +1,6 @@
-function [data, TruePsi, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, varargin)
+function [data, TruePsi, Data, True_states, Data_o] = load_peeling_dataset( data_path, dim, display, normalize, varargin)
 
 label_range = [1 2 3 4 5];
-Data_ = []; 
 load(strcat(data_path,'Peeling/proc-data-labeled.mat'))
     
 switch dim 
@@ -18,6 +17,35 @@ end
 % Select dimensions
 for i=1:length(Data)
     Data{i} = Data{i}(dimensions,:);
+end
+
+
+Data_o = Data;
+
+if normalize > 0
+    
+    if isempty(varargin)
+        X = Data{1};
+        weights = ones(1,size(X,1))';
+    else
+        weights = varargin{1};
+    end
+    
+    
+    for i=1:length(Data)
+        X = Data{i};
+        
+        if normalize == 1
+            mean_X     = mean(X,2);
+            X_zeroMean = X - repmat( mean_X, 1, length(X));
+            Data{i} = X_zeroMean;
+        else
+            X_weighted = X   .* repmat( weights, 1, length(X));
+            mean_X     = mean(X_weighted,2);
+            X_zeroMean = X_weighted - repmat( mean_X, 1, length(X));
+            Data{i} = X_zeroMean;
+        end
+    end
 end
 
 

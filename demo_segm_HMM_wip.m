@@ -77,10 +77,7 @@ dataset_name = 'Rolling';
 % - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
 % - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
 % x_p = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
-% - positions:         Data{i}(14:16,:)   (3-d: x, y, z)
-% - orientations:      Data{i}(17:20,:)   (4-d: q_i, q_j, q_k, q_w)
-% - forces:            Data{i}(21:23,:)   (3-d: f_x, f_y, f_z)
-% - torques:           Data{i}(24:26,:) (3-d: tau_x, tau_y, tau_z)
+% - same as above      Data{i}(14:26,:)
 % x_o = {mu_r, mu_g, mu_b, sigma_r, sigma_g, sigma_b}
 % - mean:              Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
 % - variance:          Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
@@ -95,12 +92,12 @@ dataset_name = 'Rolling';
 % type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
 % discontinuities.
 
-
-% clc; clear all; close all;
+clc; clear all; close all;
 data_path = './test-data/'; display = 1; 
-dim = 'act+obj'; % Which dimensions to include
-normalize = 0; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
-weights = [5*ones(1,7) 10*ones(1,6)]';
+dim = 'active'; % Which dimensions to include
+normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+% weights = [2*ones(1,7) 1/10*ones(1,6) 1/2*ones(1,6)]'; % act+obj
+weights = [2*ones(1,3) ones(1,4) 1/15*ones(1,6) ]'; % active
 [~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights);
 dataset_name = 'Peeling';
 
