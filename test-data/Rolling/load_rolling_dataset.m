@@ -1,7 +1,7 @@
-function [data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, varargin)
+function [data, TruePsi, Data, True_states, Data_o] = load_rolling_dataset( data_path, type, display, full, normalize, varargin)
 
 label_range = [1 2 3];
-Data_ = [];    
+Data_o = [];    
 
 switch type
 
@@ -16,7 +16,7 @@ switch type
     case 'proc'
         load(strcat(data_path,'Rolling/proc-data-labeled.mat')) 
                
-        Data_ = Data;
+        Data_o = Data;
         
         if normalize > 0
             
@@ -87,11 +87,12 @@ if full == 1 % Load the 15 time-series
     end
 else % Load 5 time-series
 
-    Data_ = Data; True_states_ = True_states;
-    clear Data True_states
+    Data_ = Data; True_states_ = True_states; Data_o_ = Data_o;
+    clear Data True_states Data_o
     iter = 1;
     for i=1:3:length(Data_)
         Data{iter} = Data_{i};
+        Data_o{iter} = Data_o_{i};
         True_states{iter} = True_states_{i};
         iter = iter + 1;
     end
@@ -122,6 +123,7 @@ for iter = 1:N
     data = data.addSeq( X, num2str(iter), labels );
     
     Data{iter} = Data{iter}';
+    Data_o{iter} = Data_o{iter}';
     True_states{iter} = True_states{iter}';
 end
 
