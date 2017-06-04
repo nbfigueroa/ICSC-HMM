@@ -37,6 +37,34 @@ data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating';
 
+%% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
+% Demonstration of a Dough Rolling Task consisting of 
+% 15 (13-d) time-series X = {x_1,..,x_T} with variable length T. 
+%
+% Dimensions:
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:         Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:      Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
+% - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+
+% Dataset type:
+%
+% type: 'raw', raw sensor recordings at 500 Hz, f/t readings are noisy af and
+% quaternions dimensions exhibit discontinuities
+% This dataset is NOT labeled
+%
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% discontinuities.
+
+% clc; clear all; close all;
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+normalize = 1; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+weights = [5*ones(1,7) 20*ones(1,6)]';
+[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
+dataset_name = 'Rolling';
+
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +80,7 @@ hdp_options.Kz = 10;                        % truncation level of the DP prior o
 hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
 hdp_options.plot_iter = 1;
 hdp_options.Niter = 500;
-hdp_options.saveDir = './Results';
+hdp_options.saveDir = './hdp-Results';
 
 %%% Create data structure of multiple time-series for HDP-HMM sampler %%%
 clear data_struct 
@@ -165,10 +193,10 @@ h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = 'Grating Demonstrations';
+titlename = strcat(dataset_name,' Demonstrations');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
-h5 = plotLabeled3DTrajectories(Data, est_states, titlename, labels);
+h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
 
