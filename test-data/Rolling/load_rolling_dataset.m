@@ -1,4 +1,4 @@
-function [data, TruePsi, Data, True_states] = load_rolling_dataset( data_path, type, display, full)
+function [data, TruePsi, Data, True_states] = load_rolling_dataset( data_path, type, display, full, normalize)
 
 label_range = [1 2 3];
  
@@ -14,6 +14,17 @@ switch type
         
     case 'proc'
         load(strcat(data_path,'Rolling/proc-data-labeled.mat'))
+                        
+        if normalize
+            for i=1:length(Data)
+                X = Data{i};
+                mean_X     = mean(X,1);
+                X_zeroMean = bsxfun( @minus, X, mean_X );
+                Data{i} = X_zeroMean;
+            end
+        end
+        
+        
 end
 
 if full == 1 % Load the 15 time-series
