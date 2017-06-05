@@ -65,7 +65,7 @@ dataset_name = 'Grating';
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
 normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled * weights
-weights = [2*ones(1,7) 1/15*ones(1,6)]';
+weights = [2*ones(1,7) 1/20*ones(1,6)]';
 [data, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
 dataset_name = 'Rolling';
 
