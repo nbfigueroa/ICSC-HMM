@@ -2,6 +2,7 @@ function [data, TruePsi, Data, True_states, Data_o] = load_peeling_dataset( data
 
 label_range = [1 2 3 4 5];
 load(strcat(data_path,'Peeling/proc-data-labeled.mat'))
+load(strcat(data_path,'Peeling/proc-labels.mat'))
     
 switch dim 
     case 'all'
@@ -72,6 +73,7 @@ for iter = 1:N
     data = data.addSeq( X, num2str(iter), labels );
     
     Data{iter} = Data{iter}';
+    Data_o{iter} = Data_o{iter}';
     True_states{iter} = True_states{iter}';
 end
 

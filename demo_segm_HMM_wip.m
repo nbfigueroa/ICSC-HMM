@@ -92,12 +92,13 @@ dataset_name = 'Rolling';
 % type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
 % discontinuities.
 
-clc; clear all; close all
+% clc; clear all; close all
 data_path = './test-data/'; display = 1; 
-dim = 'active'; % Which dimensions to include
-normalize = 0; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+dim = 'robots'; % Which dimensions to include
+normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 % weights = [2*ones(1,7) 1/10*ones(1,6) 1/2*ones(1,6)]'; % act+obj
-weights = [2*ones(1,3) ones(1,4) 1/15*ones(1,6) ]'; % active
+% weights = [3*ones(1,3) ones(1,4) 1/15*ones(1,6)]'; % active
+weights = [3*ones(1,3) ones(1,4) 1/15*ones(1,6) 0.5*ones(1,7) 1/40*ones(1,6) ]'; % active + passive
 [~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights);
 dataset_name = 'Peeling';
 
@@ -110,7 +111,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 8; T = 1;
+K = 4; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -188,9 +189,14 @@ h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = strcat(dataset_name,' Demonstrations');
+titlename = strcat(dataset_name,' Demonstrations (Estimated)');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
+
+% Plot Segmentated 3D Trajectories
+if exist('h6','var') && isvalid(h6), delete(h6);end
+titlename = strcat(dataset_name,' Demonstrations (True)');
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:5]);
