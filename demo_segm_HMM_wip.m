@@ -22,7 +22,6 @@ clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 
-
 %% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
@@ -37,6 +36,7 @@ clc; clear all; close all;
 data_path = './test-data/'; type = 'same'; full = 0;
 display = 1 ; % 0: no-display, 1: each ts w/labels
 [~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
+Data_ = Data;
 dataset_name = 'Grating';
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
@@ -59,11 +59,14 @@ dataset_name = 'Grating';
 % type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
 % discontinuities.
 
-% clc; clear all; close all;
+clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
 normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
-weights = [5*ones(1,7) 10*ones(1,6)]';
-[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
+% Define weights for dimensionality scaling
+weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+% Define if using first derivative of pos/orient
+use_vel = 1;
+[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
 dataset_name = 'Rolling';
 
 %% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
@@ -112,7 +115,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; T = 5;
+K = 8; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -200,4 +203,4 @@ h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 % Plot Segmentated 3D Trajectories
 if exist('h6','var') && isvalid(h6), delete(h6);end
 titlename = strcat(dataset_name,' Demonstrations (True)');
-h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:5]);
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);

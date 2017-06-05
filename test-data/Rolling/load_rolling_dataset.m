@@ -19,17 +19,19 @@ switch type
         Data_o = Data;        
         
         % Convert positions to velocities
-        for i=1:length(Data)
-            clear X3d
-            
-            X3d(1:3,:) = Data{i}(1:3,:);            
-            X3d_dot = [zeros(3,1) diff(X3d')'];            
-            % Smoothed out with savitksy golay filter
-            X3d_dot = 100*sgolayfilt(X3d_dot', 3, 151)';              
-
-            range(X3d_dot,2)
-            Data{i}(1:3,:) = X3d_dot;            
-        end                
+        if ~isempty(varargin)
+            if varargin{2}==1
+                for i=1:length(Data)
+                    clear X3d
+                    
+                    X3d(1:3,:) = Data{i}(1:3,:);
+                    X3d_dot = [zeros(3,1) diff(X3d')'];
+                    % Smoothed out with savitksy golay filter
+                    X3d_dot = 100*sgolayfilt(X3d_dot', 3, 151)';
+                    Data{i}(1:3,:) = X3d_dot;
+                end
+            end
+        end
         
         if normalize > 0
             
