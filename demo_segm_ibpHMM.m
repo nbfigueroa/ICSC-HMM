@@ -59,26 +59,27 @@ dataset_name = 'Grating';
 % quaternions dimensions exhibit discontinuities
 % This dataset is NOT labeled
 %
-% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajectories, fixed rotation
 % discontinuities.
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
 normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled * weights
-weights = [2*ones(1,7) 1/10*ones(1,6)]';
+weights = [2*ones(1,7) 1/15*ones(1,6)]';
 [data, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
 dataset_name = 'Rolling';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
+%%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Define Settings for IBP-HMM %%%
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
-modelP = {'bpM.gamma', 1, 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
+modelP = {'bpM.gamma', length(Data), 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
 
 % Sampler Settings
-algP   = {'Niter', 1000, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc',1}; 
+algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+         'doSampleFUnique', 1. 'doSplitMerge', 1}; 
 
 % Number of Repetitions
 T = 10; 
@@ -210,10 +211,14 @@ h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = strcat(dataset_name,' Demonstrations');
+titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
+titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
+% Plot Segmentated 3D Trajectories
+if exist('h6','var') && isvalid(h6), delete(h6);end
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
 
