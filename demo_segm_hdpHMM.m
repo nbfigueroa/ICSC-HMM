@@ -60,10 +60,14 @@ dataset_name = 'Grating';
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
 normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
-weights = [2*ones(1,7) 1/10*ones(1,6)]';
-[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
-dataset_name = 'Rolling';
 
+% Define weights for dimensionality scaling
+weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+
+% Define if using first derivative of pos/orient
+use_vel = 1;
+[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
+dataset_name = 'Rolling';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
@@ -74,11 +78,11 @@ hdp_options.obsModelType = 'Gaussian';
 hdp_options.priorType = 'NIW';
 hdp_options.d = size(Data{1},2);
 hdp_options.sticky = 1;
-hdp_options.kappa = 0.1;                    % NIW(kappa,theta,delta,nu_delta)
+hdp_options.kappa = 1;                      % NIW(kappa,theta,delta,nu_delta)
 hdp_options.meanSigma = eye(hdp_options.d); % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
 hdp_options.Kz = 10;                        % truncation level of the DP prior on HMM transition distributions pi_k
 hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
-hdp_options.plot_iter = 1;
+hdp_options.plot_iter = 0;
 hdp_options.Niter = 500;
 hdp_options.saveDir = './hdp-Results';
 
@@ -92,7 +96,7 @@ end
 
 %%%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM %%%
 % Number of Repetitions
-T = 10; 
+T = 5; 
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -152,6 +156,8 @@ fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hammi
 log_likelihoods = zeros(1,T);
 for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
 [Max_ll, id] = max(log_likelihoods);
+
+
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];
@@ -193,10 +199,13 @@ h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);
-titlename = strcat(dataset_name,' Demonstrations');
+titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
-
+titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
+% Plot Segmentated 3D Trajectories
+if exist('h6','var') && isvalid(h6), delete(h6);end
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);

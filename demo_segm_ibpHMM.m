@@ -64,11 +64,13 @@ dataset_name = 'Grating';
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled * weights
-weights = [2*ones(1,7) 1/20*ones(1,6)]';
-[data, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights);
+normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+% Define weights for dimensionality scaling
+weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+% Define if using first derivative of pos/orient
+use_vel = 1;
+[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
 dataset_name = 'Rolling';
-
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
