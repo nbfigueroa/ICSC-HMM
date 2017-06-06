@@ -64,20 +64,29 @@ dataset_name = 'Grating';
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
+
 % Define weights for dimensionality scaling
 weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+
 % Define if using first derivative of pos/orient
 use_vel = 1;
-[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
+[data, TruePsi, ~, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
 dataset_name = 'Rolling';
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Define Settings for IBP-HMM %%%
 
+% IBP hyper-parametrs
+gamma = 1;  % length(Data)
+alpha = 1;  % typically 1.. could change
+kappa = 20; % sticky parameter
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
-modelP = {'bpM.gamma', length(Data), 'bpM.c', 1, 'hmmM.alpha', 1, 'hmmM.kappa', 10}; 
+modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...

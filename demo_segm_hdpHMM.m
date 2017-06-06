@@ -59,7 +59,9 @@ dataset_name = 'Grating';
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
 
 % Define weights for dimensionality scaling
 weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
@@ -78,7 +80,7 @@ hdp_options.obsModelType = 'Gaussian';
 hdp_options.priorType = 'NIW';
 hdp_options.d = size(Data{1},2);
 hdp_options.sticky = 1;
-hdp_options.kappa = 1;                      % NIW(kappa,theta,delta,nu_delta)
+hdp_options.kappa = 0.5;                    % NIW(kappa,theta,delta,nu_delta)
 hdp_options.meanSigma = eye(hdp_options.d); % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
 hdp_options.Kz = 10;                        % truncation level of the DP prior on HMM transition distributions pi_k
 hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
@@ -153,24 +155,42 @@ fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hammi
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
 %% Visualize Transition Matrix, Emission Parameters and Segmentation from 'Best' Run
-log_likelihoods = zeros(1,T);
-for ii=1:T; log_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); end
-[Max_ll, id] = max(log_likelihoods);
+mean_likelihoods = zeros(1,T);
+std_likelihoods = zeros(1,T);
+for ii=1:T 
+    mean_likelihoods(ii) = mean(ChainStats_Run(ii).logliks); 
+    std_likelihoods(ii) = std(ChainStats_Run(ii).logliks); 
+end
+% [Max_ll, max_id] = max(log_likelihoods)
+[val_std id_std] = sort(std_likelihoods,'ascend');
+[val_mean id_mean] = sort(mean_likelihoods,'descend');
 
+id_mean
+id_std
 
+%% Plot Segmentation Run with Chosen Run
+id = 3;
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];
 for ii=1:length(data_struct); est_states_all  = [est_states_all BestChain.stateSeq(ii).z]; end
-label_range = unique(est_states_all)
+label_range = unique(est_states_all);
 est_states = [];
 % Plot Segmentation
 figure('Color',[1 1 1])
+true_states_all   = [];
+est_states_all    = [];
+
 for i=1:length(data_struct)
     X = data_struct(i).obs;
     
     % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
     est_states{i}  = BestChain.stateSeq(i).z;
+    
+    % Stack labels for state clustering metrics
+    true_states = True_states{jj};
+    true_states_all = [true_states_all; True_states{i}];
+    est_states_all  = [est_states_all; est_states{i}'];
     
     % Plot Inferred Segments
     subplot(length(data_struct),1,i);
@@ -178,6 +198,18 @@ for i=1:length(data_struct)
     plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est),', loglik:',num2str(ChainStats_Run(2).logliks(i))), [],label_range)
     
 end
+
+% Segmentation Metrics per run
+[relabeled_est_states_all, hamming_distance_,~,~] = mapSequence2Truth(true_states_all,est_states_all);
+[~,global_consistency_, variation_info_] = compare_segmentations(true_states_all,est_states_all);
+inferred_states_   = length(unique(est_states_all));
+
+% Cluster Metrics per run
+[cluster_purity_ cluster_NMI_ cluster_F_] = cluster_metrics(true_states_all, relabeled_est_states_all);
+
+% Overall Stats for HMM segmentation and state clustering
+fprintf('*** Sticky HDP-HMM Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
+    global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
 
 % Plot Transition Matrix
 if exist('h1','var') && isvalid(h1), delete(h1);end

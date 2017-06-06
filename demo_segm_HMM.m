@@ -61,7 +61,9 @@ dataset_name = 'Grating';
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
 
 % Define weights for dimensionality scaling
 weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
