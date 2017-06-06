@@ -61,13 +61,17 @@ dataset_name = 'Grating';
 
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
 
 % Define weights for dimensionality scaling
 weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
+
 [~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
 dataset_name = 'Rolling';
 
@@ -77,15 +81,15 @@ dataset_name = 'Rolling';
 %
 % Dimensions:
 % x_a = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
-% - positions:         Data{i}(1:3,:)   (3-d: x, y, z)
-% - orientations:      Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
-% - forces:            Data{i}(8:10,:)   (3-d: f_x, f_y, f_z)
-% - torques:           Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+% - positions:              Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:           Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:                 Data{i}(8:10,:)  (3-d: f_x, f_y, f_z)
+% - torques:                Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
 % x_p = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
-% - same as above      Data{i}(14:26,:)
+% - same as above           Data{i}(14:26,:)
 % x_o = {mu_r, mu_g, mu_b, sigma_r, sigma_g, sigma_b}
-% - mean:              Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
-% - variance:          Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
+% - rate_mean:              Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
+% - rate_variance:          Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
 
 % Dimension type:
 % dim: 'all', include all 32 dimensions (active + passive robots + object)
@@ -94,24 +98,36 @@ dataset_name = 'Rolling';
 % dim: 'active', include only 13-d from measurements from active robot
 
 % Dataset type:
-% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% sub-sampled to 100 Hz (from 500 Hz), smoothed f/t trajectories, fixed rotation
 % discontinuities.
 
-clc; clear all; close all
+% clc; 
+clear all; close all
 data_path = './test-data/'; display = 1; 
-dim = 'all'; % Which dimensions to include
-normalize = 2; % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
+
+% Select dimensions to use
+dim = 'robots'; 
 
 % Define weights for dimensionality scaling
-% weights = [3*ones(1,3) ones(1,4) 1/15*ones(1,6)]'; % active
-% weights = [2*ones(1,7) 1/10*ones(1,6) 1/2*ones(1,6)]'; % act+obj
-% weights = [3*ones(1,3) ones(1,4) 1/15*ones(1,6) 0.5*ones(1,7) 1/40*ones(1,6) ]'; % robots
-weights = [3*ones(1,3) ones(1,4) 1/15*ones(1,6) 0.5*ones(1,7) 1/40*ones(1,6) 1/2*ones(1,6) ]'; % all
+switch dim
+    case 'active'
+        weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]'; % active    
+    case 'act+obj'
+        weights = [2*ones(1,7) 1/10*ones(1,6) 2*ones(1,6)]'; % act+obj
+    case 'robots'
+        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots        
+    case 'all'
+        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) 2*ones(1,6) ]'; % all        
+end
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
 
-[~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights);
+[~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
 dataset_name = 'Peeling';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -182,7 +198,6 @@ for run=1:T
 end
 
 % Overall Stats for HMM segmentation and state clustering
-clc;
 fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
@@ -211,4 +226,4 @@ h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 % Plot Segmentated 3D Trajectories
 if exist('h6','var') && isvalid(h6), delete(h6);end
 titlename = strcat(dataset_name,' Demonstrations (True)');
-h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:5]);

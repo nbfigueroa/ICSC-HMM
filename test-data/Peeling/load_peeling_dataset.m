@@ -3,16 +3,40 @@ function [data, TruePsi, Data, True_states, Data_o] = load_peeling_dataset( data
 label_range = [1 2 3 4 5];
 load(strcat(data_path,'Peeling/proc-data-labeled.mat'))
 load(strcat(data_path,'Peeling/proc-labels.mat'))
-    
+Data_o = Data;   
+
 switch dim 
     case 'all'
-        dimensions = [1:size(Data{1},1)];
+        dimensions = [1:size(Data{1},1)];                     
+        
+        for i=1:length(Data)
+            clear X6f
+            X6f(1:6,:) = Data{i}(end-5:end,:);
+            % Smooth out color features
+            sf = 200;
+            X6f_s = [smooth(X6f(1,:),sf)'; smooth(X6f(2,:),sf)'; smooth(X6f(3,:),sf)'; ...
+                     smooth(X6f(4,:),sf)'; smooth(X6f(5,:),sf)'; smooth(X6f(6,:),sf)'];           
+            Data{i}(end-5:end,:) = X6f_s;
+        end
+        
+        
     case 'robots'
         dimensions = [1:size(Data{1},1)-6];
     case 'act+obj'
         dimensions = [1:13 27:size(Data{1},1)];
+        
+        for i=1:length(Data)
+            clear X6f
+            X6f(1:6,:) = Data{i}(end-5:end,:);
+            % Smooth out color features
+            sf = 200;
+            X6f_s = [smooth(X6f(1,:),sf)'; smooth(X6f(2,:),sf)'; smooth(X6f(3,:),sf)'; ...
+                     smooth(X6f(4,:),sf)'; smooth(X6f(5,:),sf)'; smooth(X6f(6,:),sf)'];           
+            Data{i}(end-5:end,:) = X6f_s;
+        end
+        
     case 'active'
-        dimensions = [1:13];
+        dimensions = [1:13];        
 end
 
 % Select dimensions
@@ -21,7 +45,30 @@ for i=1:length(Data)
 end
 
 
-Data_o = Data;
+% Convert positions to velocities
+if ~isempty(varargin)
+    if varargin{2}==1
+        for i=1:length(Data)
+            clear X3d
+            X3d(1:3,:) = Data{i}(1:3,:);
+            X3d_dot = [zeros(3,1) diff(X3d')'];
+            % Smoothed out with savitksy golay filter
+            X3d_dot = 100*sgolayfilt(X3d_dot', 3, 151)';
+            Data{i}(1:3,:)       = X3d_dot;
+
+            if strcmp(dim,'all') || strcmp(dim,'robots')
+                clear X7d
+                X7d(1:7,:) = Data{i}(14:20,:);
+                X7d_dot = [zeros(7,1) diff(X7d')'];
+                
+                % Smoothed out with savitksy golay filter
+                X7d_dot        = 100*sgolayfilt(X7d_dot', 7, 151)';                                
+                Data{i}(14:20,:) = X7d_dot;
+            end
+
+        end
+    end
+end
 
 if normalize > 0
     
