@@ -24,10 +24,15 @@ N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 
 
-%% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
+%% 2a) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
 ts = [1:length(Data)];
+
+%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, 5 time-series
+clc; clear all; close all;
+[~, ~, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 2, 500, 0.5 );
+dataset_name = '2D Transformed'; 
 
 %% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Carrot Grating Task consisting of 
@@ -141,7 +146,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 3; T = 1;
+K = 4; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays

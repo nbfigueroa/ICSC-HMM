@@ -27,7 +27,7 @@ cmap = [cmap1; cmap2(2:end, :)];
 colormap(vivid(cmap, [.85, .85]));
 plot(t - begin_time, X(1:end-1,:)','-.', 'LineWidth',2);hold on;
 axis( [1 N ys(1) ys(end)] );
-xlabel('Time (1,...,T)')
+xlabel('Time (1,...,T)','Interpreter','LaTex')
 ylabel('$\mathbf{x}$','Interpreter','LaTex')
 if ~isempty(legends)
     legend(legends)

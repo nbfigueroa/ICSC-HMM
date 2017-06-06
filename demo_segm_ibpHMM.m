@@ -20,15 +20,26 @@
 %% 1) Toy 2D dataset, 3 Unique Emission models, 3 time-series, same swicthing
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
-[data, Data,, True_states, ~] = genToyHMMData_Gaussian( N_TS, display ); 
+[data, Data, True_states, True_theta] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
 
-%% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
+%% 2a) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
+dataset_name = '2D'; Data_ = Data;
 label_range = unique(data.zTrueAll);
 
 % Feat matrix F (binary 5 x 4 matrix )
+if exist('h0','var') && isvalid(h0), delete(h0);end
+h0 = plotFeatMat( TruePsi.F);
+
+%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, 5 time-series
+clc; clear all; close all;
+[data, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 4, 500, 0.5 );
+dataset_name = '2D Transformed'; Data_ = Data;
+label_range = unique(data.zTrueAll);
+
+% Feat matrix F (binary 4 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
 h0 = plotFeatMat( TruePsi.F);
 
@@ -40,7 +51,7 @@ h0 = plotFeatMat( TruePsi.F);
 % clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating';
+dataset_name = 'Grating'; Data_ = Data;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -167,7 +178,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = 2;
+id = 5;
 bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'
