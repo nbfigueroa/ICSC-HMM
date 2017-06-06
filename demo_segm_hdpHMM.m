@@ -64,7 +64,7 @@ data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
@@ -168,15 +168,16 @@ end
 id_mean
 id_std
 
-%% Plot Segmentation Run with Chosen Run
-id = 3;
+%% Plot Segmentation with Chosen Run
+id = 5;
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];
 for ii=1:length(data_struct); est_states_all  = [est_states_all BestChain.stateSeq(ii).z]; end
 label_range = unique(est_states_all);
 est_states = [];
-% Plot Segmentation
+
+% Plot Segmentation and Stats
 figure('Color',[1 1 1])
 true_states_all   = [];
 est_states_all    = [];

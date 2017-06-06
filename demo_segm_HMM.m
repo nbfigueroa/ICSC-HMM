@@ -66,7 +66,10 @@ data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+% weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+
+% Define weights for dimensionality scaling
+weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
@@ -123,7 +126,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; T = 1;
+K = 3; T = 1;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays

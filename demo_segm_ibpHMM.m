@@ -69,7 +69,7 @@ data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
+weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
@@ -82,18 +82,19 @@ dataset_name = 'Rolling';
 %%% Define Settings for IBP-HMM %%%
 
 % IBP hyper-parametrs
-gamma = 1;  % length(Data)
+gamma = length(Data_);  % length(Data)
 alpha = 1;  % typically 1.. could change
-kappa = 20; % sticky parameter
+kappa = 10; % sticky parameter
+
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
-         'doSampleFUnique', 1. 'doSplitMerge', 1}; 
+         'doSampleFUnique', 1. 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -154,19 +155,33 @@ fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Dist
 
 % Get 'Best Psi' from all runs
 log_probs = zeros(1,T);
-for ii=1:T; log_probs(ii) = mean(Best_Psi(ii).logPr); end
-[Max_prob, id] = max(log_probs);
+for ii=1:T 
+    mean_likelihoods(ii) = mean(Best_Psi(ii).logPr); 
+    std_likelihoods(ii) = std(Best_Psi(ii).logPr); 
+end
+% [Max_ll, max_id] = max(log_likelihoods)
+[val_std id_std] = sort(std_likelihoods,'ascend');
+[val_mean id_mean] = sort(mean_likelihoods,'descend');
+
+id_mean
+id_std
+
+%% Plot Segmentation with Chosen Run
+id = 2;
 bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'
 K_est = bestPsi.nFeats;
 est_states_all = [];
 for ii=1:data.N; est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; end
-label_range = unique(est_states_all)
+label_range = unique(est_states_all);
 est_states = [];
 
 % Plot Segmentation
 figure('Color',[1 1 1])
+true_states_all   = [];
+est_states_all    = [];
+
 for i=1:data.N
     
     % Extract data from each time-series    
@@ -175,12 +190,29 @@ for i=1:data.N
     % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
     est_states{i}  = bestPsi.Psi.stateSeq(i).z;
     
+    % Stack labels for state clustering metrics
+    true_states_all = [true_states_all; True_states{i}];
+    est_states_all  = [est_states_all; est_states{i}'];
+    
     % Plot Inferred Segments
     subplot(data.N,1,i);
     data_labeled = [X; est_states{i}];
     plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), [],label_range)
     
 end
+
+% Segmentation Metrics per run
+[relabeled_est_states_all, hamming_distance_,~,~] = mapSequence2Truth(true_states_all,est_states_all);
+[~,global_consistency_, variation_info_] = compare_segmentations(true_states_all,est_states_all);
+inferred_states_   = length(unique(est_states_all));
+
+% Cluster Metrics per run
+[cluster_purity_ cluster_NMI_ cluster_F_] = cluster_metrics(true_states_all, relabeled_est_states_all);
+
+% Overall Stats for HMM segmentation and state clustering
+fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
+    global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
+
 
 % Plot Estimated Feature Matrix
 if exist('h2','var') && isvalid(h2), delete(h2);end
