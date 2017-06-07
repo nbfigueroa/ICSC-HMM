@@ -99,7 +99,7 @@ data = SeqData();
 F = zeros( N, nStates );
 
 F_forced = [1 1 0 0; 1 0 1 0; 0 0 1 1; 0 1 0 1];
-
+sTrueAll = [];
 for i = 1:N   
     if doVaryLength
         Ti = poissrnd(T);
@@ -118,7 +118,7 @@ for i = 1:N
 %         mask=true(1,nStates);
 %     end
     
-    mask = F_forced(i,:);
+    mask = F_forced(i+4-N,:);
     F(i,:) = mask;
     
     zTrue = zeros(1,Ti);
@@ -138,6 +138,15 @@ for i = 1:N
            
     end
     data = data.addSeq( X, num2str(i), zTrue );
+    sTrue = zeros(size(zTrue));
+    sTrue(zTrue == 1) = 1;
+    sTrue(zTrue == 4) = 1;
+    sTrue(zTrue == 2) = 2;
+    sTrue(zTrue == 3) = 2;
+    PsiTrue.z{i} = zTrue;
+    PsiTrue.s{i} = sTrue;
+    
+    sTrueAll = [sTrueAll sTrue];
 end
 
 % ---------------------------------------------------------  Reset stream
@@ -163,7 +172,8 @@ for kk = 1:nStates
 end
 
 PsiTrue.Pz = Pz;
-PsiTrue.z = zTrue;
+PsiTrue.zTrueAll = data.zTrueAll;
+PsiTrue.sTrueAll = sTrueAll;
 
 True_theta.K = nStates;
 True_theta.Mu = Mu;
@@ -177,28 +187,29 @@ for i=1:data.N
     True_states{i} = data.zTrue(i)';
 end
 
-label_range = unique(data.zTrueAll);
+label_range_z = unique(data.zTrueAll);
+label_range_s = unique(PsiTrue.sTrueAll);
 
 ts = [1:length(Data)];
 figure('Color',[1 1 1])
-
-
 for i=1:length(ts)
     X = Data{ts(i)};
-    true_states = True_states{ts(i)};
-    
-    % Plot time-series with true labels
+    true_states       = data.zTrue(i)';
+    true_super_states = PsiTrue.s{i}';
+    % Plot time-series with true labels and true super labels
     subplot(length(ts),1,i);
-    data_labeled = [X true_states]';
-    plotLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range);    
+    data_labeled = [X true_super_states true_states]';
+    plotDoubleLabeledData( data_labeled, [], strcat('Time-Series (', num2str(ts(i)),') with true labels'), {'x_1','x_2'}, label_range_z, label_range_s);    
 end
-
-
 
 title_name  = 'True Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
-plotGaussianEmissions2D(True_theta, plot_labels, title_name);
+labels = [1 2 2 1];
+plotGaussianEmissions2D(True_theta, plot_labels, title_name, labels);
 
+% Similarity matrix
+S = [1 0 0 1; 0 1 1 0; 0 1 1 0; 1 0 0 1];
+PsiTrue.S = S;
 
 
 end % main function

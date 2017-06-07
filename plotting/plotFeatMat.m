@@ -72,13 +72,15 @@ xlabel( 'Actions/States', 'Interpreter','Latex','FontSize', 14,'FontName','Times
 ylabel( 'Time-Series','Interpreter','Latex','FontSize',14,'FontName','Times', 'FontWeight','Light');
 set( gca, 'FontSize', 16);
 % colormap bone;
-
-level = 10; n = ceil(level/2);
-cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
-cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
-cmap = [cmap1; cmap2(2:end, :)];
-colormap(vivid(cmap, [0.85 0.85]));
+% 
+% level = 10; n = ceil(level/2);
+% cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
+% cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
+% cmap = [cmap1; cmap2(2:end, :)];
+% colormap(vivid(cmap, [0.85 0.85]));
 % colorbar
+
+colormap(bone)
 colorbar(  'YTick', [0 1 2],       'YTickLabel', {'Disabled', 'Available', 'Active'});
 title ('Feature Matrix','Interpreter','LaTex')
 grid on

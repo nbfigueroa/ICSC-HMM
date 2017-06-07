@@ -26,29 +26,33 @@ label_range = unique(True_states{1});
 %% 2a) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
-dataset_name = '2D'; Data_ = Data;
+dataset_name = '2D';
 label_range = unique(data.zTrueAll);
 
 % Feat matrix F (binary 5 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
 h0 = plotFeatMat( TruePsi.F);
 
-%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, 5 time-series
+%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, 4 time-series
 clc; clear all; close all;
-[data, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 4, 500, 0.5 );
-dataset_name = '2D Transformed'; Data_ = Data;
-label_range = unique(data.zTrueAll);
+[data, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 3, 500, 0.5 );
+dataset_name = '2D Transformed'; 
+label_range = unique(TruePsi.sTrueAll);
 
-% Feat matrix F (binary 4 x 4 matrix )
+%% Feat matrix F (binary 4 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
 h0 = plotFeatMat( TruePsi.F);
+
+% Similarity matrix S (4 x 4 matrix)
+if exist('h1','var') && isvalid(h1), delete(h1);end
+h1 = plotSimMat( TruePsi.S );
 
 %% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
-% clc; clear all; close all;
+clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating'; Data_ = Data;
