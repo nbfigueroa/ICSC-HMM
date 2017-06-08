@@ -35,6 +35,13 @@ You're ready! Now run demos..
 
 ...
 
+```
+*** IBP-HMM Results*** 
+ Optimal States: 3.667 (0.577) 
+ Hamming-Distance: 0.354 (0.013) GCE: 0.070 (0.121) VO: 1.108 (0.339) 
+ Purity: 0.937 (0.109) NMI: 0.620 (0.173) F: 0.780 (0.014)
+```
+
 ---
 
 
