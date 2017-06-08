@@ -22,10 +22,24 @@ clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
+super_states = 0;
 
-%% 2) Toy 2D dataset, 4 Unique Emission models, 5 time-series
+%% 2a) Toy 2D dataset, 4 Unique Emission models, max 5 time-series
 clc; clear all; close all;
-[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
+M = 4; % Number of Time-Series
+[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, M, 500, 0.5 ); 
+super_states = 0;
+
+%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, max 4 time-series
+clc; clear all; close all;
+M = 3; % Number of Time-Series
+[~, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, M, 500, 0.5 );
+dataset_name = '2D Transformed'; 
+super_states = 1;
+
+% Similarity matrix S (4 x 4 matrix)
+if exist('h1','var') && isvalid(h1), delete(h1);end
+h1 = plotSimMat( TruePsi.S )
 
 %% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
 %Demonstration of a Carrot Grating Task consisting of 
@@ -35,7 +49,7 @@ clc; clear all; close all;
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating';
+dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -69,7 +83,7 @@ weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 % Define if using first derivative of pos/orient
 use_vel = 1;
 [~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling';
+dataset_name = 'Rolling'; super_states = 0;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
@@ -132,8 +146,13 @@ for run=1:T
         logp_xn_given_zn = Gauss_logp_xn_given_zn(data_struct(jj).obs', Theta);
         [~,~, loglik_(jj,1)] = LogForwardBackward(logp_xn_given_zn, ChainStats_Run(run).initProb, ChainStats_Run(run).TransProb);
         
-        % Stack labels for state clustering metrics        
-        true_states = True_states{jj};
+        % Stack labels for state clustering metrics   
+        if super_states
+            true_states = TruePsi.s{jj}';
+        else
+            true_states = True_states{jj};
+        end
+        
         est_states  = ChainStats_Run(run).stateSeq(jj).z';
         true_states_all = [true_states_all; true_states];
         est_states_all  = [est_states_all; est_states];
@@ -189,8 +208,12 @@ for i=1:length(data_struct)
     est_states{i}  = BestChain.stateSeq(i).z;
     
     % Stack labels for state clustering metrics
-    true_states = True_states{jj};
-    true_states_all = [true_states_all; True_states{i}];
+    if super_states
+        true_states = TruePsi.s{i}';
+    else
+        true_states = True_states{i};
+    end
+    true_states_all = [true_states_all; true_states];
     est_states_all  = [est_states_all; est_states{i}'];
     
     % Plot Inferred Segments
@@ -228,7 +251,7 @@ for k=1:K_est
 end
 
 if exist('h2','var') && isvalid(h2), delete(h2);end
-h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
+h2 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);

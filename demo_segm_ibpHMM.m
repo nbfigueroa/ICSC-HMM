@@ -21,13 +21,13 @@
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [data, Data, True_states, True_theta] = genToyHMMData_Gaussian( N_TS, display ); 
-label_range = unique(True_states{1});
+super_states = 0;
 
 %% 2a) Toy 2D dataset, 4 Unique Emission models, 5 time-series
 clc; clear all; close all;
 [data, TruePsi, Data, True_states] = genToySeqData_Gaussian( 4, 2, 2, 500, 0.5 ); 
 dataset_name = '2D';
-label_range = unique(data.zTrueAll);
+super_states = 0;
 
 % Feat matrix F (binary 5 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
@@ -37,9 +37,9 @@ h0 = plotFeatMat( TruePsi.F);
 clc; clear all; close all;
 [data, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 3, 500, 0.5 );
 dataset_name = '2D Transformed'; 
-label_range = unique(TruePsi.sTrueAll);
+super_states = 1;
 
-%% Feat matrix F (binary 4 x 4 matrix )
+% Feat matrix F (binary 4 x 4 matrix )
 if exist('h0','var') && isvalid(h0), delete(h0);end
 h0 = plotFeatMat( TruePsi.F);
 
@@ -55,7 +55,7 @@ h1 = plotSimMat( TruePsi.S );
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; Data_ = Data;
+dataset_name = 'Grating'; Data_ = Data;  super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -89,7 +89,7 @@ weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 % Define if using first derivative of pos/orient
 use_vel = 1;
 [data, TruePsi, ~, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling';
+dataset_name = 'Rolling'; super_states = 0; 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
@@ -97,7 +97,7 @@ dataset_name = 'Rolling';
 %%% Define Settings for IBP-HMM %%%
 
 % IBP hyper-parametrs
-gamma = length(Data_);  % length(Data)
+gamma = length(Data);  % length(Data)
 alpha = 1;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
@@ -109,7 +109,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleC
          'doSampleFUnique', 1. 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 5; 
+T = 3; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -139,7 +139,11 @@ cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
 
-true_states_all = data.zTrueAll;
+if super_states
+    true_states_all = TruePsi.sTrueAll;
+else
+    true_states_all = data.zTrueAll;
+end
 
 for run=1:T    
     clear Psi
@@ -182,7 +186,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = 5;
+id = 1;
 bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'
@@ -206,7 +210,11 @@ for i=1:data.N
     est_states{i}  = bestPsi.Psi.stateSeq(i).z;
     
     % Stack labels for state clustering metrics
-    true_states_all = [true_states_all; True_states{i}];
+    if super_states
+        true_states_all = [true_states_all; TruePsi.s{i}'];
+    else
+        true_states_all = [true_states_all; True_states{i}];
+    end
     est_states_all  = [est_states_all; est_states{i}'];
     
     % Plot Inferred Segments
@@ -265,7 +273,7 @@ for k=1:K_est
 end
 
 if exist('h4','var') && isvalid(h4), delete(h4);end
-h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, label_range);
+h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 labels    = unique(est_states_all);

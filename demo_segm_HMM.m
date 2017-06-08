@@ -22,27 +22,35 @@
 clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
+label_range = unique(True_states{1});
+super_states = 0;
 
-
-%% 2a) Toy 2D dataset, 4 Unique Emission models, 5 time-series
+%% 2a) Toy 2D dataset, 4 Unique Emission models, max 5 time-series
 clc; clear all; close all;
-[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, 5, 500, 0.5 ); 
-ts = [1:length(Data)];
+M = 4; % Number of Time-Series
+[~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, M, 500, 0.5 ); 
+super_states = 0;
 
-%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, 5 time-series
+%% 2b) Toy 2D dataset, 2 Unique Emission models transformed, max 4 time-series
 clc; clear all; close all;
-[~, ~, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, 2, 500, 0.5 );
+M = 3; % Number of Time-Series
+[~, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, M, 500, 0.5 );
 dataset_name = '2D Transformed'; 
+super_states = 1;
+
+% Similarity matrix S (4 x 4 matrix)
+if exist('h1','var') && isvalid(h1), delete(h1);end
+h1 = plotSimMat( TruePsi.S );
 
 %% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
-% Demonstration of a Carrot Grating Task consisting of 
-% 12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
-% Dimensions:
-% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+%Demonstration of a Carrot Grating Task consisting of 
+%12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
+%Dimensions:
+%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'same'; full = 0;
 [~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating';
+dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -79,7 +87,7 @@ weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 % Define if using first derivative of pos/orient
 use_vel = 1;
 [~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling';
+dataset_name = 'Rolling'; super_states = 0;
 
 %% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
 % Demonstration of a Bimanual Peeling Task consisting of 
@@ -134,8 +142,7 @@ end
 use_vel = 1;
 
 [~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
-dataset_name = 'Peeling';
-
+dataset_name = 'Peeling'; super_states = 0;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%     Run E-M Model Selection for HMM with 10 runs in a range of K     %%
@@ -153,10 +160,12 @@ ts = [1:length(Data)];
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
 variation_info     = zeros(1,T);
+
 % Clustering Metric Arrays
 cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
+
 % Model Metric Arrays
 logliks        = zeros(length(ts),T);
 label_range    = [1:K];
@@ -177,7 +186,13 @@ for run=1:T
     
     for i=1:length(ts)
         X = Data{ts(i)};
-        true_states = True_states{ts(i)};
+        
+        if super_states
+            true_states = TruePsi.s{ts(i)}';
+        else
+            true_states = True_states{ts(i)};
+        end
+        
         logp_xn_given_zn = Gauss_logp_xn_given_zn(Data{ts(i)}, phi);
         [~,~, logliks(i,run)] = LogForwardBackward(logp_xn_given_zn, p_start, A);
         est_states_ = LogViterbiDecode(logp_xn_given_zn, p_start, A);                       

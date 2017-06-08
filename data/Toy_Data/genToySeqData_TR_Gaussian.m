@@ -208,7 +208,15 @@ labels = [1 2 2 1];
 plotGaussianEmissions2D(True_theta, plot_labels, title_name, labels);
 
 % Similarity matrix
-S = [1 0 0 1; 0 1 1 0; 0 1 1 0; 1 0 0 1];
+sigma = [];
+for i=1:True_theta.K
+    sigmas{i} = True_theta.Sigma(:,:,i);
+end
+
+tau = 10; 
+spcm = ComputeSPCMfunctionMatrix(sigmas, tau);  
+S = spcm(:,:,2);
+
 PsiTrue.S = S;
 
 
