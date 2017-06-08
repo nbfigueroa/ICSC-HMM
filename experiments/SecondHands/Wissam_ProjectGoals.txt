@@ -27,7 +27,7 @@ https://www.dropbox.com/sh/iqjotpciyara6we/AAAzRf5687V9c4ksK30GAmKva?dl=0
 	(For this you can search in the mocap toolbox, there is a function that converts skel + channels to xyz coordinates)
 
 -->	IDEA3: XYZ Coords + Virtual Force Signal
-	Compute contacts from xyz coords and 
+	Compute contacts from xyz coords and 3D point clouds
 
 -->	IDEA4: Use PCA + GPLVM on Joint Data
 	http://www.iai.uni-bonn.de/~gall/projects/stochGPLVM/stochGPLVM.html
