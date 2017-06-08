@@ -10,15 +10,13 @@ end
 M = 10;
 begin_time = t(1); 
 xs = 1:N;    
-ys = linspace(min(min(X(1:end,:))), max(max(X(1:end-1,:))),M);
+ys = linspace(min(min(X(1:end-2,:))), max(max(X(1:end-2,:))),M);
 
 segment_labels = repmat(X(D,:), M, 1) + max(label_range_s);
 cluster_labels = repmat(X(D-1,:), M/2, 1);
 segment_labels(ceil(M/2)+1:end,:) = cluster_labels;
 
 imagesc( xs, ys, segment_labels, [1 max(label_range_z)+max(label_range_s)] ); hold on;
-
-
 
 level = 20; n = ceil(level/2);
 cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';

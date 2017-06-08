@@ -106,7 +106,7 @@ modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kap
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
-         'doSampleFUnique', 1. 'doSplitMerge', 0}; 
+         'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
 T = 3; 
@@ -117,7 +117,7 @@ jobID = ceil(rand*1000);
 for run=1:T       
     % Run Gibbs Sampler for Niter once.
     clear CH    
-    % Start out with just one feature for all objects
+    % Start out with random number of features
     initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
@@ -186,7 +186,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = 1;
+id = 3;
 bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'

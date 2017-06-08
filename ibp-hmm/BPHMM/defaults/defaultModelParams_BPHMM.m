@@ -28,8 +28,10 @@ model.hmmM.prior.b_kappa = 0.01;
 % ================================================== BETA PROCESS MODEL
 % ------------------------------- GAMMA: Mass param for IBP
 model.bpM.gamma = 5;
-model.bpM.prior.a_mass = 0.01;
-model.bpM.prior.b_mass = 0.01;
+% model.bpM.prior.a_mass = 0.01;
+% model.bpM.prior.b_mass = 0.01;
+model.bpM.prior.a_mass = 0.5;
+model.bpM.prior.b_mass = 0.5;
 
 % ------------------------------- c0   : Concentration param for IBP
 model.bpM.c = 1; 

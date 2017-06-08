@@ -53,7 +53,8 @@ h1 = plotSimMat( TruePsi.S );
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'same'; full = 0;
+data_path = './test-data/'; display = 1; type = 'same'; full = 0; 
+rf = 'same'; % Define if you want data recorded from the same reference frame or 'diff'
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating'; Data_ = Data;  super_states = 0;
 
@@ -84,7 +85,7 @@ data_path = './test-data/'; display = 1; type = 'proc'; full = 0;
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
+weights = [7*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
@@ -105,11 +106,11 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
-         'doSampleFUnique', 1. 'doSplitMerge', 0}; 
+algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+         'doSampleFUnique', 1, 'doSplitMerge', 0} 
 
 % Number of Repetitions
-T = 3; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -127,7 +128,28 @@ end
 if exist('h1','var') && isvalid(h1), delete(h1);end
 [h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
-%%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
+% Visualize Hyper-parameter evolution
+figure('Color',[1 1 1])
+
+for run=1:T       
+    
+    Iterations = Sampler_Stats(run).CH.iters.Psi;
+    iters = length(Iterations);
+    Gammas = zeros(1,iters);
+    for iter =1:iters
+        Gammas(1,iter) = Sampler_Stats(run).CH.Psi(iter).gamma;
+    end
+    fprintf('E(gamma)= %2.2f var(gamma)= %2.2f\n',[mean(Gammas) var(Gammas)])
+    
+    % Plot joint traces
+    plot(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
+    grid on
+end
+xlabel('MCMC Iterations', 'Interpreter','LaTex');
+ylabel('$\gamma$', 'Interpreter','LaTex');
+title('$\gamma$ trace','Interpreter','LaTex')
+
+%% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -169,8 +191,7 @@ end
 fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
-%% Visualize Run Statisics
-% Get 'Best Psi' from all runs
+% Visualize Run Statisics
 log_probs = zeros(1,T);
 for ii=1:T 
     mean_likelihoods(ii) = mean(Best_Psi(ii).logPr); 
@@ -183,51 +204,63 @@ end
 id_mean
 id_std
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%    Run Collapsed SPCM-CRP Sampler on Theta T times for good statistics          %%
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Run Collapsed SPCM-CRP Sampler on Theta        %%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Choose best IBP-HMM run
-id = 2;
+id = 9;
 bestPsi = Best_Psi(id);
-K = length(bestPsi.Psi.theta);
 
+% Extract info from 'Best Psi'
+K_est = bestPsi.nFeats;
+% true_labels = [1 2 2 1];
 
 % Extract Sigmas
 sigmas = [];
-for k=1:K
+for k=1:K_est
    invSigma = bestPsi.Psi.theta(k).invSigma; 
    sigmas{k} = invSigma \ eye(size(invSigma,1));
 end
 
 % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
-% %%%%%%%%%%%%%%%%%%%%% Set Hyper-parameter %%%%%%%%%%%%%%%%%%%%%%%%
-% Tolerance for SPCM decay function 
-tau = 1; 
-% %%%%%% Compute Confusion Matrix of Similarities %%%%%%%%%%%%%%%%%%
-spcm = ComputeSPCMfunctionMatrix(sigmas, tau);  
-S = spcm(:,:,2);
-%%%%%%% Visualize Bounded Similarity Confusion Matrix %%%%%%%%%%%%%%
-if exist('h0','var') && isvalid(h0), delete(h0); end
-title_str = 'Bounded Similarity Function (B-SPCM) Matrix';
-h0 = plotSimilarityConfMatrix(S, title_str);
-change
+clear clust_options
+clust_options.tau           = 1; % Tolerance Parameter for SPCM-CRP
+clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
+clust_options.T             = 500;     % Sampler Iterations 
+clust_options.alpha         = 1;       % Concentration parameter
+clust_options.plot_sim      = 1;
 
-%% Plot Segmentation with Chosen Run
-id = 1;
-bestPsi = Best_Psi(id);
+% Inference of SPCM-CRP Mixture Model
+[Psi Psi_Stats est_labels]  = run_SPCMCRP_mm(sigmas, clust_options);
 
+%%%%%%%% Visualize Collapsed Gibbs Sampler Stats and Cluster Metrics %%%%%%%%%%%%%%
+if exist('h1b','var') && isvalid(h1b), delete(h1b);end
+options = [];
+options.dataset      = dataset_name;
+options.true_labels  = unique(true_states_all); 
+options.Psi          = Psi;
+[ h1b ] = plotSamplerStats( Psi_Stats, options );
+
+
+% Plot Segmentation with Chosen Run
 % Extract info from 'Best Psi'
 K_est = bestPsi.nFeats;
+
+% Generate transform-invariant state sequences
 est_states_all = [];
-for ii=1:data.N; est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; end
-label_range = unique(est_states_all);
-est_states = [];
+for ii=1:data.N; 
+    est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; 
+end
+label_range_z = unique(est_states_all);
+label_range_s = unique(est_labels);
 
 % Plot Segmentation
 figure('Color',[1 1 1])
+est_states = [];
+est_clust_states = [];
 true_states_all   = [];
 est_states_all    = [];
+est_clust_states_all    = [];
 
 for i=1:data.N
     
@@ -236,6 +269,12 @@ for i=1:data.N
     
     % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
     est_states{i}  = bestPsi.Psi.stateSeq(i).z;
+    clear s z
+    s = est_states{i};
+    for k=1:length(est_labels)
+        z(s==k) = est_labels(k);
+    end    
+    est_clust_states{i} = z;
     
     % Stack labels for state clustering metrics
     if super_states
@@ -244,11 +283,12 @@ for i=1:data.N
         true_states_all = [true_states_all; True_states{i}];
     end
     est_states_all  = [est_states_all; est_states{i}'];
+    est_clust_states_all  = [est_clust_states_all; est_clust_states{i}'];
     
     % Plot Inferred Segments
     subplot(data.N,1,i);
-    data_labeled = [X; est_states{i}];
-    plotLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), [],label_range)
+    data_labeled = [X; est_clust_states{i}; est_states{i}];
+    plotDoubleLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), [], label_range_z, label_range_s);    
     
 end
 
@@ -264,6 +304,18 @@ inferred_states_   = length(unique(est_states_all));
 fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
     global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
 
+
+% Segmentation Metrics per run
+[relabeled_est_states_all, hamming_distance_,~,~] = mapSequence2Truth(true_states_all,est_clust_states_all);
+[~,global_consistency_, variation_info_] = compare_segmentations(true_states_all,est_clust_states_all);
+inferred_states_   = length(unique(est_clust_states_all));
+
+% Cluster Metrics per run
+[cluster_purity_ cluster_NMI_ cluster_F_] = cluster_metrics(true_states_all, relabeled_est_states_all);
+
+% Overall Stats for HMM segmentation and state clustering
+fprintf('*** IBP-HMM + SPCM_CRP Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
+    global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
 
 % Plot Estimated Feature Matrix
 if exist('h2','var') && isvalid(h2), delete(h2);end
@@ -301,18 +353,24 @@ for k=1:K_est
 end
 
 if exist('h4','var') && isvalid(h4), delete(h4);end
-h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
+h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
-labels    = unique(est_states_all);
-titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 
 % Plot Segmentated 3D Trajectories
+labels    = unique(est_states_all);
+titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
-titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
-% Plot Segmentated 3D Trajectories
+% Plot Clustered/Segmentated 3D Trajectories
+labels    = unique(est_clust_states_all);
+titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
+h6 = plotLabeled3DTrajectories(Data_, est_clust_states, titlename, labels);
+
+% Plot Segmentated 3D Trajectories
+titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
+if exist('h7','var') && isvalid(h7), delete(h7);end
+h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
 

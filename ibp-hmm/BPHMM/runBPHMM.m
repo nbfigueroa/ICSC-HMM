@@ -86,6 +86,8 @@ if outParams.doPrintHeaderInfo
     fprintf( '\t           HMM trans param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.alpha, algParams.HMM.doSampleHypers );
     fprintf( '\t    HMM trans sticky param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.kappa, algParams.HMM.doSampleHypers );
     fprintf( '\t        HMM emission param = %9s  \n', Psi.ThetaM.getParamDescr() );
+    fprintf( '\t        IBP hyper-priors:  \n' );
+    fprintf( '\t        a_gamma  = %2.2f  b_gamma  = %2.2f \n',  Psi.bpM.prior.a_mass, Psi.bpM.prior.b_mass);
 end
 
 
