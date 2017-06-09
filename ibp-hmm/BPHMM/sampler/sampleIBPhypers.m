@@ -1,4 +1,4 @@
-function [Psi, Stats] = sampleIBPhypers(Psi, algParams)
+function [Psi, Stats] = sampleIBPhypers(Psi, algParams, varargin)
 % Resample two hyperparams of the Indian Buffet Process (mass & conc)
 %   given the observed feature matrix F and Gamma priors on these params
 % Procedes by conditional updates to one given the other
@@ -23,6 +23,7 @@ function [Psi, Stats] = sampleIBPhypers(Psi, algParams)
 % =============================== UNPACK
 F = Psi.F;
 gamma0 = Psi.bpM.gamma;
+
 a_gamma = Psi.bpM.prior.a_mass;
 b_gamma = Psi.bpM.prior.b_mass;
 

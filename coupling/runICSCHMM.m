@@ -1,4 +1,4 @@
-function [ChainHist] = runBPHMM( dataParams, modelParams, outParams, algParams, initParams, saveDir )
+function [ChainHist] = runICSCHMM( dataParams, modelParams, outParams, algParams, initParams, saveDir )
 % runBPHMM
 % User-facing entry function for configuring and executing MCMC simulation 
 %   for posterior inference of a Beta Process HMM (BP-HMM) model.
@@ -73,6 +73,10 @@ RandStream.setGlobalStream( RandStream( 'twister', 'Seed', SEED )   );
 % Lightspeed toolbox seed (requires 3 integers)
 randomseed( [SEED 1 2] );
 
+
+fprintf('******** RUNNING COUPLED MODEL -- IBP Coupled SPCM-CRP HMM ********\n');
+
+
 % ================================================= INITIALIZE MODEL
 % Note: InitFunc will often use own random seed (reset internally only)
 %   so that different sampling algs can be compared on *same* init state
@@ -91,8 +95,6 @@ end
 
 
 % ================================================= RUN INFERENCE
-if isfield( algParams, 'TimeLimit' ) && ~isempty( algParams.TimeLimit )
-  ChainHist = RunTimedMCMCSimForBPHMM( data, Psi, algParams, outParams, model);
-else
-  ChainHist = RunMCMCSimForBPHMM( data, Psi, algParams, outParams);
+ChainHist = RunMCMCSimForICSCHMM( data, Psi, algParams, outParams);
+
 end

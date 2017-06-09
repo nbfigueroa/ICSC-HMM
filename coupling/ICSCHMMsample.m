@@ -1,4 +1,4 @@
-function [Psi, Stats] = BPHMMsample( Psi, data, algP)
+function [Psi, Stats] = ICSCHMMsample( Psi, data, algP)
 % Perform ONE iteration of sampling on the BPHMM model,
 %  aggregating stats about sampler performance (accept rates) along the way
 % Sweeps through the following MCMC moves:
@@ -29,6 +29,8 @@ if algP.doAnneal ~= 0
        Psi.invTemp = 0;
    end
 end
+
+old_Z = Psi.Z;
 
 if algP.doSampleFShared
     [Psi, Stats.FMH] = sampleSharedFeats( Psi, data );
@@ -86,12 +88,58 @@ if algP.doSampleTheta
     Psi.ThetaM = Psi.ThetaM.sampleAllTheta( data, Psi.stateSeq );    
 end
 
+% Sampling feature clusters from current Theta estimate
+K_est = Psi.ThetaM.K;
+if K_est >= 2
+    % Extract Sigmas
+    sigmas = [];
+    for k=1:K_est
+        invSigma = Psi.ThetaM.theta(k).invSigma;
+        sigmas{k} = invSigma \ eye(size(invSigma,1));
+    end
+    
+    % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
+    clust_options.tau           = 1;      % Tolerance Parameter for SPCM-CRP
+    clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG    
+    clust_options.alpha         = 1;       % Concentration parameter
+    clust_options.plot_sim      = 0;
+    clust_options.verbose       = 0;
+    
+    if length(old_Z) ~= K_est
+        clust_options.T             = 10;      % Sampler Iterations
+        clust_options.init_clust    = 1:K_est;
+    else
+        clust_options.T             = 2;      % Sampler Iterations
+        clust_options.init_clust    = old_Z;
+    end
+    
+    
+    % Inference of SPCM-CRP Mixture Model
+    [Clust_Psi, ~, est_labels]  = run_SPCMCRP_mm(sigmas, clust_options);
+    K_z = length(unique(est_labels));
+else
+    K_z = K_est;
+    est_labels = 1:K_est;
+end
+
+% Compute Ratios for Hyper-parameters
+Psi.Z   = est_labels;
+Psi.K_z = K_z;
+M = length(Psi.stateSeq);
+K_ratio = K_est/(K_z*M);
+Psi.bpM.prior.a_mass = 0.5*K_ratio;
+Psi.bpM.prior.b_mass = 0.5*K_ratio;
+
+% Re-sample IBP Hyper-parameters
+if algP.BP.doSampleMass || algP.BP.doSampleConc
+    [Psi, Stats.BPconc] = sampleIBPhypers(Psi, algP);
+end
+
+% Re-sample HMM Hyper-parameters
 if algP.HMM.doSampleHypers
     [Psi, Stats.HMMalpha, Stats.HMMkappa] = sampleHMMhypers( Psi, algP );
 end
 
-if algP.BP.doSampleMass || algP.BP.doSampleConc
-    [Psi, Stats.BPconc] = sampleIBPhypers(Psi, algP);
-end
+
 
 end % main function

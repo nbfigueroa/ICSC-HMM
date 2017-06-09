@@ -18,7 +18,7 @@
 %  Markov Chain state variables saved at preset frequency to hard drive
 %     at filepath location specified in outParams.saveDir
 
-function [ChainHist] = RunMCMCSimForBPHMM( data, Psi, algParams, outParams, model, varargin )
+function [ChainHist] = RunMCMCSimForICSCHMM( data, Psi, algParams, outParams, model )
 tic;
 
 if isfield( Psi, 'F' )
@@ -40,11 +40,12 @@ else
 end
 
 fprintf( 'Running MCMC Sampler %d : %d ... \n', outParams.jobID, outParams.taskID );
+Psi.Z = 1:size(Psi.F,2);
 for n=n+1:algParams.Niter
     Psi.iter = n;
-
+    
     % Perform 1 iteration of MCMC, moving to next Markov state!
-    [Psi, Stats] = BPHMMsample( Psi, data, algParams);
+    [Psi, Stats] = ICSCHMMsample( Psi, data, algParams);
     
     % Diagnose convergence by calculating joint log pr. of all sampled vars
     if n == 1 || rem(n, outParams.logPrEvery)==0
@@ -63,11 +64,7 @@ for n=n+1:algParams.Niter
     end
     
     if n == 1 || rem(n, outParams.printEvery)==0        
-        if ~isempty(varargin)
             printMCMCSummary_ICSCHMM( n, Psi, logPr, algParams);            
-        else
-            printMCMCSummary_BPHMM( n, Psi, logPr, algParams);
-        end
     end
     
     
