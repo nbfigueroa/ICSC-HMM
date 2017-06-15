@@ -31,10 +31,13 @@ Before trying out anything, you must first compile the MEX functions for fast HM
 You're ready! Now run demos..
 
 ---
-### Illustrative Example
+### Motivating Example
 
 ...
 
+place nice images from Figure 2 to describe the problem.
+
+### Illustrative Example and Demos
 place nice images from Section 4 to describe the problem.
 
 ```
