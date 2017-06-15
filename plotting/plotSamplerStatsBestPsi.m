@@ -9,7 +9,7 @@ Best_Psi = [];
 
 % Plot Joint Log-prob
 h = figure('Color',[1 1 1]);
-subplot(2,1,1)
+subplot(3,1,1)
 for i=1:T
     joint_logs = zeros(1,length(Iterations));
     for ii=1:length(Iterations); joint_logs(1,ii) = Sampler_Stats(i).CH.logPr(ii).all;end
@@ -26,24 +26,44 @@ for i=1:T
     semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;
 end
 xlim([1 Iterations(end)])
-xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
+xlabel('MCMC Iterations','Interpreter','LaTex','Fontsize',16); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
 title ({sprintf('Trace of Joint Probabilities $p(F, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
 grid on
 
 Iterations_feat = Sampler_Stats(1).CH.iters.Psi;
-subplot(2,1,2)
+subplot(3,1,2)
 for i=1:T
     nFeats = zeros(1,length(Iterations_feat));
     for ii=1:length(Iterations_feat); nFeats(1,ii) = length(Sampler_Stats(i).CH.Psi(ii).theta);end
     
     stairs(Iterations_feat,nFeats, 'LineWidth',2); hold on;
     set(gca, 'XScale', 'log')
-    xlim([1 Iterations_feat(end)])
 end
-xlim([1 Iterations_feat(end)])
-xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('$K$','Interpreter','LaTex','Fontsize',20)
+xlim([1 Iterations(end)])
+xlabel('MCMC Iterations','Interpreter','LaTex','Fontsize',16); ylabel('$K$','Interpreter','LaTex','Fontsize',20)
 title ({sprintf('Estimated features (shared states) for %d runs K: %3.1f (%3.1f) ',[T mean(estimated_feats) std(estimated_feats)])}, 'Interpreter','LaTex','Fontsize',20)
 grid on
+
+subplot(3,1,3)
+% figure('Color',[1 1 1])
+for run=1:T       
+    
+    Iterations = Sampler_Stats(run).CH.iters.Psi;
+    iters = length(Iterations);
+    Gammas = zeros(1,iters);
+    for iter =1:iters
+        Gammas(1,iter) = Sampler_Stats(run).CH.Psi(iter).gamma;
+    end
+    fprintf('E(gamma)= %2.2f var(gamma)= %2.2f\n',[mean(Gammas) var(Gammas)])
+    
+    % Plot joint traces
+    semilogx(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
+    grid on
+end
+xlim([1 Iterations_feat(end)])
+xlabel('MCMC Iterations', 'Interpreter','LaTex','Fontsize',16);
+ylabel('$\gamma$', 'Interpreter','LaTex','Fontsize',20);
+title('$\gamma$ trace','Interpreter','LaTex','Fontsize',20)
 
 
 end

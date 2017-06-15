@@ -105,11 +105,11 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 5; 
+T = 3; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -123,30 +123,9 @@ for run=1:T
     Sampler_Stats(run).CH = CH;
 end
 
-%%%%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
+%% %%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
 if exist('h1','var') && isvalid(h1), delete(h1);end
 [h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
-
-% Visualize Hyper-parameter evolution
-figure('Color',[1 1 1])
-
-for run=1:T       
-    
-    Iterations = Sampler_Stats(run).CH.iters.Psi;
-    iters = length(Iterations);
-    Gammas = zeros(1,iters);
-    for iter =1:iters
-        Gammas(1,iter) = Sampler_Stats(run).CH.Psi(iter).gamma;
-    end
-    fprintf('E(gamma)= %2.2f var(gamma)= %2.2f\n',[mean(Gammas) var(Gammas)])
-    
-    % Plot joint traces
-    plot(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
-    grid on
-end
-xlabel('MCMC Iterations', 'Interpreter','LaTex');
-ylabel('$\gamma$', 'Interpreter','LaTex');
-title('$\gamma$ trace','Interpreter','LaTex')
 
 %% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 % Segmentation Metric Arrays

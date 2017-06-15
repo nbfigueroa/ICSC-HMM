@@ -94,7 +94,7 @@ for nn=1:algParams.HMM.Niter
     
     if rand < rho
         kappa0 = kappaP;
-        Kstats.nAccept = Kstats.nAccept + 1;pride
+        Kstats.nAccept = Kstats.nAccept + 1;
     end
     % otherwise, just keep kappa0 to current value
     

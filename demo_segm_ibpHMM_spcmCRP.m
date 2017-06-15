@@ -124,30 +124,9 @@ for run=1:T
     Sampler_Stats(run).CH = CH;
 end
 
-%%%%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
+%% %%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
 if exist('h1','var') && isvalid(h1), delete(h1);end
 [h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
-
-% Visualize Hyper-parameter evolution
-figure('Color',[1 1 1])
-
-for run=1:T       
-    
-    Iterations = Sampler_Stats(run).CH.iters.Psi;
-    iters = length(Iterations);
-    Gammas = zeros(1,iters);
-    for iter =1:iters
-        Gammas(1,iter) = Sampler_Stats(run).CH.Psi(iter).gamma;
-    end
-    fprintf('E(gamma)= %2.2f var(gamma)= %2.2f\n',[mean(Gammas) var(Gammas)])
-    
-    % Plot joint traces
-    plot(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
-    grid on
-end
-xlabel('MCMC Iterations', 'Interpreter','LaTex');
-ylabel('$\gamma$', 'Interpreter','LaTex');
-title('$\gamma$ trace','Interpreter','LaTex')
 
 %% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 % Segmentation Metric Arrays
@@ -208,7 +187,7 @@ id_std
 %%      Run Collapsed SPCM-CRP Sampler on Theta        %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Choose best IBP-HMM run
-id = 2;
+id = 1;
 bestPsi = Best_Psi(id);
 
 % Extract info from 'Best Psi'
@@ -223,13 +202,13 @@ end
 
 % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
 clear clust_options
-clust_options.tau           = 5; % Tolerance Parameter for SPCM-CRP
+clust_options.tau           = 1; % Tolerance Parameter for SPCM-CRP
 clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
 clust_options.T             = 100;     % Sampler Iterations 
 clust_options.alpha         = 1;       % Concentration parameter
 clust_options.plot_sim      = 0;
 clust_options.init_clust    = 1:length(sigmas);
-clust_options.verbose       = 0;
+clust_options.verbose       = 1;
 
 % Inference of SPCM-CRP Mixture Model
 [Psi Psi_Stats est_labels]  = run_SPCMCRP_mm(sigmas, clust_options);

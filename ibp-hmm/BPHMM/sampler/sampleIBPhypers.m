@@ -42,10 +42,9 @@ Stats.nTotal   = algParams.BP.Niter;
 
 for iter = 1:algParams.BP.Niter
     
+    Harmonic_Cur = sum( C0 ./ ( C0 - 1 + (1:nObj) )  );
     if algParams.BP.doSampleMass
         % ------------------------------------------------ Update gamma0 | c0
-        Harmonic_Cur = sum( C0 ./ ( C0 - 1 + (1:nObj) )  );
-
         a_POST = a_gamma + Kplus;
         b_POST = b_gamma + Harmonic_Cur;
         
