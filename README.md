@@ -35,6 +35,8 @@ You're ready! Now run demos..
 
 ...
 
+place nice images from Section 4 to describe the problem.
+
 ```
 *** IBP-HMM Results*** 
  Optimal States: 3.667 (0.577) 
