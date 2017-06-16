@@ -40,7 +40,8 @@ else
 end
 
 fprintf( 'Running MCMC Sampler %d : %d ... \n', outParams.jobID, outParams.taskID );
-Psi.Z = 1:size(Psi.F,2);
+Psi.Z = 1:Psi.ThetaM.K;
+
 for n=n+1:algParams.Niter
     Psi.iter = n;
     
@@ -55,7 +56,7 @@ for n=n+1:algParams.Niter
     
     %Record current sampler state
     %  NB: internally only records at preset frequency
-    ChainHist = recordMCMCHistory_BPHMM( n, outParams, ChainHist, Psi, logPr, Stats );
+    ChainHist = recordMCMCHistory_ICSCHMM( n, outParams, ChainHist, Psi, logPr, Stats );
     
     doSaveToDisk = n==1 || rem(n, outParams.saveEvery)==0 || n == algParams.Niter;
     if doSaveToDisk

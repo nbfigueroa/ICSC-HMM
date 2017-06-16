@@ -106,7 +106,7 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions

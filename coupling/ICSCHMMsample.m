@@ -30,8 +30,6 @@ if algP.doAnneal ~= 0
    end
 end
 
-old_Z = Psi.Z;
-
 if algP.doSampleFShared
     [Psi, Stats.FMH] = sampleSharedFeats( Psi, data );
 end
@@ -89,12 +87,12 @@ if algP.doSampleTheta
 end
 
 % Sampling feature clusters from current Theta estimate
-[Psi] = sampleFeatClusters(Psi, old_Z);
+[Psi] = sampleFeatClusters(Psi);
 
 % Compute Ratios for IBP Hyper-parameters
 M = length(Psi.stateSeq);
 K_ratio = Psi.ThetaM.K/(Psi.K_z*M);
-coeff = 0.5;
+coeff = 1;
 
 Psi.bpM.prior.a_mass = coeff*K_ratio;
 Psi.bpM.prior.b_mass = coeff*K_ratio;

@@ -1,5 +1,5 @@
-function [Psi] = sampleFeatClusters(Psi, old_Z)
-
+function [Psi] = sampleFeatClusters(Psi)
+old_Z = Psi.Z;
 K_est = Psi.ThetaM.K;
 if K_est >= 2
     % Extract Sigmas

@@ -98,18 +98,19 @@ dataset_name = 'Rolling'; super_states = 0;
 %%% Define Settings for IBP-HMM %%%
 
 % IBP hyper-parametrs
+gamma = length(Data);  % Just to initialize
 alpha = 1;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
-modelP = {'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
+modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass',1, 'BP.doSampleConc', 0, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 3; 
+T = 1; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];

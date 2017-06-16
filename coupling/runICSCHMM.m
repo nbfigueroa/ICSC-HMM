@@ -81,6 +81,8 @@ fprintf('******** RUNNING COUPLED MODEL -- IBP Coupled SPCM-CRP HMM ********\n')
 % Note: InitFunc will often use own random seed (reset internally only)
 %   so that different sampling algs can be compared on *same* init state
 [Psi, algParams, outParams] = initParams.InitFunc( data, model, initParams, algParams, outParams );
+Psi.Z   = Psi.ThetaM.K;
+Psi.K_z = length(unique(Psi.Z));
 
 if outParams.doPrintHeaderInfo
     fprintf( '\t Emission Params : sampled from posterior given init stateSeq \n' );
@@ -90,6 +92,8 @@ if outParams.doPrintHeaderInfo
     fprintf( '\t           HMM trans param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.alpha, algParams.HMM.doSampleHypers );
     fprintf( '\t    HMM trans sticky param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.kappa, algParams.HMM.doSampleHypers );
     fprintf( '\t        HMM emission param = %9s  \n', Psi.ThetaM.getParamDescr() );
+    fprintf( '\t        Transform-Dependent Features (K_theta) = %d  \n',  Psi.ThetaM.K);
+    fprintf( '\t        Transform-Invariant Features (K_phi)   = %d  \n',  Psi.K_z);
 end
 
 
