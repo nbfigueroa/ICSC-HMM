@@ -17,10 +17,10 @@ if K_est >= 2
     clust_options.verbose       = 0;
     
     if length(old_Z) ~= K_est
-        clust_options.T             = 10;      % Sampler Iterations
-        clust_options.init_clust    = 1:K_est;
+        clust_options.T             = 10;       % Sampler Iterations
+        clust_options.init_clust    = 1:K_est;       
     else
-        clust_options.T             = 2;      % Sampler Iterations
+        clust_options.T             = 5;        % Sampler Iterations
         clust_options.init_clust    = old_Z;
     end
     
@@ -33,8 +33,8 @@ else
     est_labels = 1:K_est;
 end
 
-Psi.Z   = est_labels;
-Psi.K_z = K_z;
-
+Psi.Z        = est_labels;
+Psi.K_z      = K_z;
+Psi.Z_logPrb = Clust_Psi.MaxLogProb;
 
 end

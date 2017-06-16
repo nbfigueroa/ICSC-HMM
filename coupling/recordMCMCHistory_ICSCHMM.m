@@ -3,8 +3,10 @@ function ChainHist = recordMCMCHistory_ICSCHMM( n, outParams, ChainHist, Psi, lo
 
 % -------------------------------------------------- update logPr trace
 if n == 1 || rem( n, outParams.logPrEvery ) == 0
+    logPr
     if isfield( ChainHist, 'logPr' )
         dC = length( ChainHist.logPr ) + 1;
+        dC
         ChainHist.logPr(dC) = logPr;
     else
         ChainHist = struct();

@@ -81,7 +81,7 @@ fprintf('******** RUNNING COUPLED MODEL -- IBP Coupled SPCM-CRP HMM ********\n')
 % Note: InitFunc will often use own random seed (reset internally only)
 %   so that different sampling algs can be compared on *same* init state
 [Psi, algParams, outParams] = initParams.InitFunc( data, model, initParams, algParams, outParams );
-Psi.Z   = Psi.ThetaM.K;
+Psi.Z   = 1:Psi.ThetaM.K;
 Psi.K_z = length(unique(Psi.Z));
 
 if outParams.doPrintHeaderInfo
