@@ -105,7 +105,7 @@ hdp_options.saveDir = './hdp-Results';
 %%% Create data structure of multiple time-series for HDP-HMM sampler %%%
 clear data_struct 
 for ii=1:length(Data)
-    data_struct(ii).obs = Data{ii}';
+    data_struct(ii).obs = Data{ii}';    
     % Set true_labels to visualize the sampler evolution
     % data_struct(ii).true_labels = True_states{ii}';
 end
@@ -118,6 +118,7 @@ hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
 variation_info     = zeros(1,T);
 inferred_states    = zeros(1,T);
+
 % Clustering Metric Arrays
 cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);

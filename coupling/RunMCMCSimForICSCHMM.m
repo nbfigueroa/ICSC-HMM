@@ -52,7 +52,7 @@ for n=n+1:algParams.Niter
     if n == 1 || rem(n, outParams.logPrEvery)==0
         % NB: not passing "data" as arg means Psi stores all X suff stats
         logPr = calcJointLogPr_BPHMMState( Psi );
-        logPr.Z = Psi.Z_logPrb; 
+%         logPr.Z = Psi.Z_logPrb; 
     end
     
     %Record current sampler state

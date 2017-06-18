@@ -92,7 +92,7 @@ end
 % Compute Ratios for IBP Hyper-parameters
 M = length(Psi.stateSeq);
 K_ratio = Psi.ThetaM.K/(Psi.K_z*M);
-coeff = 1;
+coeff = 0.5;
 
 Psi.bpM.prior.a_mass = coeff*K_ratio;
 Psi.bpM.prior.b_mass = coeff*K_ratio;
