@@ -124,53 +124,22 @@ for run=1:T
     Sampler_Stats(run).CH = CH;
 end
 
-%% %%%%%%%% Visualize Sampler Convergence and Best Psi/run %%%%%%%%%%
-if exist('h1','var') && isvalid(h1), delete(h1);end
-[h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
+%% %%%%%%%% Visualize Sampler Convergence/Metrics and extract Best Psi/run %%%%%%%%%%
+if exist('h1','var')  && isvalid(h1),  delete(h1);end
+if exist('h1b','var') && isvalid(h1b), delete(h1b);end
+[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
-%% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
-% Segmentation Metric Arrays
-hamming_distance   = zeros(1,T);
-global_consistency = zeros(1,T);
-variation_info     = zeros(1,T);
-inferred_states    = zeros(1,T);
-
-% Clustering Metric Arrays
-cluster_purity = zeros(1,T);
-cluster_NMI    = zeros(1,T);
-cluster_F      = zeros(1,T);
-
-if super_states
+%%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
+if isfield(TruePsi, 'sTrueAll')
     true_states_all = TruePsi.sTrueAll;
 else
     true_states_all = data.zTrueAll;
 end
 
-for run=1:T    
-    clear Psi
-    est_states_all = [];
-    
-    % Extract Estimated States for all sequences
-    Psi = Best_Psi(run).Psi;
-    for j=1:data.N
-        est_states_all = [est_states_all Best_Psi(run).Psi.stateSeq(j).z];
-    end
-    
-     % Segmentation Metrics per run
-    [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
-    [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
-    inferred_states(run)   = length(unique(est_states_all));
-    
-    % Cluster Metrics per run
-    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
-    
-end
+% Compute metrics for ICSC-HMM
+results = computeICSCHMMmetrics(true_states_all, Best_Psi);
 
-% Overall Stats for HMM segmentation and state clustering
-fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) mean(hamming_distance) std(hamming_distance)  ...
-    mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
-
-% Visualize Run Statisics
+%% Visualize Run Statisics
 log_probs = zeros(1,T);
 for ii=1:T 
     mean_likelihoods(ii) = mean(Best_Psi(ii).logPr); 

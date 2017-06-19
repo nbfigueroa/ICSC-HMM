@@ -103,11 +103,11 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',0,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers', 0,'BP.doSampleMass', 0, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 3; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -122,8 +122,9 @@ for run=1:T
 end
 
 %% %%%%%%%% Visualize Sampler Convergence/Metrics and extract Best Psi/run %%%%%%%%%%
-if exist('h1','var') && isvalid(h1), delete(h1);end
-[h1, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
+if exist('h1','var')  && isvalid(h1),  delete(h1);end
+if exist('h1b','var') && isvalid(h1b), delete(h1b);end
+[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
 %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')

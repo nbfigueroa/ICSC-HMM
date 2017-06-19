@@ -23,12 +23,14 @@ TransM   = Psi.TransM;
 % Hyperparameters for prior on kappa:
 a_kappa = TransM.prior.a_kappa;
 b_kappa = TransM.prior.b_kappa;
+
 % Variance of gamma proposal:
 var_kappa = algParams.HMM.var_kappa;
 
 % Hyperparameters for prior on alpha:
 a_alpha = TransM.prior.a_alpha;
 b_alpha = TransM.prior.b_alpha;
+
 % Variance of gamma proposal:
 var_alpha = algParams.HMM.var_alpha;
 

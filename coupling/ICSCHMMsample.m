@@ -89,10 +89,10 @@ end
 % Sampling feature clusters from current Theta estimate
 [Psi] = sampleFeatClusters(Psi);
 
-% Compute Ratios for IBP Hyper-parameters
+%%%% Compute Ratios for IBP Hyper-parameters %%%%
 M = length(Psi.stateSeq);
 K_ratio = Psi.ThetaM.K/(Psi.K_z*M);
-coeff = 0.5;
+coeff = 0.2;
 
 Psi.bpM.prior.a_mass = coeff*K_ratio;
 Psi.bpM.prior.b_mass = coeff*K_ratio;
@@ -102,8 +102,21 @@ if algP.BP.doSampleMass || algP.BP.doSampleConc
     [Psi, Stats.BPconc] = sampleIBPhypers(Psi, algP);
 end
 
-% Compute Ratios for HMM Hyper-parameters
-% ...
+%%%% Compute Ratios for HMM Hyper-parameters %%%%
+
+% Hyperparameters for prior on alpha:
+a_alpha = Psi.TransM.prior.a_alpha;
+b_alpha = Psi.TransM.prior.b_alpha;
+
+% Variance of gamma proposal:
+var_alpha = algP.HMM.var_alpha;
+
+% Hyperparameters for prior on kappa:
+a_kappa = Psi.TransM.prior.a_kappa;
+b_kappa = Psi.TransM.prior.b_kappa;
+
+% Variance of gamma proposal:
+var_kappa = algP.HMM.var_kappa;
 
 
 % Re-sample HMM Hyper-parameters

@@ -15,16 +15,15 @@ if K_est >= 2
     clust_options.alpha         = 1;       % Concentration parameter
     clust_options.plot_sim      = 0;
     clust_options.verbose       = 0;
-    
+        
     if length(old_Z) ~= K_est
-        clust_options.T             = 10;       % Sampler Iterations
-        clust_options.init_clust    = 1:K_est;       
+        clust_options.T             = 10;      % Sampler Iterations
+        clust_options.init_clust    = randsample(K_est,K_est)';       
     else
-        clust_options.T             = 5;        % Sampler Iterations
+        clust_options.T             = 5;       % Sampler Iterations
         clust_options.init_clust    = old_Z;
     end
-    
-    
+        
     % Inference of SPCM-CRP Mixture Model
     [Clust_Psi, ~, est_labels]  = run_SPCMCRP_mm(sigmas, clust_options);
     K_z = length(unique(est_labels));

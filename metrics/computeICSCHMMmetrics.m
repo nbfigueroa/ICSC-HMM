@@ -25,7 +25,9 @@ for run=1:T
     Psi = Best_Psi(run).Psi;
     for j=1:N
         est_states_all = [est_states_all Best_Psi(run).Psi.stateSeq(j).z];
-        est_clusts_all = [est_clusts_all Best_Psi(run).Psi.stateSeq(j).c];
+        if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
+            est_clusts_all = [est_clusts_all Best_Psi(run).Psi.stateSeq(j).c];
+        end
     end
     
      % Segmentation Metrics per run considering transform-dependent state
@@ -36,14 +38,15 @@ for run=1:T
     
     % Cluster Metrics per run considering transform-invariant state
     % sequences given by Z(F)
-    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
-    inferred_state_clust(run) = length(unique(est_clusts_all)); 
+    
+    if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
+        [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
+        inferred_state_clust(run) = length(unique(est_clusts_all));
+    else
+       [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
+    end
     
 end
-
-% Overall Stats for HMM segmentation and state clustering
-fprintf('*** ICSC-HMM Results*** \n Optimal Tranform-Dependent States: %3.3f (%3.3f) \n Optimal Tranform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
-    mean(inferred_state_clust) std(inferred_state_clust) mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 
 % Make struct with metrics
 results = struct();
@@ -51,9 +54,21 @@ results.hamming_distance     = hamming_distance;
 results.global_consistency   = global_consistency;
 results.variation_info       = variation_info;
 results.inferred_states      = inferred_states;
-results.inferred_state_clust = inferred_state_clust;
 results.cluster_purity       = cluster_purity;
 results.cluster_NMI          = cluster_NMI;
 results.cluster_F            = cluster_F;
+
+
+if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
+    results.inferred_state_clust = inferred_state_clust;
+    % Overall Stats for HMM segmentation and state clustering
+    fprintf('*** ICSC-HMM Results*** \n Optimal Transform-Dependent States: %3.3f (%3.3f) \n Optimal Transform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+        mean(inferred_state_clust) std(inferred_state_clust) mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+else
+    % Overall Stats for HMM segmentation and state clustering
+    fprintf('*** IBP-HMM Results*** \n Optimal Feature States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+         mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+end
+
 
 end
