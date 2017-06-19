@@ -94,16 +94,16 @@ dataset_name = 'Rolling'; super_states = 0;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Define Settings for IBP-HMM %%%
 
-% IBP hyper-parametrs
-gamma = length(Data);  % Just to initialize
-alpha = 1;  % typically 1.. could change
-kappa = 10; % sticky parameter
+% IBP initial hyper-parametrs
+gamma = length(Data); 
+alpha = 1;  
+kappa = 10; 
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers', 0,'BP.doSampleMass', 0, 'BP.doSampleConc', 0, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
@@ -138,18 +138,28 @@ results = computeICSCHMMmetrics(true_states_all, Best_Psi);
 
 %% Choose best run
 log_probs = zeros(1,T);
-for ii=1:T 
-    mean_likelihoods(ii) = mean(Best_Psi(ii).logPr); 
-    std_likelihoods(ii) = std(Best_Psi(ii).logPr); 
-end
+for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 
-[val_std id_std] = sort(std_likelihoods,'ascend');
-[val_mean id_mean] = sort(mean_likelihoods,'descend');
+[val_max id_max] = sort(log_probs,'descend')
 
-%% Visualize transform-invariant and action discovery results
+%% Plot Segmentation+Clustering with Chosen Run and Metrics
 
-% Plot of both label sets with colorbar indicating labels
-% Use this to modify Figure 8
+% Choose best IBP-HMM run
+bestPsi = Best_Psi(id_max(1));
+
+if exist('h2','var') && isvalid(h2), delete(h2);end
+[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels);
+
+% Plot Estimated Feature Matrix
+if exist('h3','var') && isvalid(h3), delete(h3);end
+[ h3 ] = plotFeatMat( bestPsi.Psi.F);
+
+% Plot Estimated Transition Matrices
+if exist('h4','var') && isvalid(h4), delete(h4);end
+[h4, bestPsi] = plotTransitionMatrices(bestPsi);
+
+% Compute Segmentation and State Clustering Metrics
+results = computeSegmClustmetrics(true_states_all, bestPsi, est_labels);
 
 %% Visualize Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';

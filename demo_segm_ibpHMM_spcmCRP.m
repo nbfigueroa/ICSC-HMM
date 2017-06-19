@@ -98,7 +98,7 @@ dataset_name = 'Rolling'; super_states = 0;
 %%% Define Settings for IBP-HMM %%%
 
 % IBP hyper-parametrs
-gamma = length(Data);  % length(Data)
+gamma = length(Data);  % length(Data)f
 alpha = 1;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
@@ -137,28 +137,23 @@ else
 end
 
 % Compute metrics for ICSC-HMM
-results = computeICSCHMMmetrics(true_states_all, Best_Psi);
+[ results ] = computeSegmClustmetrics(true_states_all, Best_Psi);
 
-%% Visualize Run Statisics
+%% Choose best run
 log_probs = zeros(1,T);
-for ii=1:T 
-    mean_likelihoods(ii) = mean(Best_Psi(ii).logPr); 
-    std_likelihoods(ii) = std(Best_Psi(ii).logPr); 
-end
+for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 
-[val_std id_std] = sort(std_likelihoods,'ascend');
-[val_mean id_mean] = sort(mean_likelihoods,'descend');
+[val_max id_max] = sort(log_probs,'descend')
 
-id_mean
-id_std
+%% Choose best IBP-HMM run
+bestPsi = Best_Psi(id_max(2));
+
+% Compute metrics for IBP-HMM
+[ results ] = computeSegmClustmetrics(true_states_all, bestPsi);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%      Run Collapsed SPCM-CRP Sampler on Theta        %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Choose best IBP-HMM run
-id = 1;
-bestPsi = Best_Psi(id);
-
 % Extract info from 'Best Psi'
 K_est = bestPsi.nFeats;
 
@@ -171,7 +166,7 @@ end
 
 % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
 clear clust_options
-clust_options.tau           = 1; % Tolerance Parameter for SPCM-CRP
+clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
 clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
 clust_options.T             = 100;     % Sampler Iterations 
 clust_options.alpha         = 1;       % Concentration parameter
@@ -190,105 +185,20 @@ options.true_labels  = unique(true_states_all);
 options.Psi          = Psi;
 [ h1b ] = plotSamplerStats( Psi_Stats, options );
 
-
-% Plot Segmentation with Chosen Run
-% Extract info from 'Best Psi'
-K_est = bestPsi.nFeats;
-
-% Generate transform-invariant state sequences
-est_states_all = [];
-for ii=1:data.N; 
-    est_states_all  = [est_states_all bestPsi.Psi.stateSeq(ii).z]; 
-end
-label_range_z = unique(est_states_all);
-label_range_s = unique(est_labels);
-
-% Plot Segmentation
-figure('Color',[1 1 1])
-est_states = [];
-est_clust_states = [];
-true_states_all   = [];
-est_states_all    = [];
-est_clust_states_all    = [];
-
-for i=1:data.N
-    
-    % Extract data from each time-series    
-    X = data.Xdata(:,[data.aggTs(i)+1:data.aggTs(i+1)]);
-    
-    % Segmentation Direct from state sequence (Gives the same output as Viterbi estimate)
-    est_states{i}  = bestPsi.Psi.stateSeq(i).z;
-    clear s z
-    s = est_states{i};
-    for k=1:length(est_labels)
-        z(s==k) = est_labels(k);
-    end    
-    est_clust_states{i} = z;
-    
-    % Stack labels for state clustering metrics
-    if super_states
-        true_states_all = [true_states_all; TruePsi.s{i}'];
-    else
-        true_states_all = [true_states_all; True_states{i}];
-    end
-    est_states_all  = [est_states_all; est_states{i}'];
-    est_clust_states_all  = [est_clust_states_all; est_clust_states{i}'];
-    
-    % Plot Inferred Segments
-    subplot(data.N,1,i);
-    data_labeled = [X; est_clust_states{i}; est_states{i}];
-    plotDoubleLabeledData( data_labeled, [], strcat('Segmented Time-Series (', num2str(i),'), K:',num2str(K_est)), [], label_range_z, label_range_s);    
-    
-end
-
-% Segmentation Metrics per run
-[relabeled_est_states_all, hamming_distance_,~,~] = mapSequence2Truth(true_states_all,est_states_all);
-[~,global_consistency_, variation_info_] = compare_segmentations(true_states_all,est_states_all);
-inferred_states_   = length(unique(est_states_all));
-
-% Cluster Metrics per run
-[cluster_purity_ cluster_NMI_ cluster_F_] = cluster_metrics(true_states_all, relabeled_est_states_all);
-
-% Overall Stats for HMM segmentation and state clustering
-fprintf('*** IBP-HMM Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
-    global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
-
-
-% Segmentation Metrics per run
-[relabeled_est_states_all, hamming_distance_,~,~] = mapSequence2Truth(true_states_all,est_clust_states_all);
-[~,global_consistency_, variation_info_] = compare_segmentations(true_states_all,est_clust_states_all);
-inferred_states_   = length(unique(est_clust_states_all));
-
-% Cluster Metrics per run
-[cluster_purity_ cluster_NMI_ cluster_F_] = cluster_metrics(true_states_all, relabeled_est_states_all);
-
-% Overall Stats for HMM segmentation and state clustering
-fprintf('*** IBP-HMM + SPCM_CRP Results*** \n Optimal States: %3.3f \n Hamming-Distance: %3.3f GCE: %3.3f VO: %3.3f \n Purity: %3.3f  NMI: %3.3f  F: %3.3f   \n',[inferred_states_  hamming_distance_  ...
-    global_consistency_ variation_info_ cluster_purity_ cluster_NMI_ cluster_F_])
+%% Plot Segmentation+Clustering with Chosen Run and Metrics
+if exist('h2','var') && isvalid(h2), delete(h2);end
+[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels);
 
 % Plot Estimated Feature Matrix
-if exist('h2','var') && isvalid(h2), delete(h2);end
-h2 = plotFeatMat( bestPsi.Psi.F);
+if exist('h3','var') && isvalid(h3), delete(h3);end
+[ h3 ] = plotFeatMat( bestPsi.Psi.F);
 
 % Plot Estimated Transition Matrices
-if exist('h3','var') && isvalid(h3), delete(h3);end
-h3 = figure('Color',[1 1 1]);
-pi = [];
-for i=1:data.N   
-    % Construct Transition Matrices for each time-series
-    f_i   = bestPsi.Psi.Eta(i).availFeatIDs;
-    eta_i = bestPsi.Psi.Eta(i).eta;
-    
-    % Normalize self-transitions with sticky parameter    
-    pi_i  = zeros(size(eta_i));   
-    for ii=1:size(pi_i,1);pi_i(ii,:) = eta_i(ii,:)/sum(eta_i(ii,:));end
-    pi{i} = pi_i;    
-    
-    % Plot them
-    subplot(data.N, 1, i)
-    plotTransMatrix(pi{i},strcat('Time-Series (', num2str(i),')'),0, f_i);
-end
-bestPsi.pi = pi;
+if exist('h4','var') && isvalid(h4), delete(h4);end
+[h4, bestPsi] = plotTransitionMatrices(bestPsi);
+
+% Compute Segmentation and State Clustering Metrics
+results = computeSegmClustmetrics(true_states_all, bestPsi, est_labels);
 
 %% Plot Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';

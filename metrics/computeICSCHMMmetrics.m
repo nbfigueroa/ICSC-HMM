@@ -1,4 +1,4 @@
-function [results] = computeICSCHMMmetrics(true_states_all, Best_Psi)
+function [results] = computeSegmClustmetrics(true_states_all, Best_Psi, varargin)
 
 % Number of runs
 T = length(Best_Psi);
@@ -32,6 +32,7 @@ for run=1:T
     
      % Segmentation Metrics per run considering transform-dependent state
      % sequence given by F
+     
     [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
     [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
     inferred_states(run)      = length(unique(est_states_all));

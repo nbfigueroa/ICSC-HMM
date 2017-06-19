@@ -57,9 +57,14 @@ for i=1:T
     semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',color); hold on;
     plot(best_iter, max_joint, 'o','MarkerFaceColor',color, 'MarkerSize', 10, 'MarkerEdgeColor',[0 0 0]);
 end
-xlim([1 Iterations(end)])
+xlim([1 Iterations(end)]);
 xlabel('MCMC Iterations','Interpreter','LaTex','Fontsize',16); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
-title ({sprintf('Trace of Joint Probabilities $p(F, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+
+if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+    title ({sprintf('Trace of Joint Probabilities $p(F, Z, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20);
+else    
+    title ({sprintf('Trace of Joint Probabilities $p(F, S, X)$ for %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20);
+end
 grid on
 
 Iterations_feat = Sampler_Stats(1).CH.iters.Psi;
