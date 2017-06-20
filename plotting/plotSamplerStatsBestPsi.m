@@ -1,4 +1,4 @@
-function [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats)
+function [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats, varargin)
 
 % Gather High-level Stats
 T = length(Sampler_Stats);
@@ -70,10 +70,11 @@ grid on
 Iterations_feat = Sampler_Stats(1).CH.iters.Psi;
 
 subplot(plots,1,2)
-for i=1:T
-    nFeats = zeros(1,length(Iterations_feat));
-    for ii=1:length(Iterations_feat); nFeats(1,ii) = length(Sampler_Stats(i).CH.Psi(ii).theta);end
-    stairs(Iterations_feat, nFeats, 'LineWidth',2, 'Color', [rand/2 rand/2 1]); hold on;
+nFeats  = zeros(T,length(Iterations_feat));
+nClusts = zeros(T,length(Iterations_feat));
+for i=1:T    
+    for ii=1:length(Iterations_feat); nFeats(i,ii) = length(Sampler_Stats(i).CH.Psi(ii).theta);end
+    stairs(Iterations_feat, nFeats(i,:), 'LineWidth',2, 'Color', [rand/2 rand/2 1]); hold on;
     set(gca, 'XScale', 'log')
 end
 xlim([1 Iterations(end)])
@@ -83,10 +84,9 @@ grid on
 
 if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
     subplot(plots,1,3)
-    for i=1:T
-        nClusts = zeros(1,length(Iterations_feat));
-        for ii=1:length(Iterations_feat); nClusts(1,ii) = Sampler_Stats(i).CH.Psi(ii).K_z;end
-        stairs(Iterations_feat, nClusts, 'LineWidth',2, 'Color', [1 rand/2 rand/2]); hold on;
+    for i=1:T        
+        for ii=1:length(Iterations_feat); nClusts(i,ii) = Sampler_Stats(i).CH.Psi(ii).K_z;end
+        stairs(Iterations_feat, nClusts(i,:), 'LineWidth',2, 'Color', [1 rand/2 rand/2]); hold on;
         set(gca, 'XScale', 'log')
     end
     xlim([1 Iterations(end)])
@@ -156,5 +156,27 @@ xlim([1 Iterations_feat(end)])
 xlabel('MCMC Iterations', 'Interpreter','LaTex','Fontsize',16);
 ylabel('$\kappa$', 'Interpreter','LaTex','Fontsize',20);
 title('Trace of HMM sticky parameter $\kappa$','Interpreter','LaTex','Fontsize',20)
+
+
+%%% Plot histogram of computed Features/Clusters
+if ~isempty(varargin)
+    h3 = figure('Color',[1 1 1]);
+    if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+        subplot(2,1,1)
+        for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
+        grid on
+        title({sprintf('Estimated Features $K$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)        
+        
+        subplot(2,1,2)
+        for f=1:size(nClusts,1);histogram(nClusts(f,:)); hold on; end
+        grid on
+        title({sprintf('Estimated Features Clusters $K_Z$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+    else
+        for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
+        grid on
+        title({sprintf('Estimated Features $K$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+    end
+end
+
 
 end

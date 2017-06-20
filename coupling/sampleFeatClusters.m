@@ -1,4 +1,4 @@
-function [Psi] = sampleFeatClusters(Psi)
+function [Psi, Z_logPrb] = sampleFeatClusters(Psi)
 old_Z = Psi.Z;
 K_est = Psi.ThetaM.K;
 if K_est >= 2    

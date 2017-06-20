@@ -92,8 +92,8 @@ if outParams.doPrintHeaderInfo
     fprintf( '\t           HMM trans param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.alpha, algParams.HMM.doSampleHypers );
     fprintf( '\t    HMM trans sticky param = %5.1f    ( resampling %d ) \n', Psi.TransM.prior.kappa, algParams.HMM.doSampleHypers );
     fprintf( '\t        HMM emission param = %9s  \n', Psi.ThetaM.getParamDescr() );
-    fprintf( '\t        Transform-Dependent Features (K_theta) = %d  \n',  Psi.ThetaM.K);
-    fprintf( '\t        Transform-Invariant Features (K_phi)   = %d  \n',  Psi.K_z);
+    fprintf( '\t        Transform-Dependent Features (K) = %d  \n',  Psi.ThetaM.K);
+    fprintf( '\t        Transform-Invariant Features (K_Z)   = %d  \n',  Psi.K_z);
 end
 
 

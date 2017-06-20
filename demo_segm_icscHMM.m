@@ -103,7 +103,7 @@ kappa = 10;
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
+algP   = {'Niter', 1000, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
@@ -124,7 +124,7 @@ end
 %% %%%%%%%% Visualize Sampler Convergence/Metrics and extract Best Psi/run %%%%%%%%%%
 if exist('h1','var')  && isvalid(h1),  delete(h1);end
 if exist('h1b','var') && isvalid(h1b), delete(h1b);end
-[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
+[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats,'hist');
 
 %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')

@@ -29,7 +29,7 @@
 
 *** ICSC-HMM Results*** 
  Optimal Transform-Dependent States: 4.000 (0.000) 
- Optimal Transform-Invariant States: 2.600 (0.699) 
+ Optimal Transform-Invariant States: 2.500 (0.527) 
  Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
  Purity: 0.943 (0.094) NMI: 0.752 (0.209) F: 0.897 (0.110) 
 

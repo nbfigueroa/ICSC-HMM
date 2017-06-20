@@ -127,7 +127,7 @@ end
 %% %%%%%%%% Visualize Sampler Convergence/Metrics and extract Best Psi/run %%%%%%%%%%
 if exist('h1','var')  && isvalid(h1),  delete(h1);end
 if exist('h1b','var') && isvalid(h1b), delete(h1b);end
-[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
+[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats, 'hist');
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%      Run Collapsed SPCM-CRP Sampler on Theta        %%
@@ -159,7 +159,6 @@ for l=1:length(Best_Psi)
     [Psi Psi_Stats est_labels{l}]  = run_SPCMCRP_mm(sigmas, clust_options);
     clust_logProbs = [clust_logProbs Psi.MaxLogProb];
 end
-
 
 %% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')

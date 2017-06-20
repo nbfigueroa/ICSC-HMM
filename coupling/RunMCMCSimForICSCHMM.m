@@ -24,7 +24,7 @@ tic;
 if isfield( Psi, 'F' )
     % Stating chain from scratch
     n = 0;
-    logPr = calcJointLogPr_BPHMMState( Psi, data );
+    logPr = calcJointLogPr_ICSCHMMState( Psi, data );
     ChainHist = recordMCMCHistory_BPHMM( 0, outParams, [], Psi, logPr  );
 
     fprintf( 'Initial Config: \n' );
@@ -33,7 +33,7 @@ else
     ChainHist = Psi;
     Psi = unpackBPHMMState(  ChainHist.Psi(end), data, model );
     
-    logPr = calcJointLogPr_BPHMMState( Psi, data );
+    logPr = calcJointLogPr_ICSCHMMState( Psi, data );
     n = ChainHist.iters.Psi(end );
     fprintf( 'Resumed Config: \n' );
     printMCMCSummary_BPHMM( n, Psi, logPr, algParams); 
@@ -51,8 +51,7 @@ for n=n+1:algParams.Niter
     % Diagnose convergence by calculating joint log pr. of all sampled vars
     if n == 1 || rem(n, outParams.logPrEvery)==0
         % NB: not passing "data" as arg means Psi stores all X suff stats
-        logPr = calcJointLogPr_BPHMMState( Psi );
-%         logPr.Z = Psi.Z_logPrb; 
+        logPr = calcJointLogPr_ICSCHMMState( Psi );
     end
     
     %Record current sampler state

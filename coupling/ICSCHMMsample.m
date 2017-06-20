@@ -103,7 +103,6 @@ if algP.BP.doSampleMass || algP.BP.doSampleConc
 end
 
 %%%% Compute Ratios for HMM Hyper-parameters %%%%
-
 % Hyperparameters for prior on alpha:
 Psi.TransM.prior.a_alpha = coeff*K_ratio;
 Psi.TransM.prior.b_alpha = coeff*K_ratio;
