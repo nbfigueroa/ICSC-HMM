@@ -112,7 +112,8 @@ end
 
 %%%% Run Weak-Limit Gibbs Sampler for sticky HDP-HMM %%%
 % Number of Repetitions
-T = 5; 
+T = 10;
+
 % Segmentation Metric Arrays
 hamming_distance   = zeros(1,T);
 global_consistency = zeros(1,T);
@@ -189,7 +190,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = 5;
+id = id_mean(1);
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];

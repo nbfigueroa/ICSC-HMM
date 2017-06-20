@@ -153,7 +153,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; T = 1;
+K = 4; T = 5;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -219,7 +219,7 @@ for run=1:T
     
 end
 
-% Overall Stats for HMM segmentation and state clustering
+%% Overall Stats for HMM segmentation and state clustering
 clc;
 fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])

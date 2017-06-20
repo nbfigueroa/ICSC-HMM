@@ -97,7 +97,7 @@ coeff = 0.5;
 Psi.bpM.prior.a_mass = coeff*K_ratio;
 Psi.bpM.prior.b_mass = coeff*K_ratio;
 
-% Re-sample IBP Hyper-parameters
+% Re-sample IBP Hyper-parameterswrap o
 if algP.BP.doSampleMass || algP.BP.doSampleConc
     [Psi, Stats.BPconc] = sampleIBPhypers(Psi, algP);
 end

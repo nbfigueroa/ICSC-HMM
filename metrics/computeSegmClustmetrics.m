@@ -38,8 +38,13 @@ for run=1:T
         else
             clear s c
             s = Best_Psi(run).Psi.stateSeq(j).z;
-            for k=1:length(est_labels)
-                c(s==k) = est_labels(k);
+            if iscell(est_labels)
+                labels = est_labels{run};
+            else
+                labels = est_labels;
+            end
+            for k=1:length(labels)
+                c(s==k) = labels(k);
             end
             est_clusts_all = [est_clusts_all c];
         end
@@ -92,7 +97,7 @@ if isempty(varargin)
 else
     results.inferred_state_clust = inferred_state_clust;
     % Overall Stats for HMM segmentation and state clustering
-    fprintf('*** IBP-HMM + SPCM_CRP Results*** \n Optimal Transform-Dependent States: %3.3f (%3.3f) \n Optimal Transform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+    fprintf('*** IBP-HMM + SPCM-CRP Results*** \n Optimal Transform-Dependent States: %3.3f (%3.3f) \n Optimal Transform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
             mean(inferred_state_clust) std(inferred_state_clust) mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
 end
 

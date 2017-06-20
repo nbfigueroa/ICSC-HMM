@@ -90,7 +90,7 @@ use_vel = 1;
 dataset_name = 'Rolling'; super_states = 0; 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
+%%    Run Collapsed ICSC-HMM Sampler T times for good statistics          %%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Define Settings for IBP-HMM %%%
 
@@ -107,13 +107,13 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 3; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
 for run=1:T       
-    % Run Gibbs Sampler for Niter once.
+    % Run MCMC Sampler for Niter once.
     clear CH    
     % Start out with just one feature for all objects
     initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
@@ -146,9 +146,10 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 
 % Choose best IBP-HMM run
 bestPsi = Best_Psi(id_max(1));
+est_labels = bestPsi.Psi.Z;
 
 if exist('h2','var') && isvalid(h2), delete(h2);end
-[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels);
+[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi);
 
 % Plot Estimated Feature Matrix
 if exist('h3','var') && isvalid(h3), delete(h3);end
@@ -159,7 +160,7 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 [h4, bestPsi] = plotTransitionMatrices(bestPsi);
 
 % Compute Segmentation and State Clustering Metrics
-results = computeSegmClustmetrics(true_states_all, bestPsi, est_labels);
+results = computeSegmClustmetrics(true_states_all, bestPsi);
 
 %% Visualize Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';

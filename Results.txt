@@ -1,0 +1,42 @@
+1) Results 2d-transformed dataset
+
+*** Hidden Markov Model Results*** 
+ Optimal States: 4 
+ Hamming-Distance: 0.407 (0.048) GCE: 0.028 (0.063) VO: 1.034 (0.263) 
+ Purity:   NMI: 0.671 (0.100) F: 0.738 (0.037)  
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 4.000 (0.000) 
+ Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.716 (0.000) F: 0.754 (0.000)  
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 4.000 (0.000) 
+ Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.716 (0.000) F: 0.754 (0.000)  
+
+*** IBP-HMM + SPCM-CRP Results***(NO Re-sampling) 
+ Optimal Transform-Dependent States: 3.900 (0.876) 
+ Optimal Transform-Invariant States: 2.400 (0.699) 
+ Hamming-Distance: 0.408 (0.040) GCE: 0.144 (0.111) VO: 1.434 (0.239) 
+ Purity: 0.785 (0.149) NMI: 0.380 (0.268) F: 0.758 (0.125)  
+
+*** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors)
+ Optimal Transform-Dependent States: 4.000 (0.000) 
+ Optimal Transform-Invariant States: 1.900 (0.316) 
+ Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
+ Purity: 0.805 (0.134) NMI: 0.431 (0.308) F: 0.798 (0.136)   
+
+*** ICSC-HMM Results*** 
+ Optimal Transform-Dependent States: 4.000 (0.000) 
+ Optimal Transform-Invariant States: 2.600 (0.699) 
+ Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
+ Purity: 0.943 (0.094) NMI: 0.752 (0.209) F: 0.897 (0.110) 
+
+
+ 2a) Results Grating Same RF
+
+
+
+
+ 2b) Results Grating Diff. RF

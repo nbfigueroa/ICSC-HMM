@@ -98,7 +98,7 @@ dataset_name = 'Rolling'; super_states = 0;
 %%% Define Settings for IBP-HMM %%%
 
 % IBP hyper-parametrs
-gamma = length(Data);  % length(Data)f
+gamma = length(Data);  % length(Data)
 alpha = 1;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
@@ -110,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleC
          'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions
-T = 3; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -129,65 +129,60 @@ if exist('h1','var')  && isvalid(h1),  delete(h1);end
 if exist('h1b','var') && isvalid(h1b), delete(h1b);end
 [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
-%%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Run Collapsed SPCM-CRP Sampler on Theta        %%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+est_labels     = [];
+clust_logProbs = [];
+for l=1:length(Best_Psi)    
+    % Extract info from 'Best Psi'
+    K_est = Best_Psi(l).nFeats;
+    
+    % Extract Sigmas
+    sigmas = [];
+    for k=1:K_est
+        invSigma = Best_Psi(l).Psi.theta(k).invSigma;
+        sigmas{k} = invSigma \ eye(size(invSigma,1));
+    end
+    
+    % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
+    clear clust_options
+    clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
+    clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
+    clust_options.T             = 100;     % Sampler Iterations
+    clust_options.alpha         = 1;       % Concentration parameter
+    clust_options.plot_sim      = 0;
+    clust_options.init_clust    = 1:length(sigmas);
+    clust_options.verbose       = 1;
+    
+    % Inference of SPCM-CRP Mixture Model
+    [Psi Psi_Stats est_labels{l}]  = run_SPCMCRP_mm(sigmas, clust_options);
+    clust_logProbs = [clust_logProbs Psi.MaxLogProb];
+end
+
+
+%% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')
     true_states_all = TruePsi.sTrueAll;
 else
     true_states_all = data.zTrueAll;
 end
 
-% Compute metrics for ICSC-HMM
-[ results ] = computeSegmClustmetrics(true_states_all, Best_Psi);
+% Compute metrics for IBP-HMM
+[ results ] = computeSegmClustmetrics(true_states_all, Best_Psi, est_labels);
 
 %% Choose best run
 log_probs = zeros(1,T);
-for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
+for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-%% Choose best IBP-HMM run
-bestPsi = Best_Psi(id_max(2));
-
-% Compute metrics for IBP-HMM
-[ results ] = computeSegmClustmetrics(true_states_all, bestPsi);
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%      Run Collapsed SPCM-CRP Sampler on Theta        %%
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Extract info from 'Best Psi'
-K_est = bestPsi.nFeats;
-
-% Extract Sigmas
-sigmas = [];
-for k=1:K_est
-   invSigma = bestPsi.Psi.theta(k).invSigma; 
-   sigmas{k} = invSigma \ eye(size(invSigma,1));
-end
-
-% Settings and Hyper-Params for SPCM-CRP Clustering algorithm
-clear clust_options
-clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
-clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
-clust_options.T             = 100;     % Sampler Iterations 
-clust_options.alpha         = 1;       % Concentration parameter
-clust_options.plot_sim      = 0;
-clust_options.init_clust    = 1:length(sigmas);
-clust_options.verbose       = 1;
-
-% Inference of SPCM-CRP Mixture Model
-[Psi Psi_Stats est_labels]  = run_SPCMCRP_mm(sigmas, clust_options);
-
-%%%%%%%% Visualize Collapsed Gibbs Sampler Stats and Cluster Metrics %%%%%%%%%%%%%%
-if exist('h1b','var') && isvalid(h1b), delete(h1b);end
-options = [];
-options.dataset      = dataset_name;
-options.true_labels  = unique(true_states_all); 
-options.Psi          = Psi;
-[ h1b ] = plotSamplerStats( Psi_Stats, options );
+bestPsi      = Best_Psi(id_max(1));
+est_labels_  = est_labels{id_max(1)};
 
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 if exist('h2','var') && isvalid(h2), delete(h2);end
-[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels);
+[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels_);
 
 % Plot Estimated Feature Matrix
 if exist('h3','var') && isvalid(h3), delete(h3);end
@@ -198,7 +193,7 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 [h4, bestPsi] = plotTransitionMatrices(bestPsi);
 
 % Compute Segmentation and State Clustering Metrics
-results = computeSegmClustmetrics(true_states_all, bestPsi, est_labels);
+results = computeSegmClustmetrics(true_states_all, bestPsi, est_labels_);
 
 %% Plot Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';
@@ -212,7 +207,7 @@ for k=1:K_est
 end
 
 if exist('h4','var') && isvalid(h4), delete(h4);end
-h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels);
+h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels_);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
 
