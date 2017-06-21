@@ -153,7 +153,7 @@ hmm_eval(Data, K_range, repeats)
 
 %%  Fit HMM with 'optimal' K and Apply Viterbi for Segmentation
 % Set "Optimal " GMM Hyper-parameters
-K = 4; T = 5;
+K = 4; T = 10;
 ts = [1:length(Data)];
 
 % Segmentation Metric Arrays
@@ -187,7 +187,7 @@ for run=1:T
     for i=1:length(ts)
         X = Data{ts(i)};
         
-        if super_states
+        if isfield(TruePsi, 'sTrueAll')
             true_states = TruePsi.s{ts(i)}';
         else
             true_states = True_states{ts(i)};
@@ -215,7 +215,7 @@ for run=1:T
     [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
     
     % Cluster Metrics per run
-    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
+    [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_states_all);
     
 end
 

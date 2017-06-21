@@ -2,30 +2,24 @@
 
 *** Hidden Markov Model Results*** 
  Optimal States: 4 
- Hamming-Distance: 0.407 (0.048) GCE: 0.028 (0.063) VO: 1.034 (0.263) 
- Purity:   NMI: 0.671 (0.100) F: 0.738 (0.037)  
-
+ Hamming-Distance: 0.258 (0.067) GCE: 0.024 (0.075) VO: 0.852 (0.297) 
+ Purity: 0.981 (0.062) NMI: 0.705 (0.121) F: 0.838 (0.081)  
+ 
 *** Sticky HDP-HMM Results*** 
  Optimal States: 4.000 (0.000) 
- Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
- Purity: 1.000 (0.000) NMI: 0.716 (0.000) F: 0.754 (0.000)  
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.743 (0.000) F: 0.863 (0.000)  
 
 *** IBP-HMM Results*** 
  Optimal Feature States: 4.000 (0.000) 
- Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
- Purity: 1.000 (0.000) NMI: 0.716 (0.000) F: 0.754 (0.000)  
-
-*** IBP-HMM + SPCM-CRP Results***(NO Re-sampling) 
- Optimal Transform-Dependent States: 3.900 (0.876) 
- Optimal Transform-Invariant States: 2.400 (0.699) 
- Hamming-Distance: 0.408 (0.040) GCE: 0.144 (0.111) VO: 1.434 (0.239) 
- Purity: 0.785 (0.149) NMI: 0.380 (0.268) F: 0.758 (0.125)  
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.743 (0.000) F: 0.863 (0.000) 
 
 *** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors)
  Optimal Transform-Dependent States: 4.000 (0.000) 
- Optimal Transform-Invariant States: 1.900 (0.316) 
- Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
- Purity: 0.805 (0.134) NMI: 0.431 (0.308) F: 0.798 (0.136)   
+ Optimal Transform-Invariant States: 2.400 (0.699) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 0.965 (0.110) NMI: 0.857 (0.304) F: 0.958 (0.094)
 
 *** ICSC-HMM Results*** 
  Optimal Transform-Dependent States: 4.000 (0.000) 

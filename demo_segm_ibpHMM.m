@@ -109,7 +109,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',1, 'BP.doSampleMass',1,'BP.doSample
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 1; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];

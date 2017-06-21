@@ -149,7 +149,7 @@ for run=1:T
         [~,~, loglik_(jj,1)] = LogForwardBackward(logp_xn_given_zn, ChainStats_Run(run).initProb, ChainStats_Run(run).TransProb);
         
         % Stack labels for state clustering metrics   
-        if super_states
+        if isfield(TruePsi, 'sTrueAll')
             true_states = TruePsi.s{jj}';
         else
             true_states = True_states{jj};
@@ -210,7 +210,7 @@ for i=1:length(data_struct)
     est_states{i}  = BestChain.stateSeq(i).z;
     
     % Stack labels for state clustering metrics
-    if super_states
+    if isfield(TruePsi, 'sTrueAll')       
         true_states = TruePsi.s{i}';
     else
         true_states = True_states{i};
