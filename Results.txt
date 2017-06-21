@@ -4,7 +4,7 @@
  Optimal States: 4 
  Hamming-Distance: 0.258 (0.067) GCE: 0.024 (0.075) VO: 0.852 (0.297) 
  Purity: 0.981 (0.062) NMI: 0.705 (0.121) F: 0.838 (0.081)  
- 
+
 *** Sticky HDP-HMM Results*** 
  Optimal States: 4.000 (0.000) 
  Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
@@ -28,9 +28,22 @@
  Purity: 1.000 (0.000) NMI: 0.965 (0.045) F: 0.991 (0.012)  
 
 
- 2a) Results Grating Same RF
+ 2b) Results Grating Diff. RF (position)
 
+ *** Hidden Markov Model Results*** (position)
+ Optimal States: 5 
+ Hamming-Distance: 0.537 (0.016) GCE: 0.222 (0.030) VO: 1.894 (0.164) 
+ Purity: 0.870 (0.020) NMI: 0.304 (0.054) F: 0.597 (0.015) 
 
+ *** Sticky HDP-HMM Results*** (position)
+ Optimal States: 4.400 (0.966) 
+ Hamming-Distance: 0.275 (0.175) GCE: 0.169 (0.018) VO: 1.256 (0.292) 
+ Purity: 0.892 (0.018) NMI: 0.467 (0.051) F: 0.780 (0.113) 
 
+ 
 
- 2b) Results Grating Diff. RF
+*** Hidden Markov Model Results*** (velocity)
+ Optimal States: 5 
+ Hamming-Distance: 0.321 (0.125) GCE: 0.141 (0.014) VO: 1.287 (0.334) 
+ Purity: 0.919 (0.013) NMI: 0.504 (0.064) F: 0.768 (0.068) 
+
