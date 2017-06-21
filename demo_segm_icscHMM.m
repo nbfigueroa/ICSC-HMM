@@ -49,8 +49,9 @@ h1 = plotSimMat( TruePsi.S );
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type : 'robot'/'grater'/'mixed' indicates reference frame of time-series
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'same'; full = 0; 
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; 
 rf = 'same'; % Define if you want data recorded from the same reference frame or 'diff'
 [data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating'; Data_ = Data; 
@@ -194,8 +195,9 @@ titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentati
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, est_clust_states, titlename, labels);
 
-% Plot Segmentated 3D Trajectories
+%% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h7','var') && isvalid(h7), delete(h7);end
-h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
+h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll)); hold on;
+drawframe(eye(4), 0.1)
 

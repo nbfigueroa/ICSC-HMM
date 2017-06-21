@@ -1,3 +1,18 @@
+%% Change Reference Frame for Demonstrationsc
+data_path = './test-data/'
+            load(strcat(data_path,'/Grating/CarrotGrating_robot.mat'))            
+%%
+offset = [0.65 -0.15 -0.05 0 0 0 0]';
+R = rotz(-pi/4);
+
+for d=1:length(Data)
+    data = Data{d}' + repmat(offset,[1 length(Data{d})]);
+    for dd=1:length(data)
+        data(1:3,dd) = R*data(1:3,dd);
+    end
+    Data{d} = data';
+end
+
 %% Lucia's Carrot Grating Experiments
 clear all
 clc
