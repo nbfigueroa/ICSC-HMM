@@ -1,4 +1,4 @@
-function [h] = plotDoubleLabelSegmentation(data, bestPsi, varargin)
+function [h, est_clust_states] = plotDoubleLabelSegmentation(data, bestPsi, varargin)
 
 % Extract info from 'Best Psi'
 K_est = bestPsi.nFeats;

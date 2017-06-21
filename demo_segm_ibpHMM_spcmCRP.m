@@ -54,7 +54,7 @@ h1 = plotSimMat( TruePsi.S );
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
-[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full);
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
 dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
@@ -167,7 +167,7 @@ else
 end
 
 % Compute metrics for IBP-HMM
-[ results, est_clusts ] = computeSegmClustmetrics(true_states_all, Best_Psi, est_labels);
+[ results ] = computeSegmClustmetrics(true_states_all, Best_Psi, est_labels);
 
 %% Choose best run
 log_probs = zeros(1,T);
@@ -175,13 +175,13 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-besTRun = id_max(2);
+besTRun = id_max(1);
 bestPsi      = Best_Psi(besTRun);
 est_labels_  = est_labels{besTRun};
 
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 if exist('h2','var') && isvalid(h2), delete(h2);end
-[ h2 ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels_);
+[ h2, est_clusts ] = plotDoubleLabelSegmentation(data, bestPsi, est_labels_);
 
 % Plot Estimated Feature Matrix
 if exist('h3','var') && isvalid(h3), delete(h3);end
@@ -227,7 +227,7 @@ h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 % Plot Clustered/Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels);
+h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
 
 % Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');

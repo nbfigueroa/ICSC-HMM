@@ -1,4 +1,4 @@
-function [results, est_clusts] = computeSegmClustmetrics(true_states_all, Best_Psi, varargin)
+function [results] = computeSegmClustmetrics(true_states_all, Best_Psi, varargin)
 
 % Number of runs
 T = length(Best_Psi);
@@ -46,8 +46,7 @@ for run=1:T
             for k=1:length(labels)
                 c(s==k) = labels(k);
             end
-            est_clusts{j} = c;
-            est_clusts_all = [est_clusts_all est_clusts{j}];
+            est_clusts_all = [est_clusts_all c];
         end
         
     end
