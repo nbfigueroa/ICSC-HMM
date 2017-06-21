@@ -49,11 +49,10 @@ h1 = plotSimMat( TruePsi.S );
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
-% type : 'robot'/'grater'/'mixed' indicates reference frame of time-series
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; 
-[data, TruePsi, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; Data_ = Data; 
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
+dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -181,24 +180,30 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
+labels = [];
+labels_c = [];
+for e=1:length(bestPsi.Psi.stateSeq)
+    est_states{e} = bestPsi.Psi.stateSeq(e).z';
+    labels = [labels unique(est_states{e})'];    
+    labels_c = [labels_c unique(est_clusts{e})'];    
+end
+labels = unique(labels);
+labels_c = unique(labels_c);
 
 % Plot Segmentated 3D Trajectories
-labels    = unique(est_states_all);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 drawframe(eye(4), 0.1)
 
 % Plot Clustered/Segmentated 3D Trajectories
-labels    = unique(est_clust_states_all);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, est_clust_states, titlename, labels);
+h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
 drawframe(eye(4), 0.1)
 
-% Plot Segmentated 3D Trajectories
+%% Plot Segmentated 3D Trajectories with "True Labels"
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h7','var') && isvalid(h7), delete(h7);end
-h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll)); hold on;
+h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
 drawframe(eye(4), 0.1)
-
