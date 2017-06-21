@@ -94,21 +94,23 @@ dataset_name = 'Rolling'; super_states = 0;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Define Settings for IBP-HMM %%%
 
+% Initialize parallel computing
+% parpool;
+
 % IBP initial hyper-parametrs
 gamma = length(Data); 
 alpha = 1;  
-kappa = 10; 
+kappa = 20; 
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 1000, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
-
+T = 20; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
@@ -122,9 +124,6 @@ for run=1:T
 end
 
 %% %%%%%%%% Visualize Sampler Convergence/Metrics and extract Best Psi/run %%%%%%%%%%
-if exist('h1','var')  && isvalid(h1),  delete(h1);end
-if exist('h1b','var') && isvalid(h1b), delete(h1b);end
-[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats,'hist');
 
 %%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')
@@ -133,7 +132,12 @@ else
     true_states_all = data.zTrueAll;
 end
 
+if exist('h1','var')  && isvalid(h1),  delete(h1);end
+if exist('h1b','var') && isvalid(h1b), delete(h1b);end
+[h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats,'metrics', true_states_all);
+
 % Compute metrics for ICSC-HMM
+clc;
 results = computeICSCHMMmetrics(true_states_all, Best_Psi);
 
 %% Choose best run
@@ -166,8 +170,8 @@ results = computeSegmClustmetrics(true_states_all, bestPsi);
 title_name  = 'Estimated Emission Parameters';
 plot_labels = {'$x_1$','$x_2$'};
 clear Est_theta
-Est_theta.K = K_est;
-for k=1:K_est
+Est_theta.K = bestPsi.nFeats;
+for k=1:Est_theta.K
     Est_theta.Mu(:,k)         = bestPsi.Psi.theta(k).mu;
     Est_theta.invSigma(:,:,k) = bestPsi.Psi.theta(k).invSigma;
     Est_theta.Sigma(:,:,k)    = Est_theta.invSigma(:,:,k) \ eye(data.D);

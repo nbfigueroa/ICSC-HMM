@@ -29,9 +29,9 @@
 
 *** ICSC-HMM Results*** 
  Optimal Transform-Dependent States: 4.000 (0.000) 
- Optimal Transform-Invariant States: 2.500 (0.527) 
- Hamming-Distance: 0.386 (0.000) GCE: 0.000 (0.000) VO: 0.917 (0.000) 
- Purity: 0.943 (0.094) NMI: 0.752 (0.209) F: 0.897 (0.110) 
+ Optimal Transform-Invariant States: 2.400 (0.516) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.965 (0.045) F: 0.991 (0.012)  
 
 
  2a) Results Grating Same RF

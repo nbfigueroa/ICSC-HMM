@@ -107,7 +107,7 @@ modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kap
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
-         'doSampleFUnique', 1, 'doSplitMerge', 0} ;
+         'doSampleFUnique', 1, 'doSplitMerge', 1} ;
 
 % Number of Repetitions
 T = 10; 

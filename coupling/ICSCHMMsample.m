@@ -112,8 +112,8 @@ algP.HMM.var_alpha = 2;
 
 % Hyperparameters for prior on kappa:
 K_kappa = Psi.ThetaM.K/Psi.K_z;
-Psi.TransM.prior.a_kappa = K_kappa;
-Psi.TransM.prior.b_kappa = K_kappa;
+Psi.TransM.prior.a_kappa = 0.5*coeff*K_kappa;
+Psi.TransM.prior.b_kappa = 0.5*coeff*K_kappa;
 
 % Variance of gamma proposal default --> var(alpha) = 10
 algP.HMM.var_kappa = 10;

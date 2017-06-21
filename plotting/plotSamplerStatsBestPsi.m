@@ -53,9 +53,9 @@ for i=1:T
     end
 
     % Plot joint traces
-    color = [rand rand rand];
-    semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',color); hold on;
-    plot(best_iter, max_joint, 'o','MarkerFaceColor',color, 'MarkerSize', 10, 'MarkerEdgeColor',[0 0 0]);
+    colors(i,:) = [rand rand rand];
+    semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',colors(i,:)); hold on;
+    plot(best_iter, max_joint, 'o','MarkerFaceColor',colors(i,:), 'MarkerSize', 10, 'MarkerEdgeColor',[0 0 0]);
 end
 xlim([1 Iterations(end)]);
 xlabel('MCMC Iterations','Interpreter','LaTex','Fontsize',16); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)
@@ -109,7 +109,7 @@ for run=1:T
     end
     
     % Plot joint traces
-    semilogx(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
+    semilogx(Iterations,Gammas,'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;   
     grid on
 end
 xlim([1 Iterations_feat(end)])
@@ -129,7 +129,7 @@ for run=1:T
     end
     
     % Plot joint traces
-    semilogx(Iterations,alphas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
+    semilogx(Iterations,alphas,'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;   
     grid on
 end
 xlim([1 Iterations_feat(end)])
@@ -149,7 +149,7 @@ for run=1:T
     end
     
     % Plot joint traces
-    semilogx(Iterations,kappas,'--*', 'LineWidth', 2,'Color',[rand rand rand]); hold on;   
+    semilogx(Iterations,kappas,'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;   
     grid on
 end
 xlim([1 Iterations_feat(end)])
@@ -160,23 +160,105 @@ title('Trace of HMM sticky parameter $\kappa$','Interpreter','LaTex','Fontsize',
 
 %%% Plot histogram of computed Features/Clusters
 if ~isempty(varargin)
-    h3 = figure('Color',[1 1 1]);
-    if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
-        subplot(2,1,1)
-        for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
-        grid on
-        title({sprintf('Estimated Features $K$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)        
+    if strcmp(varargin{1},'hist')
+        h3 = figure('Color',[1 1 1]);
+        if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+            subplot(2,1,1)
+            for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
+            grid on
+            title({sprintf('Estimated Features $K$ for %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+            
+            subplot(2,1,2)
+            for f=1:size(nClusts,1);histogram(nClusts(f,:)); hold on; end
+            grid on
+            title({sprintf('Estimated Clusters $K_Z$ for %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+        else
+            for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
+            grid on
+            title({sprintf('Estimated Features $K$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+        end
+    end
+    
+    if strcmp(varargin{1},'metrics')
+        % Extracting true states
+        true_states_all = varargin{2};
+        sequences       = length(Sampler_Stats(1).CH.Psi(1).stateSeq);
+        % Computing Hamming and F-Measure for each iteration of each run
+        hamming  = zeros(T,iters);
+        fmeasure = zeros(T,iters);
+        if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+            fmeasureClust = zeros(T,iters);
+        end
+        for run=1:T
+            for iter=1:iters
+                est_states_all  = [];                
+                for ii=1:sequences
+                    est_states_all  = [est_states_all Sampler_Stats(run).CH.Psi(iter).stateSeq(ii).z];
+                end
+                
+                % Segmentation Metrics per run considering transform-dependent state
+                % sequence given by F
+                [relabeled_est_states_all, hamming(run,iter),~,~] = mapSequence2Truth(true_states_all,est_states_all);
+                % Cluster Metrics per run considering transform-invariant state
+                % sequences given by Z(F)
+                [~, ~, fmeasure(run,iter)] = cluster_metrics(true_states_all, est_states_all);
+                
+                
+                if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+                    % Create cluster sequence and add it to best Psi struct
+                    stateSeq = Sampler_Stats(run).CH.Psi(iter).stateSeq;
+                    est_clusts_all  = [];
+                    for ss=1:length(stateSeq)
+                        clear c z
+                        z = stateSeq(ss).z;
+                        c = z;
+                        for k=1:length(Sampler_Stats(run).CH.Psi(iter).Z)
+                            c(z==k) = Sampler_Stats(run).CH.Psi(iter).Z(k);
+                        end
+                        est_clusts_all  = [est_clusts_all c];
+                    end
+                    % Cluster Metrics per run considering transform-invariant state
+                    % sequences given by Z(F)
+                    [~, ~, fmeasureClust(run,iter)] = cluster_metrics(true_states_all, est_clusts_all);
+                end
+            end
+        end        
         
-        subplot(2,1,2)
-        for f=1:size(nClusts,1);histogram(nClusts(f,:)); hold on; end
+        % Plot traces of metrics
+        h3 = figure('Color',[1 1 1]);
+        subplot(plots,1,1)        
+        for run=1:T
+            semilogx(Iterations,hamming(run, :),'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;
+        end
+        xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('Normalized Hamming','Interpreter','LaTex','Fontsize',20)
+        title ({sprintf('Estimated Features vs. Ground Truth over %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+        xlim([1 max(Iterations)])
+        ylim([0 1])
         grid on
-        title({sprintf('Estimated Features Clusters $K_Z$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
-    else
-        for f=1:size(nFeats,1);histogram(nFeats(f,:)); hold on; end
+        
+        subplot(plots,1,2)
+        for run=1:T
+            semilogx(Iterations,fmeasure(run, :),'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;
+        end
+        xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('$\mathcal{F}$-Measure','Interpreter','LaTex','Fontsize',20)
+        title ({sprintf('Estimated Features vs. Ground Truth over %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+        xlim([1 max(Iterations)])
+        ylim([0 1])
         grid on
-        title({sprintf('Estimated Features $K$ throughout %d runs ',[T])},'Interpreter','LaTex','Fontsize',20)
+        
+        if isfield(Sampler_Stats(1).CH.Psi(1), 'K_z')
+            subplot(plots,1,3)            
+            for run=1:T
+                semilogx(Iterations,fmeasureClust(run, :),'--*', 'LineWidth', 2,'Color',colors(run,:)); hold on;
+            end
+            xlabel('MCMC Iteration','Interpreter','LaTex','Fontsize',20); ylabel('$\mathcal{F}$-Measure','Interpreter','LaTex','Fontsize',20)
+            title ({sprintf('Estimated Feature Clusters vs. Ground Truth over %d runs',[T])}, 'Interpreter','LaTex','Fontsize',20)
+            xlim([1 max(Iterations)])
+            ylim([0 1])
+            grid on
+        end
+        
     end
 end
-
-
 end
+
