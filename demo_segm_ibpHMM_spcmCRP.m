@@ -53,10 +53,9 @@ h1 = plotSimMat( TruePsi.S );
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'same'; full = 0; 
-rf = 'same'; % Define if you want data recorded from the same reference frame or 'diff'
-[data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; Data_ = Data;  super_states = 0;
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full);
+dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -107,7 +106,7 @@ modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kap
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
-         'doSampleFUnique', 1, 'doSplitMerge', 1} ;
+         'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions
 T = 10; 
@@ -168,7 +167,7 @@ else
 end
 
 % Compute metrics for IBP-HMM
-[ results ] = computeSegmClustmetrics(true_states_all, Best_Psi, est_labels);
+[ results, est_clusts ] = computeSegmClustmetrics(true_states_all, Best_Psi, est_labels);
 
 %% Choose best run
 log_probs = zeros(1,T);
@@ -176,8 +175,9 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-bestPsi      = Best_Psi(id_max(1));
-est_labels_  = est_labels{id_max(1)};
+besTRun = id_max(2);
+bestPsi      = Best_Psi(besTRun);
+est_labels_  = est_labels{besTRun};
 
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 if exist('h2','var') && isvalid(h2), delete(h2);end
@@ -209,18 +209,25 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels_);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
+labels = [];
+labels_c = [];
+for e=1:length(bestPsi.Psi.stateSeq)
+    est_states{e} = bestPsi.Psi.stateSeq(e).z';
+    labels = [labels unique(est_states{e})'];    
+    labels_c = [labels_c unique(est_clusts{e})'];    
+end
+labels = unique(labels);
+labels_c = unique(labels_c);
 
 % Plot Segmentated 3D Trajectories
-labels    = unique(est_states_all);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 
 % Plot Clustered/Segmentated 3D Trajectories
-labels    = unique(est_clust_states_all);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, est_clust_states, titlename, labels);
+h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels);
 
 % Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');

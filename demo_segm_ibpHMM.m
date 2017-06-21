@@ -53,9 +53,9 @@ h1 = plotSimMat( TruePsi.S );
 %Dimensions:
 %x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'same'; full = 0;
-[data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; Data_ = Data;  super_states = 0;
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full);
+dataset_name = 'Grating'; super_states = 0;
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -109,7 +109,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',1, 'BP.doSampleMass',1,'BP.doSample
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 1; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -175,15 +175,20 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name);
 
 %% Visualize Segmented Trajectories in 3D ONLY!
-labels    = unique(est_states_all);
-titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
-
 % Plot Segmentated 3D Trajectories
+titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
+labels = [];
+for e=1:length(bestPsi.Psi.stateSeq)
+    est_states{e} = bestPsi.Psi.stateSeq(e).z';
+    labels = [labels unique(est_states{e})'];    
+end
+labels = unique(labels);
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
+drawframe(eye(4), 0.1)
 
+%% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
-% Plot Segmentated 3D Trajectories
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-
+drawframe(eye(4), 0.1)

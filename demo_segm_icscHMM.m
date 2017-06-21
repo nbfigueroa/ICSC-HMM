@@ -52,8 +52,7 @@ h1 = plotSimMat( TruePsi.S );
 % type : 'robot'/'grater'/'mixed' indicates reference frame of time-series
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; 
-rf = 'same'; % Define if you want data recorded from the same reference frame or 'diff'
-[data, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
+[data, TruePsi, Data, True_states] = load_grating_dataset( data_path, type, display, full);
 dataset_name = 'Grating'; Data_ = Data; 
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
@@ -111,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 20; 
+T = 10; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
