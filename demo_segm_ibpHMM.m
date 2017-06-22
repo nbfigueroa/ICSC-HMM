@@ -119,7 +119,7 @@ for run=1:T
     % Run Gibbs Sampler for Niter once.
     clear CH    
     % Start out with random number of features
-    initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
+    initP  = {'F.nTotal', randsample(data.N,1)+1}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
 end

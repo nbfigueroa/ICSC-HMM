@@ -110,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleC
          'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions
-T = 5; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -119,7 +119,7 @@ for run=1:T
     % Run Gibbs Sampler for Niter once.
     clear CH    
     % Start out with just one feature for all objects
-    initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
+    initP  = {'F.nTotal', randsample(data.N,1)+1}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
 end
@@ -176,7 +176,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-besTRun = id_max(1);
+besTRun = id_max(2);
 bestPsi      = Best_Psi(besTRun);
 est_labels_  = est_labels{besTRun};
 
