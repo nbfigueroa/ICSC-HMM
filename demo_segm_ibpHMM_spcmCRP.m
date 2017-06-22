@@ -224,14 +224,15 @@ labels_c = unique(labels_c);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-
+drawframe(eye(4), 0.1); axis equal
 % Plot Clustered/Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
+drawframe(eye(4), 0.1); axis equal
 
 %% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h7','var') && isvalid(h7), delete(h7);end
 h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-
+drawframe(eye(4), 0.1); axis equal
