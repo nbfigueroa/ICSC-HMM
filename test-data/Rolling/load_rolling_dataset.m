@@ -1,4 +1,4 @@
-function [data, TruePsi, Data, True_states, Data_o] = load_rolling_dataset( data_path, type, display, full, normalize, varargin)
+function [data, TruePsi, Data, True_states, Data_o] = load_rolling_dataset( data_path, type, type2, display, full, normalize, varargin)
 
 label_range = [1 2 3];
 Data_o = [];    
@@ -14,8 +14,13 @@ switch type
         end
         
     case 'proc'
-        load(strcat(data_path,'Rolling/proc-data-labeled.mat')) 
-               
+        
+        switch type2
+            case 'aligned'
+                load(strcat(data_path,'Rolling/proc-data-labeled-aligned.mat'))
+            case 'real'
+                load(strcat(data_path,'Rolling/proc-data-labeled-real.mat'))
+        end
         Data_o = Data;        
         
         % Convert positions to velocities
