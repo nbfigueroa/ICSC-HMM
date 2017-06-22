@@ -110,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
@@ -149,7 +149,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 
 % Choose best IBP-HMM run
-bestPsi = Best_Psi(id_max(2));
+bestPsi = Best_Psi(id_max(1));
 est_labels = bestPsi.Psi.Z;
 
 if exist('h2','var') && isvalid(h2), delete(h2);end

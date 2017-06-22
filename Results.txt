@@ -71,3 +71,7 @@
 
 
  *** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 
+
+
+
+*** ICSC-HMM Results*** 

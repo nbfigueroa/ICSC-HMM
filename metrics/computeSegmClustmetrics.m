@@ -59,7 +59,7 @@ for run=1:T
     [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
     [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
     inferred_states(run)      = length(unique(est_states_all));
-    nFeats(run)               = Best_Psi(run).nFeats;
+    inferred_states(run)      = Best_Psi(run).nFeats;
     
     % Cluster Metrics per run considering transform-invariant state
     % sequences given by Z(F)
@@ -67,8 +67,7 @@ for run=1:T
     if isempty(varargin)
         if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
             [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
-            inferred_state_clust(run) = length(unique(est_clusts_all));
-            nClusts(run)               = Best_Psi(run).nClusts;
+            inferred_state_clust(run)               = Best_Psi(run).nClusts;
         else
             [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
         end
@@ -78,12 +77,6 @@ for run=1:T
     end
 end
 
-inferred_states
-nFeats
-
-inferred_state_clust
-nClusts
-    
 % Make struct with metrics
 results = struct();
 results.hamming_distance     = hamming_distance;
