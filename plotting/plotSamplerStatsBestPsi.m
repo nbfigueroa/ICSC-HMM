@@ -2,7 +2,7 @@ function [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats, varargin)
 
 % Gather High-level Stats
 T = length(Sampler_Stats);
-Iterations = Sampler_Stats(1).CH.iters.logPr;
+
 estimated_feats  = zeros(1,T);
 estimated_clusts = zeros(1,T);
 
@@ -18,14 +18,15 @@ end
 
 subplot(plots,1,1)
 for i=1:T
-    joint_logs = zeros(1,length(Iterations));
+    Iterations  = Sampler_Stats(i).CH.iters.logPr;
+    joint_logs  = zeros(1,length(Iterations));
     for ii=1:length(Iterations); joint_logs(1,ii) = Sampler_Stats(i).CH.logPr(ii).all;end
-    [max_joint best_iter] = max(joint_logs);
-    
+    [max_joint best_iter] = max(joint_logs)
+%     [~, ids]  = sort(abs(Sampler_Stats(i).CH.iters.Psi - Sampler_Stats(i).CH.iters.logPr(best_iter)),'ascend');
+
     % Extract best iteration from each run    
-    Best_Psi(i).logPr   = Sampler_Stats(i).CH.logPr(best_iter).all;
-    [~, ids]  = sort(abs(Sampler_Stats(i).CH.iters.Psi - Sampler_Stats(i).CH.iters.logPr(best_iter)),'ascend');
-    Best_Psi(i).Psi     = Sampler_Stats(i).CH.Psi(ids(1));
+    Best_Psi(i).logPr   = Sampler_Stats(i).CH.logPr(best_iter).all;    
+    Best_Psi(i).Psi     = Sampler_Stats(i).CH.Psi(best_iter);
     Best_Psi(i).iter    = best_iter;
     Best_Psi(i).nFeats  = length(Best_Psi(i).Psi.theta);
     
@@ -36,7 +37,7 @@ for i=1:T
         Best_Psi(i).nClusts = Best_Psi(i).Psi.K_z;
         
         % Create cluster sequence and add it to best Psi struct
-        stateSeq = Sampler_Stats(i).CH.Psi(ids(1)).stateSeq;
+        stateSeq = Sampler_Stats(i).CH.Psi(best_iter).stateSeq;
         for ss=1:length(stateSeq)
             clear c z
             z = stateSeq(ss).z;
@@ -55,7 +56,7 @@ for i=1:T
     % Plot joint traces
     colors(i,:) = [rand rand rand];
     semilogx(Iterations,joint_logs,'--*', 'LineWidth', 2,'Color',colors(i,:)); hold on;
-    plot(best_iter, max_joint, 'o','MarkerFaceColor',colors(i,:), 'MarkerSize', 10, 'MarkerEdgeColor',[0 0 0]);
+    plot(Iterations(best_iter), max_joint, 'o','MarkerFaceColor',colors(i,:), 'MarkerSize', 10, 'MarkerEdgeColor',[0 0 0]);
 end
 xlim([1 Iterations(end)]);
 xlabel('MCMC Iterations','Interpreter','LaTex','Fontsize',16); ylabel('LogPr','Interpreter','LaTex','Fontsize',20)

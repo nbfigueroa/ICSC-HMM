@@ -2,7 +2,8 @@ function ChainHist = recordMCMCHistory_ICSCHMM( n, outParams, ChainHist, Psi, lo
 % Save current state of sampler
 
 % -------------------------------------------------- update logPr trace
-if n == 1 || rem( n, outParams.logPrEvery ) == 0
+% if n == 1 || rem( n, outParams.logPrEvery ) == 0
+if ( n==1 || rem( n, outParams.saveEvery)==0 )    
     if isfield( ChainHist, 'logPr' )
         dC = length( ChainHist.logPr ) + 1;
         ChainHist.logPr(dC) = logPr;
@@ -15,8 +16,8 @@ if n == 1 || rem( n, outParams.logPrEvery ) == 0
     ChainHist.iters.logPr(dC) = n;
     ChainHist.times.logPr(dC) = toc;
 end
-
-% -------------------------------------------------- save current config
+% 
+% % -------------------------------------------------- save current config
 if ( n==1 || rem( n, outParams.saveEvery)==0 )    
     storePsi = packBPHMMState( Psi );       
     if isfield( ChainHist, 'Psi' )

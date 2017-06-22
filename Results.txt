@@ -32,18 +32,42 @@
 
  *** Hidden Markov Model Results*** (position)
  Optimal States: 5 
- Hamming-Distance: 0.537 (0.016) GCE: 0.222 (0.030) VO: 1.894 (0.164) 
- Purity: 0.870 (0.020) NMI: 0.304 (0.054) F: 0.597 (0.015) 
+ Hamming-Distance: 0.542 (0.009) GCE: 0.215 (0.022) VO: 1.827 (0.043) 
+ Purity: 0.874 (0.015) NMI: 0.318 (0.037) F: 0.596 (0.010)  
 
- *** Sticky HDP-HMM Results*** (position)
- Optimal States: 4.400 (0.966) 
- Hamming-Distance: 0.275 (0.175) GCE: 0.169 (0.018) VO: 1.256 (0.292) 
- Purity: 0.892 (0.018) NMI: 0.467 (0.051) F: 0.780 (0.113) 
+ *** Sticky HDP-HMM Results*** (position) -- like
+ Optimal States: 4.700 (0.823) 
+ Hamming-Distance: 0.299 (0.190) GCE: 0.150 (0.029) VO: 1.213 (0.403) 
+ Purity: 0.908 (0.023) NMI: 0.502 (0.092) F: 0.766 (0.119)  
 
- 
+*** IBP-HMM Results*** (position)
+ Optimal Feature States: 5.100 (0.994) 
+ Hamming-Distance: 0.280 (0.168) GCE: 0.129 (0.035) VO: 1.207 (0.340) 
+ Purity: 0.922 (0.030) NMI: 0.523 (0.057) F: 0.788 (0.102)  
+
+*** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 
+ Optimal Transform-Dependent States: 5.100 (0.994) 
+ Optimal Transform-Invariant States: 2.300 (0.483) 
+ Hamming-Distance: 0.280 (0.168) GCE: 0.129 (0.035) VO: 1.207 (0.340) 
+ Purity: 0.878 (0.015) NMI: 0.543 (0.035) F: 0.872 (0.016)  
+
+ *** ICSC-HMM Results*** 
+
+
+
+2b) Results Grating Diff. RF (velocity)
 
 *** Hidden Markov Model Results*** (velocity)
- Optimal States: 5 
- Hamming-Distance: 0.321 (0.125) GCE: 0.141 (0.014) VO: 1.287 (0.334) 
- Purity: 0.919 (0.013) NMI: 0.504 (0.064) F: 0.768 (0.068) 
+ Optimal States: 6 
+ Hamming-Distance: 0.369 (0.143) GCE: 0.157 (0.013) VO: 1.470 (0.386) 
+ Purity: 0.912 (0.009) NMI: 0.458 (0.066) F: 0.726 (0.082) 
 
+*** Sticky HDP-HMM Results*** (velocity)
+ Optimal States: 4.100 (1.101) 
+ Hamming-Distance: 0.216 (0.073) GCE: 0.178 (0.034) VO: 1.290 (0.159) 
+ Purity: 0.878 (0.034) NMI: 0.456 (0.040) F: 0.831 (0.030)  
+
+ *** IBP-HMM Results*** (velocity)
+
+
+ *** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 

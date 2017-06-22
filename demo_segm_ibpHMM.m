@@ -51,11 +51,12 @@ h1 = plotSimMat( TruePsi.S );
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
-[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; super_states = 0;
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
+dataset_name = 'Grating'; 
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -105,7 +106,7 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',1, 'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
@@ -128,7 +129,7 @@ if exist('h1','var')  && isvalid(h1),  delete(h1);end
 if exist('h1b','var') && isvalid(h1b), delete(h1b);end
 [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats);
 
-%%%%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
+%% %%%% Compute Clustering/Segmentation Metrics vs Ground Truth %%%%%%
 if isfield(TruePsi, 'sTrueAll')
     true_states_all = TruePsi.sTrueAll;
 else
@@ -143,7 +144,7 @@ log_probs = zeros(1,T);
 for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 
 [val_max id_max] = sort(log_probs,'descend')
-bestPsi      = Best_Psi(id_max(1));
+bestPsi      = Best_Psi(id_max(2));
 
 %% Plot Segmentation with Chosen Run
 if exist('h2','var') && isvalid(h2), delete(h2);end
@@ -185,10 +186,10 @@ end
 labels = unique(labels);
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis equal
 
 %% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis equal

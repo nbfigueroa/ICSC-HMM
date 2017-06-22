@@ -42,11 +42,13 @@ h1 = plotSimMat( TruePsi.S );
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 1;
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
 dataset_name = 'Grating'; 
+
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -187,7 +189,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = id_mean(2);
+id = id_mean(1);
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];

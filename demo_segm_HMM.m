@@ -43,7 +43,8 @@ h1 = plotSimMat( TruePsi.S );
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
@@ -240,10 +241,10 @@ titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis equal
 
 % Plot Segmentated 3D Trajectories with "TRUE LABELS"
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis equal
