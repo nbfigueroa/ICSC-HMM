@@ -22,34 +22,33 @@ clc; clear all; close all;
 N_TS = 3; display = 2 ; % 0: no-display, 1: raw data in one plot, 2: ts w/labels
 [~, Data, True_states] = genToyHMMData_Gaussian( N_TS, display ); 
 label_range = unique(True_states{1});
-super_states = 0;
 
 %% 2a) Toy 2D dataset, 4 Unique Emission models, max 5 time-series
 clc; clear all; close all;
 M = 4; % Number of Time-Series
 [~, ~, Data, True_states] = genToySeqData_Gaussian( 4, 2, M, 500, 0.5 ); 
-super_states = 0;
 
 %% 2b) Toy 2D dataset, 2 Unique Emission models transformed, max 4 time-series
 clc; clear all; close all;
 M = 3; % Number of Time-Series
 [~, TruePsi, Data, True_states] = genToySeqData_TR_Gaussian(4, 2, M, 500, 0.5 );
 dataset_name = '2D Transformed'; 
-super_states = 1;
 
 % Similarity matrix S (4 x 4 matrix)
 if exist('h1','var') && isvalid(h1), delete(h1);end
-h1 = plotSimMat( TruePsi.S )
+h1 = plotSimMat( TruePsi.S );
 
 %% 3) Real 'Grating' 7D dataset, 3 Unique Emission models, 12 time-series
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'same'; full = 0;
-[~, ~, Data, True_states] = load_grating_dataset( data_path, type, display, full);
-dataset_name = 'Grating'; super_states = 0;
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
+dataset_name = 'Grating'; 
+
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 

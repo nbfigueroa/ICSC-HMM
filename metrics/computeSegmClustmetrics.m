@@ -2,7 +2,7 @@ function [results] = computeSegmClustmetrics(true_states_all, Best_Psi, varargin
 
 % Number of runs
 T = length(Best_Psi);
-N = length(Best_Psi(1).Psi.stateSeq);
+N = length(Best_Psi(1).Psi.stateSeq)
 
 % Segmentation Metric Arrays
 hamming_distance     = zeros(1,T);
@@ -10,6 +10,9 @@ global_consistency   = zeros(1,T);
 variation_info       = zeros(1,T);
 inferred_states      = zeros(1,T);
 inferred_state_clust = zeros(1,T);
+
+nFeats      = zeros(1,T);
+nClusts = zeros(1,T);
 
 % Clustering Metric Arrays
 cluster_purity = zeros(1,T);
@@ -56,6 +59,7 @@ for run=1:T
     [relabeled_est_states_all, hamming_distance(run),~,~] = mapSequence2Truth(true_states_all,est_states_all);
     [~,global_consistency(run), variation_info(run)] = compare_segmentations(true_states_all,est_states_all);
     inferred_states(run)      = length(unique(est_states_all));
+    inferred_states(run)      = Best_Psi(run).nFeats;
     
     % Cluster Metrics per run considering transform-invariant state
     % sequences given by Z(F)
@@ -63,7 +67,7 @@ for run=1:T
     if isempty(varargin)
         if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
             [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
-            inferred_state_clust(run) = length(unique(est_clusts_all));
+            inferred_state_clust(run)               = Best_Psi(run).nClusts;
         else
             [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, relabeled_est_states_all);
         end

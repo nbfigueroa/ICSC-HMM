@@ -2,7 +2,8 @@ function ChainHist = recordMCMCHistory_BPHMM( n, outParams, ChainHist, Psi, logP
 % Save current state of sampler
 
 % -------------------------------------------------- update logPr trace
-if n == 1 || rem( n, outParams.logPrEvery ) == 0
+if ( n==1 || rem( n, outParams.saveEvery)==0 )
+% if n == 1 || rem( n, outParams.logPrEvery ) == 0
     if isfield( ChainHist, 'logPr' )
         dC = length( ChainHist.logPr ) + 1;
         ChainHist.logPr(dC) = logPr;

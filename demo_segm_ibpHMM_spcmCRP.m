@@ -51,11 +51,12 @@ h1 = plotSimMat( TruePsi.S );
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
-dataset_name = 'Grating'; super_states = 0;
+dataset_name = 'Grating'; 
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -109,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleC
          'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -148,7 +149,7 @@ for l=1:length(Best_Psi)
     clear clust_options
     clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
     clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
-    clust_options.T             = 100;     % Sampler Iterations
+    clust_options.T             = 500;     % Sampler Iterations
     clust_options.alpha         = 1;       % Concentration parameter
     clust_options.plot_sim      = 0;
     clust_options.init_clust    = 1:length(sigmas);
@@ -212,9 +213,9 @@ h4 = plotGaussianEmissions2D(Est_theta, plot_labels, title_name, est_labels_);
 labels = [];
 labels_c = [];
 for e=1:length(bestPsi.Psi.stateSeq)
-    est_states{e} = bestPsi.Psi.stateSeq(e).z';
-    labels = [labels unique(est_states{e})'];    
-    labels_c = [labels_c unique(est_clusts{e})'];    
+    est_states{e} = bestPsi.Psi.stateSeq(e).z;
+    labels = [labels unique(est_states{e})];    
+    labels_c = [labels_c unique(est_clusts{e})];    
 end
 labels = unique(labels);
 labels_c = unique(labels_c);
@@ -223,14 +224,15 @@ labels_c = unique(labels_c);
 titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-
+drawframe(eye(4), 0.1); axis equal
 % Plot Clustered/Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
+drawframe(eye(4), 0.1); axis equal
 
-% Plot Segmentated 3D Trajectories
+%% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h7','var') && isvalid(h7), delete(h7);end
 h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-
+drawframe(eye(4), 0.1); axis equal

@@ -4,7 +4,7 @@
  Optimal States: 4 
  Hamming-Distance: 0.258 (0.067) GCE: 0.024 (0.075) VO: 0.852 (0.297) 
  Purity: 0.981 (0.062) NMI: 0.705 (0.121) F: 0.838 (0.081)  
- 
+
 *** Sticky HDP-HMM Results*** 
  Optimal States: 4.000 (0.000) 
  Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
@@ -28,9 +28,50 @@
  Purity: 1.000 (0.000) NMI: 0.965 (0.045) F: 0.991 (0.012)  
 
 
- 2a) Results Grating Same RF
+ 2b) Results Grating Diff. RF (position)
+
+ *** Hidden Markov Model Results*** (position)
+ Optimal States: 5 
+ Hamming-Distance: 0.542 (0.009) GCE: 0.215 (0.022) VO: 1.827 (0.043) 
+ Purity: 0.874 (0.015) NMI: 0.318 (0.037) F: 0.596 (0.010)  
+
+ *** Sticky HDP-HMM Results*** (position) -- like
+ Optimal States: 4.700 (0.823) 
+ Hamming-Distance: 0.299 (0.190) GCE: 0.150 (0.029) VO: 1.213 (0.403) 
+ Purity: 0.908 (0.023) NMI: 0.502 (0.092) F: 0.766 (0.119)  
+
+*** IBP-HMM Results*** (position)
+ Optimal Feature States: 5.100 (0.994) 
+ Hamming-Distance: 0.280 (0.168) GCE: 0.129 (0.035) VO: 1.207 (0.340) 
+ Purity: 0.922 (0.030) NMI: 0.523 (0.057) F: 0.788 (0.102)  
+
+*** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 
+ Optimal Transform-Dependent States: 5.100 (0.994) 
+ Optimal Transform-Invariant States: 2.300 (0.483) 
+ Hamming-Distance: 0.280 (0.168) GCE: 0.129 (0.035) VO: 1.207 (0.340) 
+ Purity: 0.878 (0.015) NMI: 0.543 (0.035) F: 0.872 (0.016)  
+
+ *** ICSC-HMM Results*** 
 
 
 
+2b) Results Grating Diff. RF (velocity)
 
- 2b) Results Grating Diff. RF
+*** Hidden Markov Model Results*** (velocity)
+ Optimal States: 6 
+ Hamming-Distance: 0.369 (0.143) GCE: 0.157 (0.013) VO: 1.470 (0.386) 
+ Purity: 0.912 (0.009) NMI: 0.458 (0.066) F: 0.726 (0.082) 
+
+*** Sticky HDP-HMM Results*** (velocity)
+ Optimal States: 4.100 (1.101) 
+ Hamming-Distance: 0.216 (0.073) GCE: 0.178 (0.034) VO: 1.290 (0.159) 
+ Purity: 0.878 (0.034) NMI: 0.456 (0.040) F: 0.831 (0.030)  
+
+ *** IBP-HMM Results*** (velocity)
+
+
+ *** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 
+
+
+
+*** ICSC-HMM Results*** 

@@ -48,11 +48,12 @@ h1 = plotSimMat( TruePsi.S );
 %Demonstration of a Carrot Grating Task consisting of 
 %12 (7-d) time-series X = {x_1,..,x_T} with variable length T. 
 %Dimensions:
-%x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
+% type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
-dataset_name = 'Grating'; super_states = 0;
+dataset_name = 'Grating'; 
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -109,7 +110,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
@@ -137,7 +138,7 @@ if exist('h1b','var') && isvalid(h1b), delete(h1b);end
 
 % Compute metrics for ICSC-HMM
 clc;
-results = computeICSCHMMmetrics(true_states_all, Best_Psi);
+results = computeSegmClustmetrics(true_states_all, Best_Psi);
 
 %% Choose best run
 log_probs = zeros(1,T);
@@ -184,6 +185,7 @@ labels = [];
 labels_c = [];
 for e=1:length(bestPsi.Psi.stateSeq)
     est_states{e} = bestPsi.Psi.stateSeq(e).z';
+    est_clusts{e} = bestPsi.Psi.stateSeq(e).c';
     labels = [labels unique(est_states{e})'];    
     labels_c = [labels_c unique(est_clusts{e})'];    
 end
