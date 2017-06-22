@@ -12,7 +12,7 @@ if K_est >= 2
         end
         
         % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
-        clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
+        clust_options.tau           = randsample(3,1);       % Tolerance Parameter for SPCM-CRP
         clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
         clust_options.alpha         = 1;       % Concentration parameter
         clust_options.plot_sim      = 0;
@@ -25,7 +25,7 @@ if K_est >= 2
         end
         
         % Mutliple Inference of SPCM-CRP Mixture Model
-        runs = 5;
+        runs = 3;
         parfor i=1:runs
             [Clust_Psi_{i}, ~, est_labels_{i}]  = run_SPCMCRP_mm(sigmas, clust_options);
         end

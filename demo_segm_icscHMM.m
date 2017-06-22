@@ -110,15 +110,14 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 5; 
+T = 10; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
 for run=1:T       
     % Run MCMC Sampler for Niter once.
     clear CH    
-    % Start out with just one feature for all objects
-    initP  = {'F.nTotal', randsample(ceil(data.N),1)}; 
+    initP  = {'F.nTotal', randsample(data.N,1)+1}; 
     CH = runICSCHMM( data, modelP, {jobID, run}, algP, initP, './icsc-Results');  
     Sampler_Stats(run).CH = CH;
 end
