@@ -1,0 +1,34 @@
+ -------- 4a) Results Peeling Change locations (position) --------
+
+ *** Hidden Markov Model Results*** 
+ Optimal States: 6 
+ Hamming-Distance: 0.563 (0.020) GCE: 0.398 (0.008) VO: 2.734 (0.066) 
+ Purity: 0.717 (0.010) NMI: 0.366 (0.010) F: 0.533 (0.018)  
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 6.100 (1.197) 
+ Hamming-Distance: 0.414 (0.108) GCE: 0.301 (0.114) VO: 2.085 (0.485) 
+ Purity: 0.706 (0.091) NMI: 0.434 (0.068) F: 0.646 (0.079)  
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 4.000 (0.000) 
+ Hamming-Distance: 0.242 (0.000) GCE: 0.154 (0.000) VO: 1.376 (0.000) 
+ Purity: 0.758 (0.000) NMI: 0.563 (0.000) F: 0.763 (0.000)  
+
+
+ -------- 4b) Results Peeling Change locations (velocity) --------
+ *** Hidden Markov Model Results*** 
+ Optimal States: 5 
+ Hamming-Distance: 0.360 (0.142) GCE: 0.333 (0.042) VO: 1.988 (0.415) 
+ Purity: 0.763 (0.027) NMI: 0.476 (0.072) F: 0.682 (0.095)  
+
+ *** Sticky HDP-HMM Results*** (no need for feature clustering)
+ Optimal States: 7.800 (0.789) 
+ Hamming-Distance: 0.255 (0.110) GCE: 0.277 (0.031) VO: 1.680 (0.200) 
+ Purity: 0.776 (0.095) NMI: 0.520 (0.082) F: 0.761 (0.075)  
+
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 5.500 (0.850) 
+ Hamming-Distance: 0.480 (0.021) GCE: 0.164 (0.015) VO: 1.784 (0.088) 
+ Purity: 0.524 (0.020) NMI: 0.367 (0.046) F: 0.612 (0.021)  

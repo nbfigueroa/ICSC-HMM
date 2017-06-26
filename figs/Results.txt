@@ -1,0 +1,154 @@
+1) Results 2d-transformed dataset
+
+*** Hidden Markov Model Results*** 
+ Optimal States: 4 
+ Hamming-Distance: 0.258 (0.067) GCE: 0.024 (0.075) VO: 0.852 (0.297) 
+ Purity: 0.981 (0.062) NMI: 0.705 (0.121) F: 0.838 (0.081)  
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 4.000 (0.000) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.743 (0.000) F: 0.863 (0.000)  
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 4.000 (0.000) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.743 (0.000) F: 0.863 (0.000) 
+
+*** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors)
+ Optimal Transform-Dependent States: 4.000 (0.000) 
+ Optimal Transform-Invariant States: 2.400 (0.699) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 0.965 (0.110) NMI: 0.857 (0.304) F: 0.958 (0.094)
+
+*** ICSC-HMM Results*** 
+ Optimal Transform-Dependent States: 4.000 (0.000) 
+ Optimal Transform-Invariant States: 2.400 (0.516) 
+ Hamming-Distance: 0.237 (0.000) GCE: 0.000 (0.000) VO: 0.758 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.965 (0.045) F: 0.991 (0.012)  
+
+
+ 2) Results Grating Diff. RF (position)
+
+ *** Hidden Markov Model Results*** (position)
+ Optimal States: 5 
+ Hamming-Distance: 0.542 (0.009) GCE: 0.215 (0.022) VO: 1.827 (0.043) 
+ Purity: 0.874 (0.015) NMI: 0.318 (0.037) F: 0.596 (0.010)  
+
+ *** Sticky HDP-HMM Results*** (position) -- like
+ Optimal States: 4.700 (0.823) 
+ Hamming-Distance: 0.299 (0.190) GCE: 0.150 (0.029) VO: 1.213 (0.403) 
+ Purity: 0.908 (0.023) NMI: 0.502 (0.092) F: 0.766 (0.119)  
+
+------------- WITHOUT SPLIT-MERGE MOVES -------------
+
+*** IBP-HMM Results*** (position)
+ Optimal Feature States: 6.000 (1.333) 
+ Hamming-Distance: 0.305 (0.172) GCE: 0.116 (0.027) VO: 1.254 (0.362) 
+ Purity: 0.930 (0.025) NMI: 0.533 (0.057) F: 0.778 (0.107)  
+
+ Optimal Feature States: 5.600 (1.713) 
+ Hamming-Distance: 0.301 (0.181) GCE: 0.127 (0.020) VO: 1.255 (0.406) 
+ Purity: 0.924 (0.020) NMI: 0.523 (0.062) F: 0.778 (0.110) 
+
+*** IBP-HMM + SPCM-CRP Results*** (Hyper-Param Re-sampling with fixed hyper-priors) 
+ Optimal Transform-Dependent States: 6.000 (1.333) 
+ Optimal Transform-Invariant States: 2.200 (0.789) 
+ Hamming-Distance: 0.305 (0.172) GCE: 0.116 (0.027) VO: 1.254 (0.362) 
+ Purity: 0.854 (0.061) NMI: 0.415 (0.260) F: 0.834 (0.077)  
+
+*** ICSC-HMM Results*** (over 10 runs)
+ Optimal Transform-Dependent States: 6.500 (1.581) 
+ Optimal Transform-Invariant States: 2.200 (0.422) 
+ Hamming-Distance: 0.404 (0.153) GCE: 0.113 (0.024) VO: 1.479 (0.371) 
+ Purity: 0.827 (0.063) NMI: 0.327 (0.290) F: 0.806 (0.082)  
+
+*** ICSC-HMM Results*** (over 20 runs)
+ Optimal Transform-Dependent States: 6.300 (1.418) 
+ Optimal Transform-Invariant States: 2.350 (0.489) 
+ Hamming-Distance: 0.339 (0.162) GCE: 0.114 (0.014) VO: 1.282 (0.375) 
+ Purity: 0.821 (0.063) NMI: 0.282 (0.290) F: 0.797 (0.085) 
+
+ *** ICSC-HMM Results*** (last iterations as best)
+ Optimal Transform-Dependent States: 6.150 (1.631) 
+ Optimal Transform-Invariant States: 2.450 (0.510) 
+ Hamming-Distance: 0.339 (0.162) GCE: 0.114 (0.014) VO: 1.282 (0.376) 
+ Purity: 0.854 (0.057) NMI: 0.422 (0.254) F: 0.833 (0.079)  
+
+
+------------- randsample(3,1); -------------
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 7.800 (0.447) 
+ Hamming-Distance: 0.547 (0.003) GCE: 0.112 (0.028) VO: 1.687 (0.108) 
+ Purity: 0.935 (0.022) NMI: 0.464 (0.044) F: 0.605 (0.003)  
+
+*** IBP-HMM + SPCM-CRP Results*** 
+ Optimal Transform-Dependent States: 7.800 (0.447) 
+ Optimal Transform-Invariant States: 2.800 (0.447) 
+ Hamming-Distance: 0.547 (0.003) GCE: 0.112 (0.028) VO: 1.687 (0.108) 
+ Purity: 0.890 (0.012) NMI: 0.577 (0.055) F: 0.874 (0.013)  
+
+ *** ICSC-HMM Results*** 
+ Optimal Transform-Dependent States: 8.000 (1.414) 
+ Optimal Transform-Invariant States: 2.400 (0.548) 
+ Hamming-Distance: 0.547 (0.008) GCE: 0.137 (0.020) VO: 1.769 (0.082) 
+ Purity: 0.854 (0.053) NMI: 0.432 (0.241) F: 0.845 (0.073)  
+ Purity: 0.879 (0.000) NMI: 0.551 (0.000) F: 0.879 (0.000)
+
+
+*** ICSC-HMM Results*** (20runs)
+ Optimal Transform-Dependent States: 9.200 (1.735) 
+ Optimal Transform-Invariant States: 2.500 (0.607) 
+ Hamming-Distance: 0.548 (0.007) GCE: 0.098 (0.023) VO: 1.655 (0.071) 
+ Purity: 0.845 (0.064) NMI: 0.372 (0.283) F: 0.821 (0.081) 
+
+ *** ICSC-HMM Results*** (20 runs)
+
+ 3) Results Rolling Diff. Dir (velocity)
+ *** Hidden Markov Model Results*** 
+ Optimal States: 5 
+ Hamming-Distance: 0.486 (0.038) GCE: 0.270 (0.048) VO: 2.023 (0.138) 
+ Purity: 0.799 (0.055) NMI: 0.482 (0.041) F: 0.635 (0.055)   
+
+ Optimal States: 6 
+ Hamming-Distance: 0.507 (0.052) GCE: 0.237 (0.041) VO: 2.130 (0.161) 
+ Purity: 0.824 (0.038) NMI: 0.493 (0.041) F: 0.636 (0.052) 
+
+ *** Sticky HDP-HMM Results*** 
+ Optimal States: 6.500 (1.179) 
+ Hamming-Distance: 0.501 (0.046) GCE: 0.270 (0.066) VO: 2.183 (0.194) 
+ Purity: 0.794 (0.068) NMI: 0.461 (0.050) F: 0.612 (0.040)  
+
+
+ 2) Results Grating Diff. RF (position) - zero mean data 
+
+ *** IBP-HMM Results*** w/o split-merge
+ Optimal Feature States: 4.500 (0.850) 
+ Hamming-Distance: 0.295 (0.138) GCE: 0.116 (0.028) VO: 1.187 (0.328) 
+ Purity: 0.928 (0.019) NMI: 0.554 (0.073) F: 0.798 (0.077) 
+
+*** IBP-HMM + SPCM-CRP Results*** w/o split-merge
+ Optimal Transform-Dependent States: 4.500 (0.850) 
+ Optimal Transform-Invariant States: 2.500 (0.707) 
+ Hamming-Distance: 0.295 (0.138) GCE: 0.116 (0.028) VO: 1.187 (0.328) 
+ Purity: 0.896 (0.031) NMI: 0.609 (0.069) F: 0.890 (0.020)  
+
+ *** ICSC-HMM Results*** w/o split-merge
+ Optimal Transform-Dependent States: 5.800 (1.033) 
+ Optimal Transform-Invariant States: 2.500 (0.707) 
+ Hamming-Distance: 0.319 (0.159) GCE: 0.087 (0.024) VO: 1.208 (0.412) 
+ Purity: 0.853 (0.066) NMI: 0.432 (0.302) F: 0.836 (0.085) 
+
+*** ICSC-HMM Results*** w/o split-merge (20 runs)
+ Optimal Transform-Dependent States: 5.550 (1.572) 
+ Optimal Transform-Invariant States: 2.500 (0.513) 
+ Hamming-Distance: 0.229 (0.159) GCE: 0.107 (0.029) VO: 1.019 (0.417) 
+ Purity: 0.872 (0.052) NMI: 0.519 (0.232) F: 0.865 (0.067) 
+
+
+ *** ICSC-HMM Results*** w split-merge
+ Optimal Transform-Dependent States: 7.300 (1.160) 
+ Optimal Transform-Invariant States: 2.500 (0.527) 
+ Hamming-Distance: 0.483 (0.048) GCE: 0.094 (0.025) VO: 1.612 (0.200) 
+ Purity: 0.842 (0.045) NMI: 0.393 (0.220) F: 0.822 (0.065)   
