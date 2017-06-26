@@ -2,7 +2,7 @@ function [results] = computeSegmClustmetrics(true_states_all, Best_Psi, varargin
 
 % Number of runs
 T = length(Best_Psi);
-N = length(Best_Psi(1).Psi.stateSeq)
+N = length(Best_Psi(1).Psi.stateSeq);
 
 % Segmentation Metric Arrays
 hamming_distance     = zeros(1,T);

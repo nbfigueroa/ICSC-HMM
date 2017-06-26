@@ -21,7 +21,8 @@ for i=1:T
     Iterations  = Sampler_Stats(i).CH.iters.logPr;
     joint_logs  = zeros(1,length(Iterations));
     for ii=1:length(Iterations); joint_logs(1,ii) = Sampler_Stats(i).CH.logPr(ii).all;end
-    [max_joint best_iter] = max(joint_logs)
+    [max_joint best_iter] = max(joint_logs);
+    best_iter = length(Iterations);
 %     [~, ids]  = sort(abs(Sampler_Stats(i).CH.iters.Psi - Sampler_Stats(i).CH.iters.logPr(best_iter)),'ascend');
 
     % Extract best iteration from each run    

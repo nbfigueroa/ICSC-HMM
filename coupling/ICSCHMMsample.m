@@ -43,6 +43,8 @@ if algP.doSampleZ
     Psi.ThetaM = Psi.ThetaM.updateAllXSuffStats( horzcat(Psi.stateSeq(:).z), data );
 end
 
+
+old_Z = Psi.Z;
 if algP.doSplitMerge
     SM.ADD.nAccept=0;
     SM.ADD.nTotal =0;
@@ -68,6 +70,8 @@ elseif algP.doSMNoQRev
     end
     Stats.SM = SM;
 end
+Psi.Z = old_Z;
+
 
 if algP.doSampleUniqueZ
     % Warning: after a successful accept,
@@ -78,13 +82,13 @@ if algP.doSampleUniqueZ
     [Psi, Stats.RJZ] = sampleUniqueFeats( Psi, data, algP, 1, objIDs );
 end
 
-if algP.doSampleEta
+% if algP.doSampleEta
     Psi.TransM = Psi.TransM.sampleAllEta( Psi.F, Psi.stateSeq );
-end
+% end
 
-if algP.doSampleTheta
+% if algP.doSampleTheta
     Psi.ThetaM = Psi.ThetaM.sampleAllTheta( data, Psi.stateSeq );    
-end
+% end
 
 % Sampling feature clusters from current Theta estimate
 [Psi] = sampleFeatClusters(Psi);
@@ -94,8 +98,8 @@ M = length(Psi.stateSeq);
 K_ratio = Psi.ThetaM.K/(Psi.K_z*M);
 coeff = 0.5;
 
-% Psi.bpM.prior.a_mass = coeff*K_ratio;
-% Psi.bpM.prior.b_mass = coeff*K_ratio;
+Psi.bpM.prior.a_mass = coeff*K_ratio;
+Psi.bpM.prior.b_mass = coeff*K_ratio;
 
 % Re-sample IBP Hyper-parameterswrap o
 if algP.BP.doSampleMass || algP.BP.doSampleConc
@@ -104,16 +108,16 @@ end
 
 %%%% Compute Ratios for HMM Hyper-parameters %%%%
 % Hyperparameters for prior on alpha:
-% Psi.TransM.prior.a_alpha = coeff*K_ratio;
-% Psi.TransM.prior.b_alpha = coeff*K_ratio;
+Psi.TransM.prior.a_alpha = coeff*K_ratio;
+Psi.TransM.prior.b_alpha = coeff*K_ratio;
 
 % Variance of gamma proposal default --> var(alpha) = 2
 algP.HMM.var_alpha = 2;
 
 % Hyperparameters for prior on kappa:
 K_kappa = Psi.ThetaM.K/Psi.K_z;
-% Psi.TransM.prior.a_kappa = 0.5*coeff*K_kappa;
-% Psi.TransM.prior.b_kappa = 0.5*coeff*K_kappa;
+Psi.TransM.prior.a_kappa = 0.5*coeff*K_kappa;
+Psi.TransM.prior.b_kappa = 0.5*coeff*K_kappa;
 
 % Variance of gamma proposal default --> var(alpha) = 10
 algP.HMM.var_kappa = 10;
