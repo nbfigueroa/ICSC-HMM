@@ -45,10 +45,12 @@ h1 = plotSimMat( TruePsi.S );
 %Dimensions:
 % x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 % type= 'robot'/'grater'/'mixed'
+% 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+data_path = './test-data/'; display = 1;  full = 0; use_vel = 0; type = 'mixed';
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
 dataset_name = 'Grating'; 
+
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -67,25 +69,22 @@ dataset_name = 'Grating';
 % quaternions dimensions exhibit discontinuities
 % This dataset is NOT labeled
 %
-% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajectories, fixed rotation
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-% weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]';
-
-% Define weights for dimensionality scaling
-weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
+weights = [10*ones(1,3) 2*ones(1,4) 1/7*ones(1,3) 1/10*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
-[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling';
+[data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, type2, display, full, normalize, weights, use_vel);
+dataset_name = 'Rolling'; 
 
 %% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
 % Demonstration of a Bimanual Peeling Task consisting of 
@@ -131,7 +130,8 @@ switch dim
     case 'act+obj'
         weights = [2*ones(1,7) 1/10*ones(1,6) 2*ones(1,6)]'; % act+obj
     case 'robots'
-        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots        
+        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots(velocities)        
+%         weights = [5*ones(1,3) 1/2*ones(1,4) 1/10*ones(1,6) ones(1,3) 1/2*ones(1,4) 1/20*ones(1,6) ]'; % robots(position)        
     case 'all'
         weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) 2*ones(1,6) ]'; % all        
 end
@@ -139,7 +139,7 @@ end
 % Define if using first derivative of pos/orient
 use_vel = 1;
 
-[~, ~, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
+[data, TruePsi, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
 dataset_name = 'Peeling';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -217,7 +217,7 @@ for run=1:T
     
 end
 
-%% Overall Stats for HMM segmentation and state clustering
+% Overall Stats for HMM segmentation and state clustering
 clc;
 fprintf('*** Hidden Markov Model Results*** \n Optimal States: %d \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[K mean(hamming_distance) std(hamming_distance)  ...
     mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
@@ -241,10 +241,12 @@ titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
 % Plot Segmentated 3D Trajectories
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1); axis equal
+% drawframe(eye(4), 0.1); 
+axis tight
 
-% Plot Segmentated 3D Trajectories with "TRUE LABELS"
+%% Plot Segmentated 3D Trajectories with "TRUE LABELS"
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);
-drawframe(eye(4), 0.1); axis equal
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
+% drawframe(eye(4), 0.1); 
+axis tight

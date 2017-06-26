@@ -55,8 +55,12 @@ h1 = plotSimMat( TruePsi.S );
 % type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
-[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 1; 
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, normalize, use_vel);
 dataset_name = 'Grating'; 
+
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
@@ -79,18 +83,76 @@ dataset_name = 'Grating';
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
+weights = [10*ones(1,3) 2*ones(1,4) 1/7*ones(1,3) 1/10*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
-[data, TruePsi, ~, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling'; super_states = 0; 
+[data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, type2, display, full, normalize, weights, use_vel);
+dataset_name = 'Rolling'; 
+
+%% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
+% Demonstration of a Bimanual Peeling Task consisting of 
+% 3 (32-d) time-series X = {x_1,..,x_T} with variable length T. 
+%
+% Dimensions:
+% x_a = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:              Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:           Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:                 Data{i}(8:10,:)  (3-d: f_x, f_y, f_z)
+% - torques:                Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+% x_p = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - same as above           Data{i}(14:26,:)
+% x_o = {mu_r, mu_g, mu_b, sigma_r, sigma_g, sigma_b}
+% - rate_mean:              Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
+% - rate_variance:          Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
+
+% Dimension type:
+% dim: 'all', include all 32 dimensions (active + passive robots + object)
+% dim: 'robots', include only 26-d from measurements from active + passive robots
+% dim: 'act+obj', include only 19-d from measurements from active robot + object
+% dim: 'active', include only 13-d from measurements from active robot
+
+% Dataset type:
+% sub-sampled to 100 Hz (from 500 Hz), smoothed f/t trajectories, fixed rotation
+% discontinuities.
+
+% clc; 
+clear all; close all
+data_path = './test-data/'; display = 1; 
+
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
+
+% Select dimensions to use
+dim = 'robots'; 
+
+% Define weights for dimensionality scaling
+switch dim
+    case 'active'
+%         weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]'; % active (velocities)
+        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3)]'; % active (position)
+    case 'act+obj'
+        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3) 2*ones(1,6)]'; % act+obj
+    case 'robots'
+%         weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots(velocities)        
+        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3) 1/3*ones(1,3) ones(1,4) 1/15*ones(1,3) 1/5*ones(1,3)]'; % robots(position)        
+    case 'all'
+        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) 2*ones(1,6) ]'; % all        
+end
+
+% Define if using first derivative of pos/orient
+use_vel = 0;
+
+[data, TruePsi, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
+dataset_name = 'Peeling';
+
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Collapsed IBP-HMM Sampler T times for good statistics          %%
@@ -99,18 +161,18 @@ dataset_name = 'Rolling'; super_states = 0;
 
 % IBP hyper-parametrs
 gamma = length(Data);  % length(Data)
-alpha = 1;  % typically 1.. could change
+alpha = 5;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampleConc', 1, ...
+algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -144,9 +206,9 @@ log_probs = zeros(1,T);
 for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 
 [val_max id_max] = sort(log_probs,'descend')
-bestPsi      = Best_Psi(id_max(2));
+bestPsi      = Best_Psi(id_max(1));
 
-%% Plot Segmentation with Chosen Run
+% Plot Segmentation with Chosen Run
 if exist('h2','var') && isvalid(h2), delete(h2);end
 [ h2 ] = plotSingleLabelSegmentation(data, bestPsi);
 
@@ -186,10 +248,10 @@ end
 labels = unique(labels);
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1); axis equal
+drawframe(eye(4), 0.1); axis tight
 
 %% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-drawframe(eye(4), 0.1); axis equal
+drawframe(eye(4), 0.1); axis tight

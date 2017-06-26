@@ -1,4 +1,4 @@
-function [data, TruePsi, Data, True_states, Data_] = load_grating_dataset( data_path, type, display, full, varargin)
+function [data, TruePsi, Data, True_states, Data_] = load_grating_dataset( data_path, type, display, full, normalize, varargin)
 
 
 label_range = [1 2 3];
@@ -116,6 +116,26 @@ else % Load the 6 time-series
                 % Smoothed out with savitksy golay filter
                 X3d_dot = 100*sgolayfilt(X3d_dot', 3, 151)';
                 Data{i}(:,1:3) = X3d_dot';
+            end
+        end
+    end
+    
+    
+    if normalize > 0                
+        weights = [ones(1,3) ones(1,4)]';
+        
+        for i=1:length(Data)
+            X = Data{i}';
+            
+            if normalize == 1
+                mean_X     = mean(X,2);
+                X_zeroMean = X - repmat( mean_X, 1, length(X));
+                Data{i} = X_zeroMean';
+            else
+                X_weighted = X   .* repmat( weights, 1, length(X));
+                mean_X     = mean(X_weighted,2);
+                X_zeroMean = X_weighted - repmat( mean_X, 1, length(X));
+                Data{i} = X_zeroMean';
             end
         end
     end

@@ -2,6 +2,7 @@ function [h] = plotLabeled3DTrajectories(Data, est_states, titlename, labels)
 
 h = figure('Color',[1 1 1]);
 vivid_cmap = vivid(length(labels));
+% vivid_cmap = hsv(length(labels));
 for i=1:length(Data)
     
     % Extract data from each time-series    

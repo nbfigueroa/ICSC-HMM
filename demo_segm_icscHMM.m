@@ -52,7 +52,10 @@ h1 = plotSimMat( TruePsi.S );
 % type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
 data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
-[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, use_vel);
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 1; 
+[data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, normalize, use_vel);
 dataset_name = 'Grating'; 
 
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
@@ -76,18 +79,18 @@ dataset_name = 'Grating';
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [7*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
+weights = [10*ones(1,3) 2*ones(1,4) 1/7*ones(1,3) 1/10*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
-[data, TruePsi, ~, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling'; super_states = 0; 
+[data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, type2, display, full, normalize, weights, use_vel);
+dataset_name = 'Rolling'; 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Collapsed ICSC-HMM Sampler T times for good statistics          %%
@@ -110,7 +113,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSamp
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 20; 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
 jobID = ceil(rand*1000);
@@ -148,7 +151,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 
 % Choose best IBP-HMM run
-bestPsi = Best_Psi(id_max(1));
+bestPsi = Best_Psi(id_max(6));
 est_labels = bestPsi.Psi.Z;
 
 if exist('h2','var') && isvalid(h2), delete(h2);end
@@ -192,19 +195,18 @@ labels = unique(labels);
 labels_c = unique(labels_c);
 
 % Plot Segmentated 3D Trajectories
-titlename = strcat(dataset_name,' Demonstrations (Estimated Segmentation)');
+titlename = strcat(dataset_name,' Demonstrations (Transform-Dependent Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1)
-
+drawframe(eye(4), 0.1); axis tight
 % Plot Clustered/Segmentated 3D Trajectories
-titlename = strcat(dataset_name,' Demonstrations (Estimated Clustered-Segmentation)');
+titlename = strcat(dataset_name,' Demonstrations (Transform-Invariant Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis tight
 
-%% Plot Segmentated 3D Trajectories with "True Labels"
+%% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h7','var') && isvalid(h7), delete(h7);end
 h7 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-drawframe(eye(4), 0.1)
+drawframe(eye(4), 0.1); axis tight

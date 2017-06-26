@@ -12,9 +12,9 @@ if K_est >= 2
         end
         
         % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
-        clust_options.tau           = randsample(3,1);       % Tolerance Parameter for SPCM-CRP
-        clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
-        clust_options.alpha         = 1;       % Concentration parameter
+        clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
+        clust_options.type          = 'full';   % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
+        clust_options.alpha         = randsample(3,1);       % Concentration parameter
         clust_options.plot_sim      = 0;
         clust_options.verbose       = 0;
         clust_options.T             = 15;      % Sampler Iterations

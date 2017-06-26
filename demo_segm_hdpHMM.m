@@ -50,6 +50,7 @@ data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
 dataset_name = 'Grating'; 
 
 
+
 %% 4) Real 'Dough-Rolling' 12D dataset, 3 Unique Emission models, 12 time-series
 % Demonstration of a Dough Rolling Task consisting of 
 % 15 (13-d) time-series X = {x_1,..,x_T} with variable length T. 
@@ -67,22 +68,78 @@ dataset_name = 'Grating';
 % quaternions dimensions exhibit discontinuities
 % This dataset is NOT labeled
 %
-% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajactories, fixed rotation
+% type: 'proc', sub-sampled to 100 Hz, smoothed f/t trajectories, fixed rotation
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
 
 % Define weights for dimensionality scaling
-weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,3) 0*ones(1,3)]';
+weights = [10*ones(1,3) 2*ones(1,4) 1/7*ones(1,3) 1/10*ones(1,3)]';
 
 % Define if using first derivative of pos/orient
 use_vel = 1;
-[~, ~, Data, True_states, Data_] = load_rolling_dataset( data_path, type, display, full, normalize, weights, use_vel);
-dataset_name = 'Rolling'; super_states = 0;
+[data, TruePsi, Data, True_states, Data_] = load_rolling_dataset( data_path, type, type2, display, full, normalize, weights, use_vel);
+dataset_name = 'Rolling'; 
+
+%% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
+% Demonstration of a Bimanual Peeling Task consisting of 
+% 3 (32-d) time-series X = {x_1,..,x_T} with variable length T. 
+%
+% Dimensions:
+% x_a = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - positions:              Data{i}(1:3,:)   (3-d: x, y, z)
+% - orientations:           Data{i}(4:7,:)   (4-d: q_i, q_j, q_k, q_w)
+% - forces:                 Data{i}(8:10,:)  (3-d: f_x, f_y, f_z)
+% - torques:                Data{i}(11:13,:) (3-d: tau_x, tau_y, tau_z)
+% x_p = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
+% - same as above           Data{i}(14:26,:)
+% x_o = {mu_r, mu_g, mu_b, sigma_r, sigma_g, sigma_b}
+% - rate_mean:              Data{i}(27:29,:)   (3-d: mu_r, mu_g, mu_b)
+% - rate_variance:          Data{i}(30:32,:)   (3-d: sigma_r, sigma_g, sigma_b)
+
+% Dimension type:
+% dim: 'all', include all 32 dimensions (active + passive robots + object)
+% dim: 'robots', include only 26-d from measurements from active + passive robots
+% dim: 'act+obj', include only 19-d from measurements from active robot + object
+% dim: 'active', include only 13-d from measurements from active robot
+
+% Dataset type:
+% sub-sampled to 100 Hz (from 500 Hz), smoothed f/t trajectories, fixed rotation
+% discontinuities.
+
+% clc; 
+clear all; close all
+data_path = './test-data/'; display = 1; 
+
+% Type of data processing
+% O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
+normalize = 2; 
+
+% Select dimensions to use
+dim = 'robots'; 
+
+% Define weights for dimensionality scaling
+switch dim
+    case 'active'
+        weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]'; % active    
+    case 'act+obj'
+        weights = [2*ones(1,7) 1/10*ones(1,6) 2*ones(1,6)]'; % act+obj
+    case 'robots'
+%         weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots(velocities)        
+        weights = [5*ones(1,3) 1/2*ones(1,4) 1/10*ones(1,6) ones(1,3) 1/2*ones(1,4) 1/20*ones(1,6) ]'; % robots(position)        
+    case 'all'
+        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) 2*ones(1,6) ]'; % all        
+end
+
+% Define if using first derivative of pos/orient
+use_vel = 0;
+
+[data, TruePsi, Data, True_states, Data_] = load_peeling_dataset( data_path, dim, display, normalize, weights, use_vel);
+dataset_name = 'Peeling';
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Run Sticky HDP-HMM Sampler T times for good statistics             %%
@@ -95,7 +152,7 @@ hdp_options.d = size(Data{1},2);
 hdp_options.sticky = 1;
 hdp_options.kappa = 0.5;                    % NIW(kappa,theta,delta,nu_delta)
 hdp_options.meanSigma = eye(hdp_options.d); % expected mean of IW(nu,nu_delta) prior on Sigma_{k,j}
-hdp_options.Kz = 10;                        % truncation level of the DP prior on HMM transition distributions pi_k
+hdp_options.Kz = 15;                        % truncation level of the DP prior on HMM transition distributions pi_k
 hdp_options.Ks = 1;                         % truncation level of the DPMM on emission distributions pi_s (1-Gaussian emission)
 hdp_options.plot_iter = 0;
 hdp_options.Niter = 500;
@@ -189,7 +246,7 @@ id_mean
 id_std
 
 %% Plot Segmentation with Chosen Run
-id = id_mean(1);
+id = id_mean(2);
 BestChain = ChainStats_Run(id);
 K_est = inferred_states(id);
 est_states_all = [];
@@ -265,4 +322,4 @@ h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 % Plot Segmentated 3D Trajectories
 if exist('h6','var') && isvalid(h6), delete(h6);end
-h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, [1:3]);
+h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
