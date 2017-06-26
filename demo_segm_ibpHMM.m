@@ -99,7 +99,6 @@ dataset_name = 'Rolling';
 %% 5) Real 'Peeling' (max) 32-D dataset, 5 Unique Emission models, 3 time-series
 % Demonstration of a Bimanual Peeling Task consisting of 
 % 3 (32-d) time-series X = {x_1,..,x_T} with variable length T. 
-%
 % Dimensions:
 % x_a = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w, f_x, f_y, f_z, tau_x, tau_y, tau_z}
 % - positions:              Data{i}(1:3,:)   (3-d: x, y, z)
@@ -122,7 +121,7 @@ dataset_name = 'Rolling';
 % sub-sampled to 100 Hz (from 500 Hz), smoothed f/t trajectories, fixed rotation
 % discontinuities.
 
-% clc; 
+clc; 
 clear all; close all
 data_path = './test-data/'; display = 1; 
 
@@ -131,20 +130,14 @@ data_path = './test-data/'; display = 1;
 normalize = 2; 
 
 % Select dimensions to use
-dim = 'robots'; 
+dim = 'active'; 
 
 % Define weights for dimensionality scaling
-switch dim
+weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3)]';
+switch dim                
     case 'active'
-%         weights = [5*ones(1,3) 2*ones(1,4) 1/10*ones(1,6)]'; % active (velocities)
-        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3)]'; % active (position)
-    case 'act+obj'
-        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3) 2*ones(1,6)]'; % act+obj
-    case 'robots'
-%         weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) ]'; % robots(velocities)        
-        weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3) 1/3*ones(1,3) ones(1,4) 1/15*ones(1,3) 1/5*ones(1,3)]'; % robots(position)        
-    case 'all'
-        weights = [5*ones(1,3) ones(1,4) 1/10*ones(1,6) ones(1,3) 2*ones(1,4) 1/20*ones(1,6) 2*ones(1,6) ]'; % all        
+    case 'robots' 
+        weights = [weights 1/3*ones(1,3) 2*ones(1,4) 1/15*ones(1,3) 1/5*ones(1,3)]';        
 end
 
 % Define if using first derivative of pos/orient
@@ -164,11 +157,11 @@ alpha = 5;  % typically 1.. could change
 kappa = 10; % sticky parameter
 
 % Model Setting (IBP mass, IBP concentration, HMM alpha, HMM sticky)
-modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
+modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa,'obsM.Scoef',1}; 
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
-         'doSampleFUnique', 1, 'doSplitMerge', 0}; 
+         'doSampleFUnique', 1, 'doSplitMerge', 1}; 
 
 % Number of Repetitions
 T = 5; 
@@ -180,7 +173,7 @@ for run=1:T
     % Run Gibbs Sampler for Niter once.
     clear CH    
     % Start out with random number of features
-    initP  = {'F.nTotal', randsample(data.N,1)+1}; 
+    initP  = {'F.nTotal', randsample(data.N,1)}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
 end
