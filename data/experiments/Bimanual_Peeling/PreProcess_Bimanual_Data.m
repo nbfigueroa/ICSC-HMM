@@ -4,8 +4,8 @@ close all
 clc
 
 %% Load Data from Mat File
-data_dir = './mat/';
-load(strcat(data_dir,'proc-data.mat'))
+data_dir = './data/';
+load(strcat(data_dir,'proc_data.mat'))
 N = length(proc_data);
 
 % Plot Trajectories with Reference Frames etc
@@ -13,7 +13,7 @@ for ii=1:N
     
     plotEEData( proc_data{ii}.active.X, proc_data{ii}.active.t ,strcat(proc_data{ii}.name,': Active Arm'))
     plotEEData( proc_data{ii}.passive.X, proc_data{ii}.passive.t ,strcat(proc_data{ii}.name,': Passive Arm'))
-    plotObjectData( proc_data{ii}.object.feats, proc_data{ii}.active.t, strcat(proc_data{ii}.name,': Object'))
+%     plotObjectData( proc_data{ii}.object.feats, proc_data{ii}.active.t, strcat(proc_data{ii}.name,': Object'))
     plotBimanualTrajectories(proc_data{ii}); 
 
 end

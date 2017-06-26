@@ -2,9 +2,8 @@ function [data, TruePsi, Data, True_states, Data_o] = load_peeling_dataset( data
 
 label_range = [1 2 3 4 5];
 load(strcat(data_path,'Peeling/proc-data-labeled.mat'))
-load(strcat(data_path,'Peeling/proc-labels.mat'))
-Data_o = Data;   
 
+load(strcat(data_path,'Peeling/proc-labels.mat'))
 switch dim 
     case 'all'
         dimensions = [1:size(Data{1},1)];                     
@@ -21,6 +20,9 @@ switch dim
         
         
     case 'robots'
+        load(strcat(data_path,'Peeling/proc-data-noObj.mat'))
+        Data{4} = Data_noObj{1}; True_states{4} = True_states_noObj{1};
+        Data{5} = Data_noObj{2}; True_states{5} = True_states_noObj{2};
         dimensions = [1:size(Data{1},1)-6];
     case 'act+obj'
         dimensions = [1:13 27:size(Data{1},1)];
@@ -36,8 +38,12 @@ switch dim
         end
         
     case 'active'
+        load(strcat(data_path,'Peeling/proc-data-noObj.mat'))
+        Data{4} = Data_noObj{1}; True_states{4} = True_states_noObj{1};
+        Data{5} = Data_noObj{2}; True_states{5} = True_states_noObj{2};
         dimensions = [1:13];        
 end
+Data_o = Data;   
 
 % Select dimensions
 for i=1:length(Data)
