@@ -41,8 +41,9 @@ In this illustration, the point-mass is a simplification of an end-effector or h
 
 ### Illustrative Example and Demos
 In other words, assume we are given a set of 'M' 2D time-series with varying length $T= \{T^{(1)}, \cdots, T^{(M)}\}$  and switching dynamics $\pi= \{\pi^{(1)}, \cdots, \pi^{(M)}\}$, sampled from 2 \textbf{unique} Gaussian emission models  $\theta_1,\theta_2$ subject to transformations $f_1(\cdot),f_2(\cdot)$ resulting in a set of transform-dependent emission models  $\Theta = \{\theta_1,\theta_2,\theta_3 = f_1(\theta_2),\theta_4 = f_2(\theta_3)\}$,
-
-
+<p align="center">
+<img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/transform_timeseries-1.png" width="500">
+</p>
 
 
 ```
