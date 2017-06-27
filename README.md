@@ -45,7 +45,7 @@ In other words, assume we are given a set of 'M' 2D time-series with varying len
 <img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/transform_timeseries-1.png" width="425"><img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/transform_emissionmodels-1.png" width="425">
 </p>
 
-
+### Run Demos
 ```
 *** Hidden Markov Model Results*** 
  Optimal States: 4 
@@ -77,12 +77,7 @@ In other words, assume we are given a set of 'M' 2D time-series with varying len
  Purity: 1.000 (0.000) NMI: 1.000 (0.000) F: 1.000 (0.000) 
 
 ---
-
-
-### Run Demo
-
-...
-
+```
 
 
 ### 3rd Party
