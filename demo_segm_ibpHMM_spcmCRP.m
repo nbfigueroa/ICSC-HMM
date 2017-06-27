@@ -198,7 +198,7 @@ for l=1:length(Best_Psi)
     for k=1:K_est
         invSigma = Best_Psi(l).Psi.theta(k).invSigma;
         sigma_ = invSigma \ eye(size(invSigma,1));
-        sigmas{k} = sigma_([1:3 8:13],[1:3 8:13]);
+        sigmas{k} = sigma_;
     end
     
     % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
@@ -206,7 +206,7 @@ for l=1:length(Best_Psi)
     clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
     clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
     clust_options.T             = 200;     % Sampler Iterations
-    clust_options.alpha         = randsample(5,1);       % Concentration parameter
+    clust_options.alpha         = randsample(3,1);       % Concentration parameter
     clust_options.plot_sim      = 0;
     clust_options.init_clust    = 1:length(sigmas);
     clust_options.verbose       = 1;
@@ -232,7 +232,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-besTRun = id_max(2);
+besTRun = id_max(1);
 bestPsi      = Best_Psi(besTRun);
 est_labels_  = est_labels{besTRun};
 

@@ -8,13 +8,15 @@ if K_est >= 2
         sigmas = [];
         for k=1:K_est
             invSigma = Psi.ThetaM.theta(k).invSigma;
-            sigmas{k} = invSigma \ eye(size(invSigma,1));
+            sigma_ = invSigma \ eye(size(invSigma,1));
+%             sigmas{k} = sigma_([1:3 8:13],[1:3 8:13]);
+            sigmas{k} = sigma_;
         end
         
         % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
-        clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
-        clust_options.type          = 'full';   % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
-        clust_options.alpha         = randsample(3,1);       % Concentration parameter
+        clust_options.tau           = 1;                % Tolerance Parameter for SPCM-CRP
+        clust_options.type          = 'full';           % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
+        clust_options.alpha         = randsample(4,1);  % Concentration parameter
         clust_options.plot_sim      = 0;
         clust_options.verbose       = 0;
         clust_options.T             = 15;      % Sampler Iterations

@@ -1,0 +1,19 @@
+-------- 1) Grating Dataset --------
+*** IBP-HMM Results*** 
+ Optimal Feature States: 5.100 (1.287) 
+ Hamming-Distance: 0.336 (0.170) GCE: 0.094 (0.029) VO: 1.208 (0.364) 
+ Purity: 0.940 (0.024) NMI: 0.573 (0.066) F: 0.769 (0.100) 
+
+*** IBP-HMM + SPCM-CRP Results***
+ Optimal Transform-Dependent States: 5.100 (1.287)  
+ Hamming-Distance: 0.336 (0.170) GCE: 0.094 (0.029) VO: 1.208 (0.364) 
+ Optimal Transform-Invariant States: 3.000 (0.943) 
+ Hamming-Distance: 0.122 (0.044) GCE: 0.107 (0.045) VO: 0.755 (0.114) 
+ Purity: 0.897 (0.050) NMI: 0.572 (0.203) F: 0.879 (0.059) 
+
+ *** ICSC-HMM Results*** 
+ Optimal Transform-Dependent States: 4.600 (1.075)  
+ Hamming-Distance: 0.218 (0.151) GCE: 0.107 (0.026) VO: 0.975 (0.398) 
+ Optimal Transform-Invariant States: 3.400 (1.075) 
+ Hamming-Distance: 0.126 (0.075) GCE: 0.108 (0.031) VO: 0.751 (0.231) 
+ Purity: 0.918 (0.022) NMI: 0.633 (0.069) F: 0.890 (0.039)  

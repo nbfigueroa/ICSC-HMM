@@ -133,11 +133,11 @@ normalize = 2;
 dim = 'active'; 
 
 % Define weights for dimensionality scaling
-weights = [3*ones(1,3) 1/2*ones(1,4) 1/15*ones(1,3) 1/2*ones(1,3)]';
+weights = [3*ones(1,3) 1/2*ones(1,4) 1/10*ones(1,3) 1/20*ones(1,3)]';
 switch dim                
     case 'active'
     case 'robots' 
-        weights = [weights 1/3*ones(1,3) 2*ones(1,4) 1/15*ones(1,3) 1/5*ones(1,3)]';        
+        weights = [weights' 1/7*ones(1,3) 1/2*ones(1,4) 1/20*ones(1,3) 1/10*ones(1,3)]';        
 end
 
 % Define if using first derivative of pos/orient
@@ -161,10 +161,10 @@ modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kap
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
-         'doSampleFUnique', 1, 'doSplitMerge', 1}; 
+         'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 5; 
+T = 10; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -173,7 +173,7 @@ for run=1:T
     % Run Gibbs Sampler for Niter once.
     clear CH    
     % Start out with random number of features
-    initP  = {'F.nTotal', randsample(data.N,1)}; 
+    initP  = {'F.nTotal', randsample(data.N,1)+2}; 
     CH = runBPHMM( data, modelP, {jobID, run}, algP, initP, './ibp-Results' );  
     Sampler_Stats(run).CH = CH;
 end

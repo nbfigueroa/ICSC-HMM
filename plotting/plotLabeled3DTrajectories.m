@@ -1,8 +1,8 @@
 function [h] = plotLabeled3DTrajectories(Data, est_states, titlename, labels)
 
 h = figure('Color',[1 1 1]);
-vivid_cmap = vivid(length(labels));
-% vivid_cmap = hsv(length(labels));
+% vivid_cmap = vivid(length(labels));
+vivid_cmap = hsv(length(labels));
 for i=1:length(Data)
     
     % Extract data from each time-series    
@@ -15,7 +15,7 @@ for i=1:length(Data)
     end
     
 end
-xlabel('$\xi_1$','Interpreter','LaTex');ylabel('$\xi_2$','Interpreter','LaTex');zlabel('$\xi_1$','Interpreter','LaTex')
+xlabel('$x$','Interpreter','LaTex');ylabel('$y$','Interpreter','LaTex');zlabel('$z$','Interpreter','LaTex')
 
 % Labels for colormap
 colormap(vivid_cmap);

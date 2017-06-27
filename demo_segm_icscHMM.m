@@ -161,7 +161,7 @@ modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kap
 
 % Sampler Settings
 algP   = {'Niter', 500, 'HMM.doSampleHypers', 1,'BP.doSampleMass', 1, 'BP.doSampleConc', 0, ...
-         'doSampleFUnique', 1, 'doSplitMerge', 1}; 
+         'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
 T = 10; 
@@ -189,7 +189,7 @@ if exist('h1','var')  && isvalid(h1),  delete(h1);end
 if exist('h1b','var') && isvalid(h1b), delete(h1b);end
 [h1, h1b, Best_Psi] = plotSamplerStatsBestPsi(Sampler_Stats,'metrics', true_states_all);
 
-%% Compute metrics for ICSC-HMM
+% Compute metrics for ICSC-HMM
 clc;
 results = computeSegmClustmetrics(true_states_all, Best_Psi);
 
@@ -202,7 +202,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr; end
 %% Plot Segmentation+Clustering with Chosen Run and Metrics
 
 % Choose best IBP-HMM run
-bestPsi = Best_Psi(id_max(5));
+bestPsi = Best_Psi(id_max(1));
 est_labels = bestPsi.Psi.Z;
 
 if exist('h2','var') && isvalid(h2), delete(h2);end

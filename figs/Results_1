@@ -1,0 +1,29 @@
+-------- 1) 2D Toy Data --------
+*** Hidden Markov Model Results*** 
+ Optimal States: 4 
+ Hamming-Distance: 0.385 (0.016) GCE: 0.026 (0.082) VO: 1.025 (0.229) 
+ Purity: 0.977 (0.074) NMI: 0.679 (0.109) F: 0.752 (0.041)  
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 4.000 (0.000) 
+ Hamming-Distance: 0.379 (0.000) GCE: 0.000 (0.001) VO: 0.956 (0.006) 
+ Purity: 1.000 (0.000) NMI: 0.713 (0.002) F: 0.765 (0.000)  
+
+*** IBP-HMM Results*** 
+ Optimal Feature States: 4.000 (0.000) 
+ Hamming-Distance: 0.379 (0.000) GCE: 0.000 (0.000) VO: 0.953 (0.000) 
+ Purity: 1.000 (0.000) NMI: 0.714 (0.000) F: 0.765 (0.000)  
+
+ *** IBP-HMM + SPCM-CRP Results***
+ Optimal Transform-Dependent States: 4.000 (0.000)  
+ Hamming-Distance: 0.379 (0.000) GCE: 0.000 (0.000) VO: 0.953 (0.000) 
+ Optimal Transform-Invariant States: 2.000 (0.000) 
+ Hamming-Distance: 0.000 (0.000) GCE: 0.000 (0.000) VO: 0.000 (0.000) 
+ Purity: 1.000 (0.000) NMI: 1.000 (0.000) F: 1.000 (0.000) 
+
+ *** ICSC-HMM Results*** 
+ Optimal Transform-Dependent States: 4.100 (0.316)  
+ Hamming-Distance: 0.379 (0.000) GCE: 0.000 (0.000) VO: 0.953 (0.000) 
+ Optimal Transform-Invariant States: 2.000 (0.000) 
+ Hamming-Distance: 0.000 (0.000) GCE: 0.000 (0.000) VO: 0.000 (0.000) 
+ Purity: 1.000 (0.000) NMI: 1.000 (0.000) F: 1.000 (0.000) 
