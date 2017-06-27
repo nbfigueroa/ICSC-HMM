@@ -35,7 +35,7 @@ You're ready! Now run demos..
 ***In which applications would someone need to tackle the three challenges listed above?*** 
 Imagine a set of time-series, whose variables correspond to motion or interaction signals, such as position, velocity, orientation, forces and torques of an end-effector or a hand; representing a human (or robot) executing a complex sequence of actions in an LfD setting. These time-series might be subject to ***transformations***, as shown in the following figure: 
 <p align="center">
-<img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/segmented_trajectories_light-1.png" width="400">
+<img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/segmented_trajectories_light-1.png" width="500">
 </p>
 In this illustration, the point-mass is a simplification of an end-effector or hand. We have three time-series representing trajectories of the point-mass composed of a sequence of **common** actions: (i) approaching towards a surface, (ii) sliding on a surface and (iii) flying away. Given no **prior** knowledge on the number of actions present in the trajectories or what their sequencing might be, we would like to decompose them and discover the underlying transform-invariant actions (right). This translates to developing an unsupervised **joint segmentation and action discovery** framework; capable of decomposing the time-series into sequences of **transform-invariant** actions.
 
