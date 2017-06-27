@@ -37,10 +37,13 @@ Imagine a set of time-series, whose variables correspond to motion or interactio
 <p align="center">
 <img src="https://github.com/nbfigueroa/ICSC-HMM/blob/master/figs/img/segmented_trajectories_light-1.png" width="700">
 </p>
-In this illustration, the point-mass is a simplification of an end-effector or hand. We have three time-series representing trajectories of the point-mass composed of a sequence of **common** actions: (i) approaching towards a surface, (ii) sliding on a surface and (iii) flying away. Given no \textit{prior} knowledge on the number of actions present in the trajectories or what their sequencing might be, we would like to decompose them and discover the underlying transform-invariant actions (right). This translates to developing an unsupervised \textbf{joint segmentation and action discovery} framework; capable of decomposing the time-series into sequences of \textbf{transform-invariant} actions.
+In this illustration, the point-mass is a simplification of an end-effector or hand. We have three time-series representing trajectories of the point-mass composed of a sequence of **common** actions: (i) approaching towards a surface, (ii) sliding on a surface and (iii) flying away. Given no **prior** knowledge on the number of actions present in the trajectories or what their sequencing might be, we would like to decompose them and discover the underlying transform-invariant actions (right). This translates to developing an unsupervised **joint segmentation and action discovery** framework; capable of decomposing the time-series into sequences of **transform-invariant** actions.
 
 ### Illustrative Example and Demos
-place nice images from Section 4 to describe the problem.
+In other words, assume we are given a set of 'M' 2D time-series with varying length $T= \{T^{(1)}, \cdots, T^{(M)}\}$  and switching dynamics $\pi= \{\pi^{(1)}, \cdots, \pi^{(M)}\}$, sampled from 2 \textbf{unique} Gaussian emission models  $\theta_1,\theta_2$ subject to transformations $f_1(\cdot),f_2(\cdot)$ resulting in a set of transform-dependent emission models  $\Theta = \{\theta_1,\theta_2,\theta_3 = f_1(\theta_2),\theta_4 = f_2(\theta_3)\}$,
+
+
+
 
 ```
 *** Hidden Markov Model Results*** 
