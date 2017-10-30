@@ -12,7 +12,7 @@ This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Mar
 We tackle these challenges by coupling the IBP-HMM which solves for challenges **(1-2)** with the SPCM-CRP mixture model for Covariance matrices which addresses challenge **(3)**. The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM) and modified accordingly. 
 
 #### Reference
-[1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *Submitted to Journal of Machine Learning Research (JMLR)* [Under Review]. 
+[1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *Submitted to Journal of Machine Learning Research (JMLR)* [Under Review](https://arxiv.org/abs/1710.10060). 
 
 ---
 
