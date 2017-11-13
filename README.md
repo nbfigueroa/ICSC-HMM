@@ -3,6 +3,8 @@ ICSC-HMM : IBP Coupled SPCM-CRP Hidden Markov Model for Transform-Invariant Time
 Website: https://github.com/nbfigueroa/ICSC-HMM  
 Author: Nadia Figueroa (nadia.figueroafernandez AT epfl.ch) 
 
+***NOTE:*** If you are solely interested in the transform-invariant metric and clustering algorithm for Covariance matrices introduced in [1] go to [https://github.com/nbfigueroa/SPCM-CRP.git](https://github.com/nbfigueroa/SPCM-CRP.git)
+
 This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation and action recognition: 
 
 **(1) Unknown cardinality:** The typical model selection problem, number of hidden states is unknown. This can be solved by formulating an HMM with the Bayesian Non-Parametric treatment. This is done by placing an infinite prior on the transition distributions, typically the Hierarchical Dirichlet Process (HDP).  
