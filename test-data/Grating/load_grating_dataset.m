@@ -91,14 +91,14 @@ else % Load the 6 time-series
             Data_ = Data;
             load(strcat(data_path,'/Grating/CarrotGrating_grater.mat'))
             for i=2:2:length(Data)
-                Data{i} = Data_{i};
+                Data{i} = Data_{i}(:,1:3);
             end
             
             Data_ = Data; True_states_ = True_states;
             clear Data True_states
             iter = 1;
             for i=1:6
-                Data{iter} = Data_{i};
+                Data{iter} = Data_{i}(:,1:3);
                 True_states{iter} = True_states_{i};
                 iter = iter + 1;
             end
@@ -146,7 +146,8 @@ else % Load the 6 time-series
         for i=1:length(ts)
             X = Data{ts(i)};
             true_states = True_states{ts(i)};
-            
+            size(X)
+            size(true_states)
             % Plot time-series with true labels
             subplot(length(ts),1,i);
             data_labeled = [X true_states]';
