@@ -54,10 +54,10 @@ h1 = plotSimMat( TruePsi.S );
 % x = {pos_x, pos_y, pos_z, q_i, q_j, q_k, q_w}
 % type= 'robot'/'grater'/'mixed'
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 0;
+data_path = './test-data/'; display = 1; type = 'mixed'; full = 0; use_vel = 1;
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
-normalize = 1; 
+normalize = 2; 
 [data, TruePsi, Data, True_states ,Data_] = load_grating_dataset( data_path, type, display, full, normalize, use_vel);
 dataset_name = 'Grating'; 
 
@@ -83,7 +83,7 @@ dataset_name = 'Grating';
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'aligned'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
@@ -161,11 +161,11 @@ kappa = 10; % sticky parameter
 modelP = {'bpM.gamma', gamma, 'bpM.c', 1, 'hmmM.alpha', alpha, 'hmmM.kappa', kappa}; 
 
 % Sampler Settings
-algP   = {'Niter', 500, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
+algP   = {'Niter', 300, 'HMM.doSampleHypers',1,'BP.doSampleMass',1,'BP.doSampleConc', 0, ...
          'doSampleFUnique', 1, 'doSplitMerge', 0} ;
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -198,6 +198,7 @@ for l=1:length(Best_Psi)
     for k=1:K_est
         invSigma = Best_Psi(l).Psi.theta(k).invSigma;
         sigma_ = invSigma \ eye(size(invSigma,1));
+%         sigmas{k} = sigma_([1:3 8:10],[1:3 8:10]);
         sigmas{k} = sigma_;
     end
     
@@ -206,7 +207,7 @@ for l=1:length(Best_Psi)
     clust_options.tau           = 1;       % Tolerance Parameter for SPCM-CRP
     clust_options.type          = 'full';  % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
     clust_options.T             = 200;     % Sampler Iterations
-    clust_options.alpha         = randsample(3,1);       % Concentration parameter
+    clust_options.alpha         = randsample(5,1);       % Concentration parameter
     clust_options.plot_sim      = 0;
     clust_options.init_clust    = 1:length(sigmas);
     clust_options.verbose       = 1;
@@ -232,7 +233,7 @@ for ii=1:T; log_probs(ii) = Best_Psi(ii).logPr + clust_logProbs(ii); end
 
 [val_max id_max] = sort(log_probs,'descend')
 
-besTRun = id_max(1);
+besTRun = id_max(3);
 bestPsi      = Best_Psi(besTRun);
 est_labels_  = est_labels{besTRun};
 
@@ -281,14 +282,14 @@ O = eye(4); O(1,4) = -0.3;O(2,4) = -0.5;
 titlename = strcat(dataset_name,' Demonstrations (Transform-Dependent Segmentation)');
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(O, 0.05); 
+% drawframe(O, 0.05); 
 axis tight
 
-%% Plot Clustered/Segmentated 3D Trajectories
+% Plot Clustered/Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Transform-Invariant Segmentation)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, est_clusts, titlename, labels_c);
-drawframe(O, 0.05); 
+% drawframe(O, 0.05); 
 axis tight
 
 %% Plot Segmentated 3D Trajectories

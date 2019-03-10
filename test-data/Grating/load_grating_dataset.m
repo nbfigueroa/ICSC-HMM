@@ -90,7 +90,7 @@ else % Load the 6 time-series
             load(strcat(data_path,'/Grating/CarrotGrating_robot.mat'))
             Data_ = Data;
             load(strcat(data_path,'/Grating/CarrotGrating_grater.mat'))
-            for i=2:2:length(Data)
+            for i=1:2:length(Data)
                 Data{i} = Data_{i};
             end
             

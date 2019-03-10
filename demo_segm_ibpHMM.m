@@ -83,7 +83,7 @@ dataset_name = 'Grating';
 % discontinuities.
 
 clc; clear all; close all;
-data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'real'; 
+data_path = './test-data/'; display = 1; type = 'proc'; full = 0; type2 = 'aligned'; 
 % Type of data processing
 % O: no data manipulation -- 1: zero-mean -- 2: scaled by range * weights
 normalize = 2; 
@@ -164,7 +164,7 @@ algP   = {'Niter', 500, 'HMM.doSampleHypers', 1, 'BP.doSampleMass',1,'BP.doSampl
          'doSampleFUnique', 1, 'doSplitMerge', 0}; 
 
 % Number of Repetitions
-T = 10; 
+T = 5; 
 
 % Run MCMC Sampler for T times
 Sampler_Stats = [];
@@ -214,6 +214,7 @@ if exist('h4','var') && isvalid(h4), delete(h4);end
 
 % Compute Segmentation and State Clustering Metrics
 results = computeSegmClustmetrics(true_states_all, bestPsi);
+K_est = bestPsi.nFeats;
 
 %% Plot Estimated  Emission Parameters for 2D Datasets ONLY!
 title_name  = 'Estimated Emission Parameters';
@@ -240,10 +241,12 @@ end
 labels = unique(labels);
 if exist('h5','var') && isvalid(h5), delete(h5);end
 h5 = plotLabeled3DTrajectories(Data_, est_states, titlename, labels);
-drawframe(eye(4), 0.1); axis tight
+% drawframe(eye(4), 0.1); 
+axis tight
 
 %% Plot Segmentated 3D Trajectories
 titlename = strcat(dataset_name,' Demonstrations (Ground Truth)');
 if exist('h6','var') && isvalid(h6), delete(h6);end
 h6 = plotLabeled3DTrajectories(Data_, True_states, titlename, unique(data.zTrueAll));
-drawframe(eye(4), 0.1); axis tight
+% drawframe(eye(4), 0.1); 
+axis tight

@@ -112,7 +112,8 @@ else % Load 5 time-series
     clear Data True_states Data_o
     iter = 1;
 %     for i=1:2:12
-    for i=2:2:10
+%     for i=2:2:10
+    for i=1:5
         Data{iter} = Data_{i};
         Data_o{iter} = Data_o_{i};
         True_states{iter} = True_states_{i};

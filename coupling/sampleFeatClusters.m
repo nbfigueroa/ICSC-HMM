@@ -9,26 +9,28 @@ if K_est >= 2
         for k=1:K_est
             invSigma = Psi.ThetaM.theta(k).invSigma;
             sigma_ = invSigma \ eye(size(invSigma,1));
-%             sigmas{k} = sigma_([1:3 8:13],[1:3 8:13]);
             sigmas{k} = sigma_;
         end
         
         % Settings and Hyper-Params for SPCM-CRP Clustering algorithm
         clust_options.tau           = 1;                % Tolerance Parameter for SPCM-CRP
         clust_options.type          = 'full';           % Type of Covariance Matrix: 'full' = NIW or 'Diag' = NIG
-        clust_options.alpha         = randsample(4,1);  % Concentration parameter
+%         clust_options.alpha         = randsample(3,1);  % Concentration parameter
+        clust_options.alpha         = 1;  % Concentration parameter
         clust_options.plot_sim      = 0;
         clust_options.verbose       = 0;
-        clust_options.T             = 15;      % Sampler Iterations
+        clust_options.T             = 10;      % Sampler Iterations
         if length(old_Z) ~= K_est
             clust_options.init_clust    = randsample(K_est,K_est)';
         else
+            clust_options.T             = 5;      % Sampler Iterations
             clust_options.init_clust    = old_Z;
         end
         
         % Mutliple Inference of SPCM-CRP Mixture Model
         runs = 3;
         parfor i=1:runs
+%         for i=1:runs
             [Clust_Psi_{i}, ~, est_labels_{i}]  = run_SPCMCRP_mm(sigmas, clust_options);
         end
         

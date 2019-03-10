@@ -25,17 +25,18 @@ if colored
     if color_labels==0
         colors= vivid(K);
     else
-        level = 20; n = ceil(level/2);
+        level = 10; n = ceil(level/2);
         cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
         cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
         cmap = [cmap1; cmap2(2:end, :)];
-        cmap_vivid = vivid(cmap, [.85, .85]);
-        color_int = ceil(256/4);        
-        color_range = 1:color_int:256;
+               
+        cmap_vivid = vivid(cmap, [.85, .85]);        
+        color_int = floor(length(cmap_vivid)/length(color_labels));        
+        color_range = 1:color_int:length(cmap_vivid);
         for k =1:length(color_labels)
             colors(k,:) = cmap_vivid(color_range(color_labels(k)),:);
-        end
-    end
+        end                       
+    end        
 else
     % Gray Color
     colors = repmat([0.3    0.3    0.3],[K,1]);
