@@ -21,7 +21,7 @@ else  % With label_range
     segment_labels = repmat(X(D,:), M, 1);
     imagesc( xs, ys, segment_labels, [1 max( label_range)] ); hold on;
 end
-level = 10; n = ceil(level/2);
+level = 20; n = ceil(level/2);
 cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
 cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
 cmap = [cmap1; cmap2(2:end, :)];

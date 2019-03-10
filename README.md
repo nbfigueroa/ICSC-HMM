@@ -3,6 +3,8 @@ ICSC-HMM : IBP Coupled SPCM-CRP Hidden Markov Model for Transform-Invariant Time
 Website: https://github.com/nbfigueroa/ICSC-HMM  
 Author: Nadia Figueroa (nadia.figueroafernandez AT epfl.ch) 
 
+**NOTE:** If you are solely interested in the transform-invariant metric and clustering algorithm for Covariance matrices introduced in [1] go to [https://github.com/nbfigueroa/SPCM-CRP.git](https://github.com/nbfigueroa/SPCM-CRP.git)
+
 This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Markov Model) [1]. The ICSC-HMM is a segmentation and action recognition algorithm that solves for three challenges in HMM-based segmentation and action recognition: 
 
 **(1) Unknown cardinality:** The typical model selection problem, number of hidden states is unknown. This can be solved by formulating an HMM with the Bayesian Non-Parametric treatment. This is done by placing an infinite prior on the transition distributions, typically the Hierarchical Dirichlet Process (HDP).  
@@ -12,7 +14,7 @@ This is a toolbox for inference of the ICSC-HMM (IBP Coupled SPCM-CRP Hidden Mar
 We tackle these challenges by coupling the IBP-HMM which solves for challenges **(1-2)** with the SPCM-CRP mixture model for Covariance matrices which addresses challenge **(3)**. The underlying IBP-HMM code was forked from [NPBayesHMM](https://github.com/michaelchughes/NPBayesHMM) and modified accordingly. 
 
 #### Reference
-[1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *In preparation for Pattern Recognition*. 
+[1] [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) and Aude Billard, "Transform-Invariant Non-Parametric Clustering of Covariance Matrices and its Application to Unsupervised Joint Segmentation and Action Discovery." *Submitted to Journal of Machine Learning Research (JMLR)* [In submission](https://arxiv.org/abs/1710.10060). 
 
 ---
 
