@@ -23,6 +23,7 @@ nClusts = zeros(1,T);
 cluster_purity = zeros(1,T);
 cluster_NMI    = zeros(1,T);
 cluster_F      = zeros(1,T);
+cluster_ARI    = zeros(1,T);
 
 if ~isempty(varargin)
     est_labels = varargin{1};
@@ -70,17 +71,17 @@ for run=1:T
     % sequences given by Z(F)    
     if isempty(varargin)
         if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
-            [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
+            [cluster_purity(run), cluster_NMI(run), cluster_F(run), cluster_ARI(run)] = cluster_metrics(true_states_all, est_clusts_all);
             inferred_state_clust(run)               = Best_Psi(run).nClusts;
             
             [~, hamming_distance_c(run),~,~] = mapSequence2Truth(true_states_all,est_clusts_all);
             [~,global_consistency_c(run), variation_info_c(run)] = compare_segmentations(true_states_all,est_clusts_all);
             
         else
-            [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_states_all);
+            [cluster_purity(run), cluster_NMI(run), cluster_F(run), cluster_ARI(run)] = cluster_metrics(true_states_all, est_states_all);
         end
     else
-        [cluster_purity(run) cluster_NMI(run) cluster_F(run)] = cluster_metrics(true_states_all, est_clusts_all);
+        [cluster_purity(run), cluster_NMI(run), cluster_F(run), cluster_ARI(run)] = cluster_metrics(true_states_all, est_clusts_all);
         inferred_state_clust(run) = length(unique(est_clusts_all));
                     [relabeled_est_states_all, hamming_distance_c(run),~,~] = mapSequence2Truth(true_states_all,est_clusts_all);
             [~,global_consistency_c(run), variation_info_c(run)] = compare_segmentations(true_states_all,est_clusts_all);
@@ -96,6 +97,7 @@ results.inferred_states      = inferred_states;
 results.cluster_purity       = cluster_purity;
 results.cluster_NMI          = cluster_NMI;
 results.cluster_F            = cluster_F;
+results.cluster_ARI          = cluster_ARI;
 
 if isempty(varargin)
     if isfield(Best_Psi(run).Psi.stateSeq(j), 'c')
@@ -104,14 +106,14 @@ if isempty(varargin)
         results.global_consistency_c   = global_consistency_c;
         results.variation_info_c       = variation_info_c;
         % Overall Stats for HMM segmentation and state clustering
-        fprintf('*** ICSC-HMM Results*** \n Optimal Transform-Dependent States: %3.3f (%3.3f)  \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Optimal Transform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+        fprintf('*** ICSC-HMM Results*** \n Optimal Geometric-Dependent States: %3.3f (%3.3f)  \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Optimal Geometric-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) ARI: %3.3f (%3.3f) F-2: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
             mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) ...
             mean(inferred_state_clust) std(inferred_state_clust) mean(hamming_distance_c) std(hamming_distance_c) mean(global_consistency_c) std(global_consistency_c) mean(variation_info_c) std(variation_info_c) ...
-            mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+            mean(cluster_purity) std(cluster_purity) mean(cluster_ARI) std(cluster_ARI) mean(cluster_F) std(cluster_F)])
     else
         % Overall Stats for HMM segmentation and state clustering
-        fprintf('*** IBP-HMM Results*** \n Optimal Feature States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
-            mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])
+        fprintf('*** IBP-HMM Results*** \n Optimal Hidden States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) ARI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+            mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) mean(cluster_purity) std(cluster_purity) mean(cluster_ARI) std(cluster_ARI) mean(cluster_F) std(cluster_F)])
     end
 else
     results.inferred_state_clust = inferred_state_clust;
@@ -119,7 +121,7 @@ else
     results.global_consistency_c   = global_consistency_c;
     results.variation_info_c       = variation_info_c;
     % Overall Stats for HMM segmentation and state clustering        
-        fprintf('*** IBP-HMM + SPCM-CRP Results***\n Optimal Transform-Dependent States: %3.3f (%3.3f)  \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Optimal Transform-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) NMI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
+        fprintf('*** IBP-HMM + SPCM-CRP Results***\n Optimal Geometric-Dependent States: %3.3f (%3.3f)  \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Optimal Geometric-Invariant States: %3.3f (%3.3f) \n Hamming-Distance: %3.3f (%3.3f) GCE: %3.3f (%3.3f) VO: %3.3f (%3.3f) \n Purity: %3.3f (%3.3f) ARI: %3.3f (%3.3f) F: %3.3f (%3.3f)  \n',[mean(inferred_states) std(inferred_states) ...
             mean(hamming_distance) std(hamming_distance) mean(global_consistency) std(global_consistency) mean(variation_info) std(variation_info) ...
             mean(inferred_state_clust) std(inferred_state_clust) mean(hamming_distance_c) std(hamming_distance_c) mean(global_consistency_c) std(global_consistency_c) mean(variation_info_c) std(variation_info_c) ...
             mean(cluster_purity) std(cluster_purity) mean(cluster_NMI) std(cluster_NMI) mean(cluster_F) std(cluster_F)])

@@ -32,7 +32,7 @@ switch type
                     X3d(1:3,:) = Data{i}(1:3,:);
                     X3d_dot = [zeros(3,1) diff(X3d')'];
                     % Smoothed out with savitksy golay filter
-                    X3d_dot = 100*sgolayfilt(X3d_dot', 3, 151)';
+                    X3d_dot = sgolayfilt(X3d_dot', 3, 151)';
                     Data{i}(1:3,:) = X3d_dot;
                 end
             end
@@ -111,8 +111,6 @@ else % Load 5 time-series
     Data_ = Data; True_states_ = True_states; Data_o_ = Data_o;
     clear Data True_states Data_o
     iter = 1;
-%     for i=1:2:12
-%     for i=2:2:10
     for i=1:5
         Data{iter} = Data_{i};
         Data_o{iter} = Data_o_{i};

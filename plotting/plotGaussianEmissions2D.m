@@ -25,22 +25,29 @@ if colored
     if color_labels==0
         colors= vivid(K);
     else
-        level = 10; n = ceil(level/2);
-        cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
-        cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
-        cmap = [cmap1; cmap2(2:end, :)];
-               
-        cmap_vivid = vivid(cmap, [.85, .85]);        
-        color_int = floor(length(cmap_vivid)/length(color_labels));        
-        color_range = 1:color_int:length(cmap_vivid);
+%         level = 10; n = ceil(level/2);
+%         cmap1 = [linspace(1, 1, n); linspace(0, 1, n); linspace(0, 1, n)]';
+%         cmap2 = [linspace(1, 0, n); linspace(1, 0, n); linspace(1, 1, n)]';
+%         cmap = [cmap1; cmap2(2:end, :)];
+%                
+%         cmap_vivid = vivid(cmap, [.85, .85]);        
+%         color_int = floor(length(cmap_vivid)/length(color_labels));        
+%         color_range = 1:color_int:length(cmap_vivid)
+%         for k =1:length(color_labels)
+%             colors(k,:) = cmap_vivid(color_range(color_labels(k)),:);
+%         end         
+        color_range = hsv(max(color_labels));
         for k =1:length(color_labels)
-            colors(k,:) = cmap_vivid(color_range(color_labels(k)),:);
-        end                       
+            colors(k,:) = color_range(color_labels(k),:);
+        end      
+%         colormap(cmap);
+       
     end        
 else
     % Gray Color
     colors = repmat([0.3    0.3    0.3],[K,1]);
 end
+
 
 for i=1:K   
     hold on
@@ -54,6 +61,8 @@ end
 hold on;
 ml_plot_centroid(gmm.Mu',colors); hold on;
 ml_plot_gmm_contour(gca,gmm.Priors,gmm.Mu,gmm.Sigma,colors,1); 
+alpha 0.3;
+
 
 % if isempty(varargin)
     labels = 1:K;

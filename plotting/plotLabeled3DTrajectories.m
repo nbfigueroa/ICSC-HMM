@@ -11,7 +11,8 @@ for i=1:length(Data)
     
     % Plot Inferred Segments
     for ii=1:length(labels)
-        plot3(X3d(1,est_states{i} == labels(ii)),X3d(2,est_states{i} == labels(ii)),X3d(3,est_states{i} == labels(ii)),'.','Color',vivid_cmap(ii,:),'LineWidth',1); hold on;
+        est_labels = find(est_states{i}==labels(ii));
+        plot3(X3d(1,est_labels),X3d(2,est_labels),X3d(3,est_labels),'.','Color',vivid_cmap(labels(ii),:),'LineWidth',1); hold on;
     end
     
 end

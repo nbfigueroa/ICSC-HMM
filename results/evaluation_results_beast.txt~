@@ -1,0 +1,69 @@
+============================================= RIM WIPING =============================================
+
+*** IBP-HMM Results*** 
+ Optimal Hidden States: 4.600 (0.843) 
+ Hamming-Distance: 0.446 (0.073) GCE: 0.206 (0.099) VO: 1.759 (0.143) 
+ Purity: 0.846 (0.109) ARI: 0.289 (0.115) F: 0.603 (0.044)
+
+*** IBP-HMM Results*** 
+ Optimal Hidden States: 6.400 (2.459) 
+ Hamming-Distance: 0.515 (0.118) GCE: 0.189 (0.057) VO: 1.976 (0.316) 
+ Purity: 0.861 (0.049) ARI: 0.299 (0.084) F: 0.538 (0.123)  
+
+*** IBP+SPCM Results (Coupled)*** 
+ Hamming-Distance: 0.469 (0.081) GCE: 0.291 (0.064) VO: 1.618 (0.250) 
+ Purity: 0.699 (0.084) ARI: 0.186 (0.198) F: 0.662 (0.071)  
+   K_S: 4.600 (0.843) K_Z: 2.800 (0.632) 
+
+*** IBP+SPCM Results*** 
+ Hamming-Distance: 0.449 (0.104) GCE: 0.292 (0.101) VO: 1.563 (0.359) 
+ Purity: 0.723 (0.076) ARI: 0.262 (0.223) F: 0.661 (0.111)  
+   K_S: 4.600 (0.843) K_Z: 3.000 (0.471) 
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 5.000 (1.155) 
+ Hamming-Distance: 0.545 (0.082) GCE: 0.269 (0.052) VO: 2.010 (0.258) 
+ Purity: 0.777 (0.056) ARI: 0.239 (0.115) F: 0.538 (0.075) 
+
+
+============================================= ROLLING =============================================
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 9.600 (1.430) 
+ Hamming-Distance: 0.545 (0.035) GCE: 0.159 (0.032) VO: 2.258 (0.148) 
+ Purity: 0.894 (0.027) ARI: 0.360 (0.031) F: 0.506 (0.035)  
+
+*** IBP-HMM Results*** 
+ Optimal Hidden States: 9.100 (1.595) 
+ Hamming-Distance: 0.553 (0.024) GCE: 0.213 (0.049) VO: 2.358 (0.152) 
+ Purity: 0.846 (0.045) ARI: 0.334 (0.027) F: 0.495 (0.022)  
+
+*** IBP+SPCM Results*** 
+ Hamming-Distance: 0.403 (0.097) GCE: 0.335 (0.120) VO: 1.976 (0.392) 
+ Purity: 0.665 (0.100) ARI: 0.270 (0.177) F: 0.667 (0.088)       
+   K_S: 9.100 (1.595) K_Z: 3.900 (0.738) 
+
+*** IBP+SPCM Results (Coupled)*** 
+ Hamming-Distance: 0.378 (0.066) GCE: 0.294 (0.098) VO: 1.840 (0.294) 
+ Purity: 0.674 (0.098) ARI: 0.308 (0.176) F: 0.684 (0.055)  
+   K_S: 8.550 (1.050) K_Z: 3.950 (1.050) 
+
+
+=========================== PEELING (active no vel - passive position) 16D ===========================
+
+*** Sticky HDP-HMM Results*** 
+ Optimal States: 4.100 (0.994) 
+ Hamming-Distance: 0.432 (0.054) GCE: 0.394 (0.043) VO: 2.246 (0.165) 
+ Purity: 0.708 (0.047) ARI: 0.332 (0.082) F: 0.628 (0.046) 
+
+*** IBP-HMM Results*** 
+ Optimal Hidden States: 5.300 (0.483) 
+ Hamming-Distance: 0.463 (0.037) GCE: 0.388 (0.041) VO: 2.301 (0.093) 
+ Purity: 0.721 (0.065) ARI: 0.300 (0.065) F: 0.599 (0.019) 
+
+*** IBP+SPCM Results*** 
+ Hamming-Distance: 0.359 (0.097) GCE: 0.323 (0.092) VO: 1.943 (0.344) 
+ Purity: 0.706 (0.069) ARI: 0.417 (0.125) F: 0.703 (0.080)  
+   K_S: 5.300 (0.483) K_Z: 3.200 (0.422) 
+
+
+

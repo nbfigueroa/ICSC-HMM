@@ -19,7 +19,6 @@ function [Psi, Stats] = sampleIBPhypers(Psi, algParams, varargin)
 % References:
 %   Gharamani, Griffiths, and Solich. Esp. eq. 21
 
-
 % =============================== UNPACK
 F = Psi.F;
 gamma0 = Psi.bpM.gamma;

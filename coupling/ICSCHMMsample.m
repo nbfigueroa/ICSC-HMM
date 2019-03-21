@@ -90,6 +90,7 @@ end
     Psi.ThetaM = Psi.ThetaM.sampleAllTheta( data, Psi.stateSeq );    
 % end
 
+%%%%%%%%%% This is the algorithmic coupling part from Section 5.4 %%%%%%%%%
 % Sampling feature clusters from current Theta estimate
 [Psi] = sampleFeatClusters(Psi);
 

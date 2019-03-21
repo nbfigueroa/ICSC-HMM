@@ -1,4 +1,4 @@
-function [] = hmm_eval(Data,  K_range, repeats)
+function [chosen_K] = hmm_eval(Data,  K_range, repeats)
 %HMM_EVAL Implementation of the HMM Model Fitting with AIC/BIC metrics.
 %
 %   input -----------------------------------------------------------------
@@ -48,6 +48,10 @@ for i=1:length(K_range)
     
 end
 
+% Find optimal value on RSS curve
+[~, chosen_K] = ml_curve_opt(BIC_mean,'line');
+
+
 % Plot Metric Curves
 figure('Color',[1 1 1]);
 errorbar(K_range',AIC_mean(K_range)', AIC_std(K_range)','--or','LineWidth',2); hold on;
@@ -57,6 +61,7 @@ xlabel('Number of states $K$','Interpreter','LaTex'); ylabel('AIC/BIC Score','In
 title('Model Selection for Hidden Markov Model','Interpreter','LaTex','FontSize',20)
 
 legend('AIC', 'BIC')
+
 
 
 end

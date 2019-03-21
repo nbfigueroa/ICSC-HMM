@@ -187,8 +187,8 @@ for i=1:data.N
     True_states{i} = data.zTrue(i)';
 end
 
-label_range_z = unique(data.zTrueAll);
-label_range_s = unique(PsiTrue.sTrueAll);
+label_range_s = unique(data.zTrueAll);
+label_range_z = unique(PsiTrue.sTrueAll);
 
 ts = [1:length(Data)];
 figure('Color',[1 1 1])
@@ -203,8 +203,8 @@ for i=1:length(ts)
 end
 
 title_name  = 'True Emission Parameters';
-plot_labels = {'$x_1$','$x_2$'};
-labels = [1 2 2 1];
+plot_labels = {'$y_1$','$y_2$'};
+labels = [1 2 3 4 1 1] ;
 plotGaussianEmissions2D(True_theta, plot_labels, title_name, labels);
 
 % Similarity matrix
@@ -213,8 +213,9 @@ for i=1:True_theta.K
     sigmas{i} = True_theta.Sigma(:,:,i);
 end
 
-tau = 10; 
-spcm = ComputeSPCMfunctionMatrix(sigmas, tau);  
+gamma = 2; 
+dis_type = 2;
+spcm = ComputeSPCMfunctionMatrix(sigmas, gamma, dis_type);  
 S = spcm(:,:,2);
 
 PsiTrue.S = S;
