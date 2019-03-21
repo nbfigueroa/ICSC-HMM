@@ -1,4 +1,7 @@
 # ICSC-HMM
+
+**[TODO: UPDATE README.. paper and code have drastically changed!]** 
+
 ICSC-HMM : IBP Coupled SPCM-CRP Hidden Markov Model for Transform-Invariant Time-Series Segmentation  
 Website: https://github.com/nbfigueroa/ICSC-HMM  
 Author: Nadia Figueroa (nadia.figueroafernandez AT epfl.ch) 
